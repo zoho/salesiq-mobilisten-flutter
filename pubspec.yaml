@@ -1,0 +1,26 @@
+name: mobilisten_plugin
+description: Zoho SalesIQ Mobilisten Flutter Plugin
+version: 1.0.0
+repository: https://github.com/zoho/salesiq-mobilisten-flutter
+homepage: https://mobilisten.io/
+
+environment:
+  sdk: ">=2.7.0 <3.0.0"
+  flutter: ">=1.20.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: com.zohosalesiq.plugin
+        pluginClass: MobilistenPlugin
+      ios:
+        pluginClass: MobilistenPlugin
