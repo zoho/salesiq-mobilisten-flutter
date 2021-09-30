@@ -21,8 +21,10 @@ Please follow the steps mentioned below to install the Mobilisten plugin in your
 dependencies:
   flutter:
     sdk: flutter
-+   mobilisten_plugin: 
-+     git: https://github.com/zoho/salesiq-mobilisten-flutter
++ mobilisten_plugin:
++   git:
++     url: https://github.com/zoho/salesiq-mobilisten-flutter
++     ref: v1.0.0
 ```
 
 2. Run `flutter pub get` to fetch dependencies for the project.
