@@ -63,7 +63,7 @@ import 'dart:io' as io;
 import 'package:mobilisten_plugin/mobilisten_plugin.dart';
 ```
 
-9. Initialize Mobilisten using the [`init`](https://zcms.zohocorp.com/salesiq/help/developer-guides/flutter-sdk-init.html) API within the `initState()` method in the **main.dart** file.
+9. Initialize Mobilisten using the [`init`](https://www.zoho.com/salesiq/help/developer-guides/flutter-sdk-init.html) API within the `initState()` method in the **main.dart** file.
 ```dart
 if (io.Platform.isIOS || io.Platform.isAndroid) {
     String appKey;
