@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:collection';
 import 'package:flutter/services.dart';
 
 class ZohoSalesIQ {
@@ -18,12 +17,11 @@ class ZohoSalesIQ {
   static final articleEventChannel =
       EventChannel(_mobilistenArticleEventChannel).receiveBroadcastStream();
 
-  static Future<String> init(String appKey, String accessKey) async {
+  static Future<Null> init(String appKey, String accessKey) async {
     Map<String, dynamic> args = <String, dynamic>{};
     args.putIfAbsent("appKey", () => appKey);
     args.putIfAbsent("accessKey", () => accessKey);
-    final String success = await _channel.invokeMethod('init', args);
-    return success;
+    await _channel.invokeMethod('init', args);
   }
 
   static Future<Null> showLauncher(bool show) async {
@@ -295,30 +293,47 @@ class ZohoSalesIQ {
     List<SIQChat> chatList = [];
     for (int i = 0; i < mapList.length; i++) {
       Map map = mapList[i];
-      SIQChat chat = SIQChat();
-      chat.id = map["id"];
-      chat.question = map["question"];
-      chat.isBotAttender = map["isBotAttender"];
-      chat.attenderEmail = map["attenderEmail"];
-      chat.attenderID = map["attenderID"];
-      chat.attenderName = map["attenderName"];
-      chat.departmentName = map["departmentName"];
-      chat.unreadCount = map["unreadCount"];
-      chat.lastMessage = map["lastMessage"];
-      chat.lastMessageSender = map["lastMessageSender"];
-      chat.queuePosition = map["queuePosition"];
-      chat.feedback = map["feedback"];
-      chat.rating = map["rating"];
-
-      String status = map["status"] ?? "closed";
-      chat.status = SIQChatStatusString.toChatType(status);
-
-      double lastMessageTime = map["lastMessageTime"];
-      if (lastMessageTime != null) {
-        chat.lastMessageTime = _convertDoubleToDateTime(lastMessageTime);
+      String? id = map["id"];
+      String? question = map["question"];
+      bool isBotAttender = map["isBotAttender"] ?? false;
+      String? attenderEmail = map["attenderEmail"];
+      String? attenderID = map["attenderID"];
+      String? attenderName = map["attenderName"];
+      String? departmentName = map["departmentName"];
+      int unreadCount = map["unreadCount"] ?? 0;
+      String? lastMessage = map["lastMessage"];
+      String? lastMessageSender = map["lastMessageSender"];
+      DateTime? lastMessageTime;
+      double? lastMessageTimeMS = map["lastMessageTime"];
+      if (lastMessageTimeMS != null) {
+        lastMessageTime = _convertDoubleToDateTime(lastMessageTimeMS);
       }
+      int? queuePosition = map["queuePosition"];
+      String? rating = map["rating"];
+      String? feedback = map["feedback"];
 
-      chatList.add(chat);
+      String statusString = map["status"] ?? "closed";
+      SIQChatStatus status = SIQChatStatusString.toChatType(statusString);
+
+      if (id != null) {
+        SIQChat chat = SIQChat(
+            id,
+            question,
+            queuePosition,
+            attenderName,
+            attenderEmail,
+            attenderID,
+            isBotAttender,
+            departmentName,
+            status,
+            unreadCount,
+            lastMessage,
+            lastMessageTime,
+            lastMessageSender,
+            feedback,
+            rating);
+        chatList.add(chat);
+      }
     }
     return chatList;
   }
@@ -327,24 +342,37 @@ class ZohoSalesIQ {
     List<SIQArticle> articleList = [];
     for (int i = 0; i < mapList.length; i++) {
       Map map = mapList[i];
-      SIQArticle article = SIQArticle();
-      article.id = map["id"];
-      article.name = map["name"];
-      article.categoryId = map["categoryID"];
-      article.categoryName = map["categoryName"];
-      article.viewCount = map["viewCount"];
-      article.likeCount = map["likeCount"];
-      article.dislikeCount = map["dislikeCount"];
-      article.departmentID = map["departmentID"];
-      double createdTime = map["createdTime"];
-      double modifiedTime = map["modifiedTime"];
-      if (createdTime != null) {
-        article.createdTime = _convertDoubleToDateTime(createdTime);
+
+      String? id = map["id"];
+      String name = map["name"] ?? "-";
+      String? categoryId = map["categoryID"];
+      String categoryName = map["categoryName"] ?? "-";
+      int viewCount = map["viewCount"] ?? 0;
+      int likeCount = map["likeCount"] ?? 0;
+      int dislikeCount = map["dislikeCount"] ?? 0;
+      double? createdTimeMS = map["createdTime"];
+      double? modifiedTimeMS = map["modifiedTime"];
+
+      late DateTime createdTime;
+      late DateTime modifiedTime;
+
+      if (createdTimeMS != null) {
+        createdTime = _convertDoubleToDateTime(createdTimeMS);
+      } else {
+        createdTime = DateTime.now();
       }
-      if (modifiedTime != null) {
-        article.modifiedTime = _convertDoubleToDateTime(modifiedTime);
+
+      if (modifiedTimeMS != null) {
+        modifiedTime = _convertDoubleToDateTime(modifiedTimeMS);
+      } else {
+        modifiedTime = createdTime;
       }
-      articleList.add(article);
+
+      if (id != null && categoryId != null) {
+        SIQArticle article = SIQArticle(id, name, categoryId, categoryName,
+            viewCount, likeCount, dislikeCount, createdTime, modifiedTime);
+        articleList.add(article);
+      }
     }
     return articleList;
   }
@@ -353,11 +381,14 @@ class ZohoSalesIQ {
     List<SIQArticleCategory> categoryList = [];
     for (int i = 0; i < mapList.length; i++) {
       Map map = mapList[i];
-      SIQArticleCategory category = SIQArticleCategory();
-      category.id = map["id"];
-      category.name = map["name"];
-      category.articleCount = map["articleCount"];
-      categoryList.add(category);
+      String? id = map["id"];
+      String? name = map["name"];
+      int articleCount = map["articleCount"] ?? 0;
+      if (id != null && name != null) {
+        SIQArticleCategory category =
+            SIQArticleCategory(id, name, articleCount);
+        categoryList.add(category);
+      }
     }
     return categoryList;
   }
@@ -366,74 +397,103 @@ class ZohoSalesIQ {
     List<SIQDepartment> departmentList = [];
     for (int i = 0; i < mapList.length; i++) {
       Map map = mapList[i];
-      SIQDepartment department = SIQDepartment();
-      department.id = map["id"];
-      department.name = map["name"];
-      department.available = map["available"];
-      departmentList.add(department);
+      String? id = map["id"];
+      String? name = map["name"];
+      bool available = map["available"] ?? false;
+      if ((id != null) && (name != null)) {
+        SIQDepartment department = SIQDepartment(id, name, available);
+        departmentList.add(department);
+      }
     }
     return departmentList;
   }
 }
 
 class SIQChat {
-  String id;
-  String question;
-  int queuePosition;
+  final String id;
+  final String? question;
+  final int? queuePosition;
 
-  String attenderName;
-  String attenderEmail;
-  String attenderID;
-  bool isBotAttender;
+  final String? attenderName;
+  final String? attenderEmail;
+  final String? attenderID;
+  final bool isBotAttender;
 
-  String departmentName;
-  SIQChatStatus status;
-  int unreadCount;
+  final String? departmentName;
+  final SIQChatStatus status;
+  final int unreadCount;
 
-  String lastMessage;
-  DateTime lastMessageTime;
-  String lastMessageSender;
+  final String? lastMessage;
+  final DateTime? lastMessageTime;
+  final String? lastMessageSender;
 
-  String feedback;
-  String rating;
+  final String? feedback;
+  final String? rating;
+  SIQChat(
+      this.id,
+      this.question,
+      this.queuePosition,
+      this.attenderName,
+      this.attenderEmail,
+      this.attenderID,
+      this.isBotAttender,
+      this.departmentName,
+      this.status,
+      this.unreadCount,
+      this.lastMessage,
+      this.lastMessageTime,
+      this.lastMessageSender,
+      this.feedback,
+      this.rating);
 }
 
 class SIQDepartment {
-  String id;
-  String name;
-  bool available;
+  final String id;
+  final String name;
+  final bool available;
+  SIQDepartment(this.id, this.name, this.available);
 }
 
 class SIQArticle {
-  String id;
-  String name;
+  final String id;
+  final String name;
 
-  String categoryId;
-  String categoryName;
+  final String categoryId;
+  final String categoryName;
 
-  int viewCount;
-  int likeCount;
-  int dislikeCount;
+  final int viewCount;
+  final int likeCount;
+  final int dislikeCount;
 
-  String departmentID;
-  DateTime createdTime;
-  DateTime modifiedTime;
+  final DateTime createdTime;
+  final DateTime modifiedTime;
+  SIQArticle(
+      this.id,
+      this.name,
+      this.categoryId,
+      this.categoryName,
+      this.viewCount,
+      this.likeCount,
+      this.dislikeCount,
+      this.createdTime,
+      this.modifiedTime);
 }
 
 class SIQArticleCategory {
-  String id;
-  String name;
-  int articleCount;
+  final String id;
+  final String name;
+  final int articleCount;
+  SIQArticleCategory(this.id, this.name, this.articleCount);
 }
 
 class SIQVisitorLocation {
-  double latitude;
-  double longitude;
-  String city;
-  String state;
-  String country;
-  String countryCode;
-  String zipCode;
+  double? latitude;
+  double? longitude;
+  String? city;
+  String? state;
+  String? country;
+  String? countryCode;
+  String? zipCode;
 }
 
 class SIQEvent {

@@ -86,4 +86,4 @@ if (io.Platform.isIOS || io.Platform.isAndroid) {
 
 ## API Documentation
 
-You can find the list of all APIs and their documentation  [here](https://zcms.zohocorp.com/salesiq/help/developer-guides/flutter-sdk-show-launcher.html)  under the  **API Reference**  section.
+You can find the list of all APIs and their documentation  [here](https://www.zoho.com/salesiq/help/developer-guides/flutter-sdk-show-launcher.html)  under the  **API Reference**  section.
