@@ -14,7 +14,7 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
         var name: String {
             switch self {
             case .plugin:
-                return "mobilisten_plugin"
+                return "salesiq_mobilisten"
             case .main:
                 return "mobilistenEventChannel"
             case .chat:

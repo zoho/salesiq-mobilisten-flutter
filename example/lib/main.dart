@@ -1,7 +1,8 @@
 import 'dart:io' as io;
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'package:mobilisten_plugin/mobilisten_plugin.dart';
+
+import 'package:salesiq_mobilisten/salesiq_mobilisten.dart';
 
 void main() {
   runApp(MyApp());

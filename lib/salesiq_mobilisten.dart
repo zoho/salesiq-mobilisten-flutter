@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 
 class ZohoSalesIQ {
-  static MethodChannel _channel = const MethodChannel('mobilisten_plugin');
+  static MethodChannel _channel = const MethodChannel('salesiq_mobilisten');
 
   static const String _mobilistenEventChannel = "mobilistenEventChannel";
   static const String _mobilistenChatEventChannel =

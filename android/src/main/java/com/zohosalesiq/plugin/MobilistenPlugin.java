@@ -90,7 +90,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
 
     @Override
     public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
-        channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "mobilisten_plugin");         // No I18N
+        channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "salesiq_mobilisten");         // No I18N
         channel.setMethodCallHandler(this);
 
         handler =  new Handler(Looper.getMainLooper());

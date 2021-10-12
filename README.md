@@ -21,10 +21,7 @@ Please follow the steps mentioned below to install the Mobilisten plugin in your
 dependencies:
   flutter:
     sdk: flutter
-+ mobilisten_plugin:
-+   git:
-+     url: https://github.com/zoho/salesiq-mobilisten-flutter
-+     ref: v1.0.0
++ salesiq_mobilisten: ^1.0.0
 ```
 
 2. Run `flutter pub get` to fetch dependencies for the project.
@@ -60,7 +57,7 @@ Note the App and Access keys generated for Android to be used in further steps.
 8. Open the **main.dart** file inside the `lib` directory and import Mobilisten as shown below. With this, additionally import `dart:io` to check the current platform which will be used at a later stage.
 ```dart
 import 'dart:io' as io;
-import 'package:mobilisten_plugin/mobilisten_plugin.dart';
+import 'package:salesiq_mobilisten/salesiq_mobilisten.dart';
 ```
 
 9. Initialize Mobilisten using the [`init`](https://www.zoho.com/salesiq/help/developer-guides/flutter-sdk-init.html) API within the `initState()` method in the **main.dart** file.

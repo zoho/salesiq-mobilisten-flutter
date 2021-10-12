@@ -1,17 +1,17 @@
 #
 # To learn more about a Podspec see http://guides.cocoapods.org/syntax/podspec.html.
-# Run `pod lib lint mobilisten_plugin.podspec` to validate before publishing.
+# Run `pod lib lint salesiq_mobilisten.podspec` to validate before publishing.
 #
 Pod::Spec.new do |s|
-  s.name             = 'mobilisten_plugin'
-  s.version          = '4.2.0'
-  s.summary          = 'SalesIQ Mobilisten Flutter Plugin'
+  s.name             = 'salesiq_mobilisten'
+  s.version          = '4.2.1'
+  s.summary          = 'A new Flutter plugin for SalesIQ Mobilisten'
   s.description      = <<-DESC
 SalesIQ Mobilisten Flutter Plugin
                        DESC
-  s.homepage         = 'https://www.zoho.com/salesiq'
+  s.homepage         = 'http://mobilisten.io'
   s.license          = { :file => '../LICENSE' }
-  s.author           = { 'Rishabh Raghunath' => 'rishabh.r@zohocorp.com' }
+  s.author           = { 'Rishabh Raghunath' => 'support@zohosalesiq.com' }
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
