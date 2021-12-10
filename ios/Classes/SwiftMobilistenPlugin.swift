@@ -70,7 +70,7 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
         
         var enabled: Bool {
             switch self {
-            case .chatUnreadCountChanged, .homeViewOpened, .homeViewClosed:
+            case .homeViewOpened, .homeViewClosed, .chatUnreadCountChanged:
                 return SwiftMobilistenPlugin.checkFlag(name: .enableDisabledEvents)
             default:
                 return true
@@ -430,6 +430,8 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
             }
         case "isMultipleOpenChatRestricted":
             result(ZohoSalesIQ.Chat.multipleOpenRestricted)
+        case "getChatUnreadCount":
+            result(ZohoSalesIQ.Chat.getUnreadMessageCount())
         case "enablePushForiOS":
             if let args = argument as? [String: Any], let token = args["token"] as? String, let isTestDevice = args["isTestDevice"] as? Bool, let productionMode = args["productionMode"] as? Bool {
                 let apnsMode: APNSMode = productionMode ? .production : .sandbox
