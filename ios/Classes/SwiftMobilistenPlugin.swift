@@ -70,7 +70,7 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
         
         var enabled: Bool {
             switch self {
-            case .homeViewOpened, .homeViewClosed, .chatUnreadCountChanged:
+            case .homeViewOpened, .homeViewClosed:
                 return SwiftMobilistenPlugin.checkFlag(name: .enableDisabledEvents)
             default:
                 return true

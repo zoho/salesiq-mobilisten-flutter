@@ -13,6 +13,7 @@ import android.util.Base64;
 import androidx.annotation.NonNull;
 
 import com.zoho.commons.ChatComponent;
+import com.zoho.livechat.android.NotificationListener;
 import com.zoho.livechat.android.SIQDepartment;
 import com.zoho.livechat.android.SIQVisitor;
 import com.zoho.livechat.android.SIQVisitorLocation;
@@ -150,6 +151,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 ZohoSalesIQ.Chat.setListener(listener);
                 ZohoSalesIQ.FAQ.setListener(listener);
                 ZohoSalesIQ.ChatActions.setListener(listener);
+                ZohoSalesIQ.Notification.setListener(listener);
                 break;
 
             case "showLauncher":
@@ -630,6 +632,10 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 finalResult.success(ZohoLiveChat.Chat.isMultipleOpenRestricted());
                 break;
 
+            case "getChatUnreadCount":
+                finalResult.success(ZohoLiveChat.Notification.getBadgeCount());
+                break;
+
             default:
                 finalResult.notImplemented();
                 break;
@@ -876,7 +882,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         istestdevice = testdevice;
     }
 
-    public class SalesIQListeners implements SalesIQListener, SalesIQChatListener, SalesIQFAQListener, SalesIQActionListener {
+    public class SalesIQListeners implements SalesIQListener, SalesIQChatListener, SalesIQFAQListener, SalesIQActionListener, NotificationListener {
         @Override
         public void handleSupportOpen() {
             Map<String, String> eventMap = new HashMap<>();
@@ -1064,6 +1070,16 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         }
 
         @Override
+        public void onBadgeChange(int unreadCount) {
+            Map<String, Object> eventMap = new HashMap<String, Object>();
+            eventMap.put("eventName", SIQEvent.chatUnreadCountChanged);
+            eventMap.put("unreadCount", unreadCount);
+            if (chatEventSink != null) {
+                chatEventSink.success(eventMap);
+            }
+        }
+
+        @Override
         public void handleArticleOpened(String articleID) {
             Map<String, Object> eventMap = new HashMap<String, Object>();
             eventMap.put("eventName", SIQEvent.articleOpened);
@@ -1126,5 +1142,6 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         static String articleDisliked = "articleDisliked";                                   // No I18N
         static String articleOpened = "articleOpened";                                   // No I18N
         static String articleClosed = "articleClosed";                                   // No I18N
+        static String chatUnreadCountChanged = "chatUnreadCountChanged";                                   // No I18N
     }
 }

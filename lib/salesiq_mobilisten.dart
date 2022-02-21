@@ -355,6 +355,11 @@ class ZohoSalesIQ {
     return await _channel.invokeMethod('isMultipleOpenChatRestricted');
   }
 
+  /// An integer value representing the number of unread messages.
+  static Future<int> get chatUnreadCount async {
+    return await _channel.invokeMethod('getChatUnreadCount');
+  }
+
   static DateTime _convertDoubleToDateTime(double epochTime) {
     return DateTime.fromMillisecondsSinceEpoch(epochTime.toInt());
   }
@@ -588,6 +593,7 @@ class SIQEvent {
   static const String articleDisliked = "articleDisliked";
   static const String articleOpened = "articleOpened";
   static const String articleClosed = "articleClosed";
+  static const String chatUnreadCountChanged = "chatUnreadCountChanged";
 }
 
 enum SIQChatStatus {
