@@ -148,38 +148,47 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
         case "showLauncher":
             if let show = argument as? Bool {
                 ZohoSalesIQ.showLauncher(show)
+                result(nil)
             }
         case "setLanguage":
             if let code = argument as? String {
                 ZohoSalesIQ.Chat.setLanguageWithCode(code)
+                result(nil)
             }
         case "setDepartment":
             if let department = argument as? String {
                 ZohoSalesIQ.Chat.setDepartment(department)
+                result(nil)
             }
         case "setDepartments":
             if let departments = argument as? [String] {
                 ZohoSalesIQ.Chat.setDepartments(departments)
+                result(nil)
             }
         case "setQuestion":
             if let question = argument as? String {
                 ZohoSalesIQ.Visitor.setQuestion(question)
+                result(nil)
             }
         case "startChat":
             if let question = argument as? String {
                 ZohoSalesIQ.Chat.startChat(question: question)
+                result(nil)
             }
         case "setConversationVisibility":
             if let show = argument as? Bool {
                 ZohoSalesIQ.Conversation.setVisibility(show)
+                result(nil)
             }
         case "setConversationListTitle":
             if let title = argument as? String {
                 ZohoSalesIQ.Conversation.setTitle(title)
+                result(nil)
             }
         case "setFAQVisibility":
             if let show = argument as? Bool {
                 ZohoSalesIQ.FAQ.setVisibility(show)
+                result(nil)
             }
         case "registerVisitor":
             if let id = argument as? String {
@@ -202,92 +211,117 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
         case "setPageTitle":
             if let pageTitle = argument as? String {
                 ZohoSalesIQ.Tracking.setPageTitle(pageTitle)
+                result(nil)
             }
         case "performCustomAction":
             if let customAction = argument as? String {
                 ZohoSalesIQ.Visitor.performCustomAction(customAction)
+                result(nil)
             }
         case "enableInAppNotification":
             ZohoSalesIQ.Chat.setVisibility(.inAppNotifications, visible: true)
+            result(nil)
         case "disableInAppNotification":
             ZohoSalesIQ.Chat.setVisibility(.inAppNotifications, visible: false)
         case "setOperatorEmail":
             if let operatorEmail = argument as? String {
                 ZohoSalesIQ.Chat.setAgentEmail(operatorEmail)
+                result(nil)
             }
         case "show":
             ZohoSalesIQ.Chat.show()
+            result(nil)
         case "openChatWithID":
             if let id = argument as? String {
                 ZohoSalesIQ.Chat.show(referenceID: id, new: false)
+                result(nil)
             }
         case "openNewChat":
             ZohoSalesIQ.Chat.show(new: true)
+            result(nil)
         case "showOfflineMessage":
             if let show = argument as? Bool {
                 ZohoSalesIQ.Chat.showOfflineMessage(show)
+                result(nil)
             }
         case "endChat":
             if let id = argument as? String {
                 ZohoSalesIQ.Chat.endSession(referenceID: id)
+                result(nil)
             }
         case "setVisitorName":
             if let name = argument as? String {
                 ZohoSalesIQ.Visitor.setName(name)
+                result(nil)
             }
         case "setVisitorEmail":
             if let email = argument as? String {
                 ZohoSalesIQ.Visitor.setEmail(email)
+                result(nil)
             }
         case "setVisitorContactNumber":
             if let phone = argument as? String {
                 ZohoSalesIQ.Visitor.setContactNumber(phone)
+                result(nil)
             }
         case "setVisitorAddInfo":
             if let args = call.argumentDictionary, let key = args["key"] as? String, let value = args["value"] as? String {
                 ZohoSalesIQ.Visitor.addInfo(key, value: value)
+                result(nil)
             }
         case "setVisitorLocation":
             if let args = argument as? [String: AnyObject] {
                 ZohoSalesIQ.Visitor.setLocation(getVisitorLocation(using: args))
+                result(nil)
             }
         case "setChatTitle":
             if let title = argument as? String {
                 ZohoSalesIQ.Chat.setTitle(title)
+                result(nil)
             }
         case "showOperatorImageInLauncher":
             if let show = argument as? Bool {
                 ZohoSalesIQ.Chat.setVisibility(.attenderImageOnLauncher, visible: show)
+                result(nil)
             }
         case "showOperatorImageInChat":
             if let show = argument as? Bool {
                 ZohoSalesIQ.Chat.setVisibility(.attenderImageInChat, visible: show)
+                result(nil)
             }
         case "setVisitorNameVisibility":
             if let show = argument as? Bool {
                 ZohoSalesIQ.Chat.setVisibility(.visitorName, visible: show)
+                result(nil)
             }
         case "setFeedbackVisibility":
             if let show = argument as? Bool {
                 ZohoSalesIQ.Chat.setVisibility(.feedback, visible: show)
+                result(nil)
             }
         case "setRatingVisibility":
             if let show = argument as? Bool {
                 ZohoSalesIQ.Chat.setVisibility(.rating, visible: show)
+                result(nil)
             }
         case "enableScreenshotOption":
             ZohoSalesIQ.Chat.setVisibility(.screenshotOption, visible: true)
+            result(nil)
         case "disableScreenshotOption":
             ZohoSalesIQ.Chat.setVisibility(.screenshotOption, visible: false)
+            result(nil)
         case "enablePreChatForms":
             ZohoSalesIQ.Chat.setVisibility(.preChatForm, visible: true)
+            result(nil)
         case "disablePreChatForms":
             ZohoSalesIQ.Chat.setVisibility(.preChatForm, visible: false)
+            result(nil)
         case "setThemeColorForiOS":
             if let colorCode = argument as? String, let themeColor = UIColor(hex: colorCode) {
                 let theme = ZohoSalesIQ.Theme.baseTheme
                 theme.themeColor = themeColor
                 ZohoSalesIQ.Theme.setTheme(theme: theme)
+                result(nil)
             }
         case "getChats", "getChatsWithFilter":
             var status: ChatStatus = .all
@@ -392,20 +426,24 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
                     self.sendChatEvent(name: .performChatAction, dataLabel: "chatAction", data: arg)
                 }
                 ZohoSalesIQ.ChatActions.register(action: action)
+                result(nil)
             } else {
                 result(operationFailedError)
             }
         case "unregisterChatAction":
             if let name = argument as? String {
                 ZohoSalesIQ.ChatActions.unregisterWithName(name: name)
+                result(nil)
             } else {
                 result(operationFailedError)
             }
         case "unregisterAllChatActions":
             ZohoSalesIQ.ChatActions.unregisterAll()
+            result(nil)
         case "setChatActionTimeout":
             if let time = argument as? Int {
                 ZohoSalesIQ.ChatActions.setTimeout(Double(time))
+                result(nil)
             } else {
                 result(operationFailedError)
             }
@@ -413,6 +451,7 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
             if let uuid = argument as? String, let handler = chatActionStore[uuid] {
                 handler.success()
                 chatActionStore.removeValue(forKey: uuid)
+                result(nil)
             } else {
                 result(operationFailedError)
             }
@@ -425,6 +464,7 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
                     handler.faliure(message: msg)
                 }
                 chatActionStore.removeValue(forKey: uuid)
+                result(nil)
             } else {
                 result(operationFailedError)
             }
@@ -436,18 +476,21 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
             if let args = argument as? [String: Any], let token = args["token"] as? String, let isTestDevice = args["isTestDevice"] as? Bool, let productionMode = args["productionMode"] as? Bool {
                 let apnsMode: APNSMode = productionMode ? .production : .sandbox
                 ZohoSalesIQ.enablePush(token, isTestDevice: isTestDevice, mode: apnsMode)
+                result(nil)
             } else {
                 result(operationFailedError)
             }
         case "handleNotificationResponseForiOS":
             if let userInfo = argument as? [AnyHashable: Any] {
                 ZohoSalesIQ.handleNotificationResponse(userInfo)
+                result(nil)
             } else {
                 result(operationFailedError)
             }
         case "processNotificationWithInfoForiOS":
             if let userInfo = argument as? [AnyHashable: Any] {
                 ZohoSalesIQ.processNotificationWithInfo(userInfo)
+                result(nil)
             } else {
                 result(operationFailedError)
             }
