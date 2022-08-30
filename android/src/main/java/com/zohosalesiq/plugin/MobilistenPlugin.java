@@ -643,6 +643,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
     }
 
     private static void initSalesIQ(final Application application, final Activity activity, final String appKey, final String accessKey, final Result result) {
+        final boolean[] isCallBackInvoked = {false};
         if (application != null) {
             try {
                 ZohoSalesIQ.init(application, appKey, accessKey, activity, null, new InitListener() {
@@ -661,7 +662,8 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                         handler.post(new Runnable() {
                             @Override
                             public void run() {
-                                if (result != null) {
+                                if (result != null && !isCallBackInvoked[0]) {
+                                    isCallBackInvoked[0] = true;
                                     result.success("InitSuccess");         // No I18N
                                 }
                             }
@@ -674,7 +676,8 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                         handler.post(new Runnable() {
                             @Override
                             public void run() {
-                                if (result != null) {
+                                if (result != null && !isCallBackInvoked[0]) {
+                                    isCallBackInvoked[0] = true;
                                     result.error(LiveChatUtil.getString(errorCode), errorMessage, null);
                                 }
                             }
