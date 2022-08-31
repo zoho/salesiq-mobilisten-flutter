@@ -87,14 +87,10 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
 
     private static Hashtable<String, SalesIQCustomActionListener> actionsList = new Hashtable<>();
 
-    Handler handler;
-
     @Override
     public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
         channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "salesiq_mobilisten");         // No I18N
         channel.setMethodCallHandler(this);
-
-        handler =  new Handler(Looper.getMainLooper());
 
         eventChannel = new EventChannel(flutterPluginBinding.getBinaryMessenger(), mobilistenEventChannel);
         chatEventChannel = new EventChannel(flutterPluginBinding.getBinaryMessenger(), mobilistenChatEventChannel);
@@ -156,48 +152,51 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
 
             case "showLauncher":
                 ZohoSalesIQ.showLauncher(LiveChatUtil.getBoolean(call.arguments));
-                handler = new Handler(Looper.getMainLooper());
-                handler.post(new Runnable() {
-                    public void run() {
-                        if (activity != null) {
-                            ZohoSalesIQ.getApplicationManager().setCurrentActivity(activity);
-                            ZohoSalesIQ.getApplicationManager().refreshChatBubble();
-                        }
-                    }
-                });
+                ZohoSalesIQ.getApplicationManager().setCurrentActivity(activity);
+                ZohoSalesIQ.getApplicationManager().refreshChatBubble();
+
+                finalResult.success(null);
                 break;
 
             case "setLanguage":
                 ZohoSalesIQ.Chat.setLanguage(LiveChatUtil.getString(call.arguments));
+                finalResult.success(null);
                 break;
 
             case "setDepartment":
                 ZohoSalesIQ.Chat.setDepartment(LiveChatUtil.getString(call.arguments));
+                finalResult.success(null);
                 break;
 
             case "setDepartments":
                 ArrayList deptList = (ArrayList) call.arguments;
                 ZohoSalesIQ.Chat.setDepartments(deptList);
+                finalResult.success(null);
                 break;
 
             case "setQuestion":
                 ZohoSalesIQ.Visitor.setQuestion(LiveChatUtil.getString(call.arguments));
+                finalResult.success(null);
                 break;
 
             case "startChat":
                 ZohoSalesIQ.Visitor.startChat(LiveChatUtil.getString(call.arguments));
+                finalResult.success(null);
                 break;
 
             case "setConversationVisibility":
                 ZohoSalesIQ.Conversation.setVisibility(LiveChatUtil.getBoolean(call.arguments));
+                finalResult.success(null);
                 break;
 
             case "setConversationListTitle":
                 ZohoSalesIQ.Conversation.setTitle(LiveChatUtil.getString(call.arguments));
+                finalResult.success(null);
                 break;
 
             case "setFAQVisibility":
                 ZohoSalesIQ.FAQ.setVisibility(LiveChatUtil.getBoolean(call.arguments));
+                finalResult.success(null);
                 break;
 
             case "registerVisitor":
@@ -216,27 +215,33 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
 
             case "unregisterVisitor":  //need to pass the current activity
                 ZohoSalesIQ.unregisterVisitor(activity);  //need to pass the current activity
+                finalResult.success(null);
                 break;
 
             case "setPageTitle":
                 ZohoSalesIQ.Tracking.setPageTitle(LiveChatUtil.getString(call.arguments));
+                finalResult.success(null);
                 break;
 
             case "performCustomAction":
                 ZohoSalesIQ.Tracking.setCustomAction(LiveChatUtil.getString(call.arguments));
+                finalResult.success(null);
                 break;
 
             case "enableInAppNotification":
                 ZohoSalesIQ.Notification.enableInApp();
+                finalResult.success(null);
                 break;
 
             case "disableInAppNotification":
                 ZohoSalesIQ.Notification.disableInApp();
+                finalResult.success(null);
                 break;
 
             case "setOperatorEmail":
                 try {
                     ZohoSalesIQ.Chat.setOperatorEmail(LiveChatUtil.getString(call.arguments));
+                    finalResult.success(null);
                 } catch (InvalidEmailException e) {
                     finalResult.error("10001", e.getMessage(), null);         // No I18N
                 }
@@ -244,40 +249,49 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
 
             case "show":
                 ZohoSalesIQ.Chat.show();
+                finalResult.success(null);
                 break;
 
             case "openChatWithID":
                 ZohoSalesIQ.Chat.open(LiveChatUtil.getString(call.arguments));
+                finalResult.success(null);
                 break;
 
             case "openNewChat":
                 ZohoSalesIQ.Chat.openNewChat();
+                finalResult.success(null);
                 break;
 
             case "showOfflineMessage":
                 ZohoSalesIQ.Chat.showOfflineMessage(LiveChatUtil.getBoolean(call.arguments));
+                finalResult.success(null);
                 break;
 
             case "endChat":
                 ZohoSalesIQ.Chat.endChat(LiveChatUtil.getString(call.arguments));
+                finalResult.success(null);
                 break;
 
             case "setVisitorName":
                 ZohoSalesIQ.Visitor.setName(LiveChatUtil.getString(call.arguments));
+                finalResult.success(null);
                 break;
 
             case "setVisitorEmail":
                 ZohoSalesIQ.Visitor.setEmail(LiveChatUtil.getString(call.arguments));
+                finalResult.success(null);
                 break;
 
             case "setVisitorContactNumber":
                 ZohoSalesIQ.Visitor.setContactNumber(LiveChatUtil.getString(call.arguments));
+                finalResult.success(null);
                 break;
 
             case "setVisitorAddInfo":
                 String key = LiveChatUtil.getString(call.argument("key"));         // No I18N
                 String value = LiveChatUtil.getString(call.argument("value"));         // No I18N
                 ZohoSalesIQ.Visitor.addInfo(key, value);
+                finalResult.success(null);
                 break;
 
             case "setVisitorLocation":
@@ -307,73 +321,67 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                         siqVisitorLocation.setZipCode(LiveChatUtil.getString(visitorLocation.get("zipCode")));         // No I18N
                     }
                     ZohoSalesIQ.Visitor.setLocation(siqVisitorLocation);
+                    finalResult.success(null);
                 }
                 break;
 
             case "setChatTitle":
                 ZohoSalesIQ.Chat.setTitle(LiveChatUtil.getString(call.arguments));
+                finalResult.success(null);
                 break;
 
             case "showOperatorImageInLauncher":
                 ZohoSalesIQ.Chat.showOperatorImageInLauncher(LiveChatUtil.getBoolean(call.arguments));
+                finalResult.success(null);
                 break;
 
             case "showOperatorImageInChat":
                 ZohoSalesIQ.Chat.setVisibility(ChatComponent.operatorImage, LiveChatUtil.getBoolean(call.arguments));
+                finalResult.success(null);
                 break;
 
             case "setVisitorNameVisibility":
                 ZohoSalesIQ.Chat.setVisibility(ChatComponent.visitorName, LiveChatUtil.getBoolean(call.arguments));
+                finalResult.success(null);
                 break;
 
             case "setFeedbackVisibility":
                 ZohoSalesIQ.Chat.setVisibility(ChatComponent.feedback, LiveChatUtil.getBoolean(call.arguments));
+                finalResult.success(null);
                 break;
 
             case "setRatingVisibility":
                 ZohoSalesIQ.Chat.setVisibility(ChatComponent.rating, LiveChatUtil.getBoolean(call.arguments));
+                finalResult.success(null);
                 break;
 
             case "enablePreChatForms":
                 ZohoSalesIQ.Chat.setVisibility(ChatComponent.prechatForm, true);
+                finalResult.success(null);
                 break;
 
             case "disablePreChatForms":
                 ZohoSalesIQ.Chat.setVisibility(ChatComponent.prechatForm, false);
+                finalResult.success(null);
                 break;
 
             case "getDepartments":
-                handler = new Handler(Looper.getMainLooper());
-                handler.post(new Runnable(){
-                    public void run(){
-                        ZohoSalesIQ.Chat.getDepartments(new DepartmentListener() {
-                            @Override
-                            public void onSuccess(ArrayList<SIQDepartment> arrayList) {
-                                if (arrayList != null){
-                                    final List<Map<String, Object>> departmentList = new ArrayList<Map<String, Object>>();
-                                    for (int i=0; i<arrayList.size(); i++){
-                                        Map<String, Object> chatMapObject = getDepartmentMapObject(arrayList.get(i));
-                                        departmentList.add(chatMapObject);
-                                    }
-                                    handler.post(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            finalResult.success(departmentList);
-                                        }
-                                    });
-                                }
+                ZohoSalesIQ.Chat.getDepartments(new DepartmentListener() {
+                    @Override
+                    public void onSuccess(ArrayList<SIQDepartment> arrayList) {
+                        if (arrayList != null){
+                            final List<Map<String, Object>> departmentList = new ArrayList<Map<String, Object>>();
+                            for (int i=0; i<arrayList.size(); i++){
+                                Map<String, Object> chatMapObject = getDepartmentMapObject(arrayList.get(i));
+                                departmentList.add(chatMapObject);
                             }
+                            finalResult.success(departmentList);
+                        }
+                    }
 
-                            @Override
-                            public void onFailure(final int errorCode, final String errorMessage) {
-                                handler.post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        finalResult.error(LiveChatUtil.getString(errorCode), errorMessage, null);
-                                    }
-                                });
-                            }
-                        });
+                    @Override
+                    public void onFailure(final int errorCode, final String errorMessage) {
+                        finalResult.error(LiveChatUtil.getString(errorCode), errorMessage, null);
                     }
                 });
                 break;
@@ -423,31 +431,22 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 break;
 
             case "getArticles":
-                handler.post(new Runnable() {
-                    public void run() {
-                        ZohoSalesIQ.FAQ.getArticles(new FAQListener() {
-                            @Override
-                            public void onSuccess(ArrayList<SalesIQArticle> arrayList) {
-                                if (arrayList != null){
-                                    final List<Map<String, Object>> articleList = new ArrayList<Map<String, Object>>();
-                                    for (int i = 0; i < arrayList.size(); i++) {
-                                        Map<String, Object> chatMapObject = getArticleMapObject(arrayList.get(i));
-                                        articleList.add(chatMapObject);
-                                    }
-                                    handler.post(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            finalResult.success(articleList);
-                                        }
-                                    });
-                                }
+                ZohoSalesIQ.FAQ.getArticles(new FAQListener() {
+                    @Override
+                    public void onSuccess(ArrayList<SalesIQArticle> arrayList) {
+                        if (arrayList != null){
+                            final List<Map<String, Object>> articleList = new ArrayList<Map<String, Object>>();
+                            for (int i = 0; i < arrayList.size(); i++) {
+                                Map<String, Object> chatMapObject = getArticleMapObject(arrayList.get(i));
+                                articleList.add(chatMapObject);
                             }
+                            finalResult.success(articleList);
+                        }
+                    }
 
-                            @Override
-                            public void onFailure(int code, String message) {
-                                finalResult.error(""+code, message, null);
-                            }
-                        });
+                    @Override
+                    public void onFailure(int code, String message) {
+                        finalResult.error(""+code, message, null);
                     }
                 });
                 break;
@@ -463,12 +462,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                                 Map<String, Object> chatMapObject = getArticleMapObject(arrayList.get(i));
                                 articleList.add(chatMapObject);
                             }
-                            handler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    finalResult.success(articleList);
-                                }
-                            });
+                            finalResult.success(articleList);
                         }
                     }
 
@@ -494,22 +488,12 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                                 categoryList.add(categoryMap);
                             }
                         }
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                finalResult.success(categoryList);
-                            }
-                        });
+                        finalResult.success(categoryList);
                     }
 
                     @Override
                     public void onFailure(final int errorCode, final String errorMessage) {
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                finalResult.error(LiveChatUtil.getString(errorCode), errorMessage, null);
-                            }
-                        });
+                        finalResult.error(LiveChatUtil.getString(errorCode), errorMessage, null);
                     }
                 });
                 break;
@@ -558,76 +542,67 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
             case "registerChatAction":
                 UUID uuid = UUID.randomUUID();
                 ZohoLiveChat.ChatActions.register(LiveChatUtil.getString(call.arguments));
+                finalResult.success(null);
                 break;
 
             case "unregisterChatAction":
                 ZohoLiveChat.ChatActions.unregister(LiveChatUtil.getString(call.arguments));
+                finalResult.success(null);
                 break;
 
             case "unregisterAllChatActions":
                 ZohoLiveChat.ChatActions.unregisterAll();
+                finalResult.success(null);
                 break;
 
             case "setChatActionTimeout":
                 final long timeout =  LiveChatUtil.getLong(call.arguments);
-                handler = new Handler(Looper.getMainLooper());
-                handler.post(new Runnable() {
-                    public void run() {
-                        ZohoSalesIQ.ChatActions.setTimeout(timeout*1000);
-                    }
-                });
+                ZohoSalesIQ.ChatActions.setTimeout(timeout*1000);
+                finalResult.success(null);
                 break;
 
-            case "completeChatAction":
+            case "completeChatAction": {
                 final String actionID = LiveChatUtil.getString(call.arguments);
-                handler = new Handler(Looper.getMainLooper());
-                handler.post(new Runnable() {
-                    public void run() {
-                        SalesIQCustomActionListener listener;
-                        listener = actionsList.get(actionID);
-                        if (listener != null){
-                            listener.onSuccess();
-                        }
-                        if (actionsList != null) {
-                            actionsList.remove(actionID);
-                        }
-                    }
-                });
+                SalesIQCustomActionListener actionListener = actionsList.get(actionID);
+                if (actionListener != null){
+                    actionListener.onSuccess();
+                }
+                if (actionsList != null) {
+                    actionsList.remove(actionID);
+                }
+                finalResult.success(null);
                 break;
-
-            case "completeChatActionWithMessage":
+            }
+            case "completeChatActionWithMessage": {
                 final String actionId = LiveChatUtil.getString(call.argument("actionUUID"));         // No I18N
                 final boolean state = LiveChatUtil.getBoolean(call.argument("state"));         // No I18N
                 final String message = LiveChatUtil.getString(call.argument("message"));         // No I18N
-                Handler handler1 = new Handler(Looper.getMainLooper());
-                handler1.post(new Runnable() {
-                    public void run() {
-                        SalesIQCustomActionListener listener = actionsList.get(actionId);
-                        if (listener != null){
-                            if (state) {
-                                if (message != null && message.length() > 0) {
-                                    listener.onSuccess(message);
-                                }
-                                else{
-                                    listener.onSuccess();
-                                }
-                            }
-                            else{
-                                if (message != null && message.length() > 0) {
-                                    listener.onFailure(message);
-                                }
-                                else{
-                                    listener.onFailure();
-                                }
-                            }
+
+                SalesIQCustomActionListener actionListener = actionsList.get(actionId);
+                if (actionListener != null){
+                    if (state) {
+                        if (message != null && message.length() > 0) {
+                            actionListener.onSuccess(message);
                         }
-                        if (actionsList != null) {
-                            actionsList.remove(actionId);
+                        else{
+                            actionListener.onSuccess();
                         }
                     }
-                });
+                    else{
+                        if (message != null && message.length() > 0) {
+                            actionListener.onFailure(message);
+                        }
+                        else{
+                            actionListener.onFailure();
+                        }
+                    }
+                }
+                if (actionsList != null) {
+                    actionsList.remove(actionId);
+                }
+                finalResult.success(null);
                 break;
-
+            }
             case "isMultipleOpenChatRestricted":
                 finalResult.success(ZohoLiveChat.Chat.isMultipleOpenRestricted());
                 break;
