@@ -488,8 +488,8 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                             for (int i=0; i<arrayList.size(); i++) {
                                 SalesIQArticleCategory category = arrayList.get(i);
                                 Map<String, Object> categoryMap = new HashMap<String, Object>();
-                                categoryMap.put("id", category.getCategoryid());         // No I18N
-                                categoryMap.put("name", category.getCategoryname());         // No I18N
+                                categoryMap.put("id", category.getCategoryId());         // No I18N
+                                categoryMap.put("name", category.getCategoryName());         // No I18N
                                 categoryMap.put("articleCount", category.getCount());         // No I18N
                                 categoryList.add(categoryMap);
                             }
@@ -768,8 +768,8 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         Map<String, Object> articleMap = new HashMap<String, Object>();
         articleMap.put("id", article.getId());         // No I18N
         articleMap.put("name", article.getTitle());         // No I18N
-        if (article.getCategory_id() != null) {
-            articleMap.put("categoryID", article.getCategory_id());         // No I18N
+        if (article.getCategoryId() != null) {
+            articleMap.put("categoryID", article.getCategoryId());         // No I18N
         }
         if (article.getCategoryName() != null) {
             articleMap.put("categoryName", article.getCategoryName());         // No I18N
@@ -777,9 +777,9 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         articleMap.put("viewCount", article.getViewed());         // No I18N
         articleMap.put("likeCount", article.getLiked());         // No I18N
         articleMap.put("dislikeCount", article.getDisliked());         // No I18N
-        articleMap.put("departmentID", article.getDepartment_id());         // No I18N
-        articleMap.put("createdTime", LiveChatUtil.getDouble(article.getCreated_time()));         // No I18N
-        articleMap.put("modifiedTime", LiveChatUtil.getDouble(article.getModified_time()));         // No I18N
+        articleMap.put("departmentID", article.getDepartmentId());         // No I18N
+        articleMap.put("createdTime", LiveChatUtil.getDouble(article.getCreatedTime()));         // No I18N
+        articleMap.put("modifiedTime", LiveChatUtil.getDouble(article.getModifiedTime()));         // No I18N
         return articleMap;
     }
 
@@ -875,7 +875,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         handler.post(new Runnable() {
             public void run() {
                 initSalesIQ(application,  null, appKey, accessKey, null);
-                ZohoSalesIQ.Notification.handle(application, extras, 0);
+                ZohoSalesIQ.Notification.handle(application, extras);
             }
         });
     }
