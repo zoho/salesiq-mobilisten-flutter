@@ -1,5 +1,6 @@
 package com.zohosalesiq.plugin;
 
+import android.net.Uri;
 import android.app.Activity;
 import android.app.Application;
 import android.content.SharedPreferences;
@@ -13,8 +14,10 @@ import android.util.Base64;
 import androidx.annotation.NonNull;
 
 import com.zoho.commons.ChatComponent;
+import com.zoho.commons.LauncherProperties;
+import com.zoho.commons.LauncherModes;
 import com.zoho.livechat.android.NotificationListener;
-import com.zoho.livechat.android.SIQDepartment;
+import com.zoho.livechat.android.SIQDepartment; 
 import com.zoho.livechat.android.SIQVisitor;
 import com.zoho.livechat.android.SIQVisitorLocation;
 import com.zoho.livechat.android.SalesIQCustomAction;
@@ -39,6 +42,7 @@ import com.zoho.livechat.android.listeners.SalesIQListener;
 import com.zoho.livechat.android.models.SalesIQArticle;
 import com.zoho.livechat.android.models.SalesIQArticleCategory;
 import com.zoho.livechat.android.utils.LiveChatUtil;
+import com.zoho.livechat.android.operation.SalesIQApplicationManager;
 import com.zoho.salesiqembed.ZohoSalesIQ;
 
 import java.io.ByteArrayOutputStream;
@@ -58,6 +62,9 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
+import android.content.res.AssetManager;
+import android.content.res.AssetFileDescriptor;
+import io.flutter.view.FlutterView;
 
 
 public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, ActivityAware {
@@ -88,6 +95,23 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
     private static Hashtable<String, SalesIQCustomActionListener> actionsList = new Hashtable<>();
 
     Handler handler;
+
+    static class Tab {
+        static String CONVERSATIONS = "TAB_CONVERSATIONS";  // No I18N
+        static String FAQ = "TAB_FAQ";  // No I18N
+    }
+
+    static class ReturnEvent {
+        private static final String EVENT_OPEN_URL = "OPEN_URL";  // No I18N
+        private static final String EVENT_COMPLETE_CHAT_ACTION = "COMPLETE_CHAT_ACTION";// No I18N
+    }
+
+    class Launcher {
+        static final String HORIZONTAL_LEFT = "HORIZONTAL_LEFT";    // No I18N
+        static final String HORIZONTAL_RIGHT = "HORIZONTAL_RIGHT";  // No I18N
+        static final String VERTICAL_TOP = "VERTICAL_TOP";  // No I18N
+        static final String VERTICAL_BOTTOM = "VERTICAL_BOTTOM";    // No I18N
+    }
 
     @Override
     public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
@@ -488,8 +512,8 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                             for (int i=0; i<arrayList.size(); i++) {
                                 SalesIQArticleCategory category = arrayList.get(i);
                                 Map<String, Object> categoryMap = new HashMap<String, Object>();
-                                categoryMap.put("id", category.getCategoryid());         // No I18N
-                                categoryMap.put("name", category.getCategoryname());         // No I18N
+                                categoryMap.put("id", category.getCategoryId());         // No I18N
+                                categoryMap.put("name", category.getCategoryName());         // No I18N
                                 categoryMap.put("articleCount", category.getCount());         // No I18N
                                 categoryList.add(categoryMap);
                             }
@@ -634,8 +658,39 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
 
             case "getChatUnreadCount":
                 finalResult.success(ZohoLiveChat.Notification.getBadgeCount());
+                break;        
+            case "setNotificationIconForAndroid":
+                ZohoSalesIQ.Notification.setIcon(getResourceId(LiveChatUtil.getString(call.arguments)));
                 break;
-
+            case "printDebugLogsForAndroid":
+                ZohoSalesIQ.printDebugLogs(LiveChatUtil.getBoolean(call.arguments));
+                break;
+            case "setTabOrder":            
+                setTabOrder((ArrayList) call.arguments);            
+                break;
+            case "shouldOpenUrl":            
+                shouldOpenUrl((Boolean) call.arguments);            
+                break;
+            case "sendEvent":
+                sendEvent((String) call.argument("eventName"), (ArrayList) call.argument("values"));    // No I18N
+                break;
+            case "isLoggerEnabled":
+                isLoggerEnabled(finalResult);
+            break;
+            case "setLoggerEnabled":
+                setLoggerEnabled((Boolean) call.arguments);
+            break;
+            case "setLauncherPropertiesForAndroid":            
+                setLauncherPropertiesForAndroid((Map<String, Object>) call.arguments);                                    
+            break;
+            case "syncThemeWithOSForAndroid":
+                ZohoSalesIQ.syncThemeWithOS((Boolean) call.arguments);
+                break;
+            case "setThemeColorForiOS":
+            case "writeLogForiOS":
+            case "clearLogForiOS":
+            case "setPathForiOS":
+            break;
             default:
                 finalResult.notImplemented();
                 break;
@@ -768,8 +823,8 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         Map<String, Object> articleMap = new HashMap<String, Object>();
         articleMap.put("id", article.getId());         // No I18N
         articleMap.put("name", article.getTitle());         // No I18N
-        if (article.getCategory_id() != null) {
-            articleMap.put("categoryID", article.getCategory_id());         // No I18N
+        if (article.getCategoryId() != null) {
+            articleMap.put("categoryID", article.getCategoryId());         // No I18N
         }
         if (article.getCategoryName() != null) {
             articleMap.put("categoryName", article.getCategoryName());         // No I18N
@@ -777,9 +832,9 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         articleMap.put("viewCount", article.getViewed());         // No I18N
         articleMap.put("likeCount", article.getLiked());         // No I18N
         articleMap.put("dislikeCount", article.getDisliked());         // No I18N
-        articleMap.put("departmentID", article.getDepartment_id());         // No I18N
-        articleMap.put("createdTime", LiveChatUtil.getDouble(article.getCreated_time()));         // No I18N
-        articleMap.put("modifiedTime", LiveChatUtil.getDouble(article.getModified_time()));         // No I18N
+        articleMap.put("departmentID", article.getDepartmentId());         // No I18N
+        articleMap.put("createdTime", LiveChatUtil.getDouble(article.getCreatedTime()));         // No I18N
+        articleMap.put("modifiedTime", LiveChatUtil.getDouble(article.getModifiedTime()));         // No I18N
         return articleMap;
     }
 
@@ -875,7 +930,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         handler.post(new Runnable() {
             public void run() {
                 initSalesIQ(application,  null, appKey, accessKey, null);
-                ZohoSalesIQ.Notification.handle(application, extras, 0);
+                ZohoSalesIQ.Notification.handle(application, extras);
             }
         });
     }
@@ -883,6 +938,159 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
     public static void enablePush(String token, Boolean testdevice) {
         fcmtoken = token;
         istestdevice = testdevice;
+    }
+    
+    private Drawable getDrawable(final String resourceName) {
+        int resourceId = getResourceId(resourceName);
+        Drawable drawable = null;
+        if (resourceId > 0 && ZohoSalesIQ.getApplicationManager() != null && ZohoSalesIQ.getApplicationManager().getApplication() != null) {
+            drawable = ZohoSalesIQ.getApplicationManager().getApplication().getDrawable(resourceId);
+        }
+        return drawable;
+    }
+
+    private void setLauncherPropertiesForAndroid(final Map<String, Object> launcherPropertiesMap) {        
+        int mode = mode = LiveChatUtil.getInteger(launcherPropertiesMap.getOrDefault("mode", LauncherModes.FLOATING));  // No I18N
+        LauncherProperties launcherProperties = new LauncherProperties(mode);
+        int y = (int) launcherPropertiesMap.getOrDefault("y", -1);  // No I18N
+        if (y > -1) {
+            launcherProperties.setY(y);
+        }
+
+        if (launcherPropertiesMap.containsKey("horizontal_direction")) {
+            LauncherProperties.Horizontal horizontalDirection = null;
+            if (Launcher.HORIZONTAL_LEFT.equals(
+                (String) launcherPropertiesMap.get("horizontal_direction")  // No I18N
+            )) {
+                horizontalDirection = LauncherProperties.Horizontal.LEFT;
+            } else if (Launcher.HORIZONTAL_RIGHT.equals(
+                (String) launcherPropertiesMap.get("horizontal_direction")  // No I18N
+            )) {
+                horizontalDirection = LauncherProperties.Horizontal.RIGHT;
+            }
+            if (horizontalDirection != null) {
+                launcherProperties.setDirection(horizontalDirection);
+            }
+        }
+        if (launcherPropertiesMap.containsKey("vertical_direction")) {
+            LauncherProperties.Vertical verticalDirection = null;
+            if (Launcher.VERTICAL_TOP.equals(
+                (String) launcherPropertiesMap.get("vertical_direction")    // No I18N
+                    )) {
+                verticalDirection = LauncherProperties.Vertical.TOP;
+            } else if (Launcher.VERTICAL_BOTTOM.equals(
+                (String) launcherPropertiesMap.get("vertical_direction")    // No I18N
+            )) {
+                verticalDirection = LauncherProperties.Vertical.BOTTOM;
+            }
+            if (verticalDirection != null) {
+                launcherProperties.setDirection(verticalDirection);
+            }
+        }
+        if (launcherPropertiesMap.containsKey("icon") &&
+                ZohoSalesIQ.getApplicationManager() != null &&
+                ZohoSalesIQ.getApplicationManager().getApplication() != null
+        ) {
+            int resourceId = getResourceId((String) launcherPropertiesMap.get("icon"));
+            Drawable drawable = ZohoSalesIQ.getApplicationManager().getApplication().getDrawable(resourceId);
+            if (resourceId > 0 && drawable != null) {
+                launcherProperties.setIcon(drawable);
+            }
+        }
+        ZohoSalesIQ.setLauncherProperties(launcherProperties);        
+    }
+
+    boolean shouldOpenUrl = true;
+    private void shouldOpenUrl(final boolean value) {
+        shouldOpenUrl = value;
+    }
+
+    private void setTabOrder(final ArrayList<String> tabNames) {
+        int minimumTabOrdersSize = Math.min(tabNames.size(), ZohoSalesIQ.Tab.values().length);
+        ZohoSalesIQ.Tab[] tabOrder = new ZohoSalesIQ.Tab[minimumTabOrdersSize];
+        int insertIndex = 0;
+        for (int index = 0; index < minimumTabOrdersSize; index++) {
+            String tabName = tabNames.get(index);
+            if (Tab.CONVERSATIONS.equals(tabName)) {
+                tabOrder[insertIndex++] = ZohoSalesIQ.Tab.Conversations;
+            } else if (Tab.FAQ.equals(tabName)) {
+                tabOrder[insertIndex++] = ZohoSalesIQ.Tab.FAQ;
+            }
+        }
+        ZohoSalesIQ.setTabOrder(tabOrder);
+    }
+
+    private void printDebugLogsForAndroid(final Boolean value) {
+        ZohoSalesIQ.printDebugLogs(value);
+    }
+
+    private void setNotificationIconForAndroid(final String drawableName) {
+        int resourceId = getResourceId(drawableName);
+        if (resourceId > 0) {
+            ZohoSalesIQ.Notification.setIcon(resourceId);
+        }
+    }
+
+    private int getResourceId(String drawableName) {
+        SalesIQApplicationManager salesIQApplicationManager = ZohoSalesIQ.getApplicationManager();
+        int resourceId = 0;
+        if (salesIQApplicationManager != null) {
+            resourceId = salesIQApplicationManager.getApplication().getResources().getIdentifier(
+                    drawableName, "drawable",   // No I18N
+                    ZohoSalesIQ.getApplicationManager().getApplication().getPackageName());
+
+        }
+        return resourceId;
+    }
+
+    private void setLoggerEnabled(final boolean value) {
+        ZohoSalesIQ.Logger.setEnabled(value);
+    }
+
+    private void isLoggerEnabled(Result result) {
+        result.success(ZohoSalesIQ.Logger.isEnabled());
+    }
+
+    private void sendEvent(final String event, final ArrayList objects) {
+        switch (event) {
+            case ReturnEvent.EVENT_OPEN_URL:
+                final Application context = application;
+                if (!shouldOpenUrl && objects.size() == 1) {
+                    String url = (String) objects.get(0);
+                    if (url != null) {
+                        LiveChatUtil.openUri(context, Uri.parse(url));
+                    }
+                }
+                break;
+            case ReturnEvent.EVENT_COMPLETE_CHAT_ACTION:
+                if (objects.size() > 0) {
+                    String uuid = (String) objects.get(0);
+                    boolean success = objects.size() <= 1 || objects.get(1) instanceof Boolean && (boolean) objects.get(1);
+                    String message = objects.size() == 3 ? (String) objects.get(2) : null;
+                    if (uuid != null && !uuid.isEmpty()) {
+                        SalesIQCustomActionListener listener = actionsList.get(uuid);
+                        if (listener != null) {
+                            if (message != null && !message.isEmpty()) {
+                                if (success) {
+                                    listener.onSuccess(message);
+                                } else {
+                                    listener.onFailure(message);
+                                }
+                            } else {
+                                if (success) {
+                                    listener.onSuccess();
+                                } else {
+                                    listener.onFailure();
+                                }
+                            }
+                        }
+                        if (actionsList != null) {
+                            actionsList.remove(uuid);
+                        }
+                    }
+                }
+                break;
+        }
     }
 
     public class SalesIQListeners implements SalesIQListener, SalesIQChatListener, SalesIQFAQListener, SalesIQActionListener, NotificationListener {
@@ -1052,6 +1260,19 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         }
 
         @Override
+        public boolean handleUri(Uri uri, VisitorChat visitorChat) {
+            Map<String, Object> eventMap = new HashMap<String, Object>();        
+            Map<String, Object> chatMapObject = getChatMapObject(visitorChat, true);
+            eventMap.put("eventName", SIQEvent.handleURL);
+            eventMap.put("chat", chatMapObject);
+            eventMap.put("url", uri.toString());
+            if (chatEventSink != null) {
+                chatEventSink.success(eventMap);
+            }
+            return shouldOpenUrl;
+        }
+
+        @Override
         public void handleCustomAction(SalesIQCustomAction salesIQCustomAction, SalesIQCustomActionListener salesIQCustomActionListener) {
             UUID uuid = UUID.randomUUID();
 
@@ -1120,7 +1341,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
             if (faqEventSink != null) {
                 faqEventSink.success(eventMap);
             }
-        }
+        }    
     }
 
     static class SIQEvent{
@@ -1145,6 +1366,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         static String articleDisliked = "articleDisliked";                                   // No I18N
         static String articleOpened = "articleOpened";                                   // No I18N
         static String articleClosed = "articleClosed";                                   // No I18N
-        static String chatUnreadCountChanged = "chatUnreadCountChanged";                                   // No I18N
+        static String chatUnreadCountChanged = "chatUnreadCountChanged";    // No I18N
+        static String handleURL = "handleURL";    // No I18N
     }
 }

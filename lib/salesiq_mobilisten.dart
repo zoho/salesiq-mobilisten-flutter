@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:flutter/services.dart';
+import 'launcher.dart';
+import 'tab.dart';
 
 class ZohoSalesIQ {
   static MethodChannel _channel = const MethodChannel('salesiq_mobilisten');
@@ -28,6 +30,11 @@ class ZohoSalesIQ {
     args.putIfAbsent("appKey", () => appKey);
     args.putIfAbsent("accessKey", () => accessKey);
     await _channel.invokeMethod('init', args);
+  }
+
+  /// This API controls the behaviour of url opening behaviour
+  static void shouldOpenUrl(bool openUrl) {
+    _channel.invokeMethod('shouldOpenUrl', openUrl);
   }
 
   /// Controls the visibility of the default launcher using the value provided for [show].
@@ -312,6 +319,8 @@ class ZohoSalesIQ {
   }
 
   /// Marks a chat action as complete provided the [actionUUID].
+  @Deprecated('This method was deprecated after v1.0.5,'
+      'Use sendEvent(event, values) method instead.')
   static Future<Null> completeChatAction(String actionUUID) async {
     await _channel.invokeMethod('completeChatAction', actionUUID);
   }
@@ -340,6 +349,8 @@ class ZohoSalesIQ {
   }
 
   /// Marks a chat action as complete provided the [actionUUID], completion state and the message to be shown upon completion.
+  @Deprecated('This method was deprecated after v1.0.5, '
+      'Use sendEvent(event, values) method instead.')
   static Future<Null> completeChatActionWithMessage(
       String actionUUID, bool state, String message) async {
     Map<String, dynamic> chatActionDetails = <String, dynamic>{};
@@ -482,6 +493,70 @@ class ZohoSalesIQ {
     }
     return departmentList;
   }
+
+  /// Sets the order for the bottom navigation tabs inside the SDK
+  static void setTabOrder(List<SIQTab> tabs) {
+    _channel.invokeMethod(
+        'setTabOrder', tabs.map((tab) => tab.toString()).toList());
+  }
+
+  /// Use this API to send events to the SDK with [SIQSendEvent] and it's values
+  /// with respect to the event
+  static Future<Null> sendEvent(
+      SIQSendEvent eventName, List<Object> values) async {
+    Map<String, Object> map = <String, Object>{};
+    map.putIfAbsent("eventName", () => eventName.toString());
+    map.putIfAbsent("values", () => values);
+    await _channel.invokeMethod('sendEvent', map);
+  }
+
+  /// Sets the properties for the launcher using [LauncherProperties]. 
+  /// This API is used to customize launcher's mode, y position, sides and icon.
+  ///
+  /// Applies only for Android
+  static void setLauncherPropertiesForAndroid(
+      LauncherProperties launcherProperties) {
+    Map<String, Object> map = <String, Object>{};
+    map.putIfAbsent("mode", () => launcherProperties.mode.toString());
+    if (launcherProperties.y != null) {
+      map.putIfAbsent("y", () => launcherProperties.y!);
+    }
+    if (launcherProperties.horizontalDirection != null) {
+      map.putIfAbsent("horizontal_direction",
+          () => launcherProperties.horizontalDirection.toString());
+    }
+    if (launcherProperties.verticalDirection != null) {
+      map.putIfAbsent("vertical_direction",
+          () => launcherProperties.verticalDirection.toString());
+    }
+    if (launcherProperties.icon != null) {
+      map.putIfAbsent("icon", () => launcherProperties.icon!);
+    }
+    _channel.invokeMethod('setLauncherPropertiesForAndroid', map);
+  }
+
+  /// This API sets the icon for the notifications created from SDK.
+  ///
+  /// Applies only for Android
+  ///
+  /// params: resourceName  - specifies the name of the resource 
+  ///                         in the drawable folder
+  static void setNotificationIconForAndroid(String resourceName) {
+    _channel.invokeMethod('setNotificationIconForAndroid', resourceName);
+  }
+
+  /// If this API is enabled, the SDK theme will work in sync with system's
+  /// dark/light mode
+  ///
+  /// Applies only for Android
+  static void syncThemeWithOSForAndroid(bool value) {
+    _channel.invokeMethod('syncThemeWithOSForAndroid', value);
+  }
+
+  /// The android mobilisten debug logs will be printed only when true is set.
+  static void printDebugLogsForAndroid(bool value) {
+    _channel.invokeMethod('printDebugLogsForAndroid', value);
+  }
 }
 
 class SIQChat {
@@ -594,6 +669,7 @@ class SIQEvent {
   static const String articleOpened = "articleOpened";
   static const String articleClosed = "articleClosed";
   static const String chatUnreadCountChanged = "chatUnreadCountChanged";
+  static const String handleURL = "handleURL";
 }
 
 enum SIQChatStatus {
@@ -636,5 +712,26 @@ extension SIQChatStatusString on SIQChatStatus {
       }
     }
     return SIQChatStatus.closed;
+  }
+}
+
+class SIQSendEvent {
+  const SIQSendEvent._(this.index);
+  final int index;
+
+  static const SIQSendEvent openUrl = SIQSendEvent._(0);
+  static const SIQSendEvent completeChatAction = SIQSendEvent._(1);
+
+  static const List<SIQSendEvent> values = <SIQSendEvent>[
+    openUrl,
+    completeChatAction
+  ];
+
+  @override
+  String toString() {
+    return const <int, String>{
+      0: 'OPEN_URL',
+      1: 'COMPLETE_CHAT_ACTION'
+    }[index]!;
   }
 }

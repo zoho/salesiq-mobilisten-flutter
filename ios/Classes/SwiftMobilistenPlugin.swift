@@ -67,6 +67,7 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
         case homeViewOpened = "homeViewOpened"
         case homeViewClosed = "homeViewClosed"
         case chatUnreadCountChanged = "chatUnreadCountChanged"
+        case handleURL = "handleURL"
         
         var enabled: Bool {
             switch self {
@@ -87,6 +88,7 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
     var eventSink: FlutterEventSink?
     var faqEventSink: FlutterEventSink?
     var chatEventSink: FlutterEventSink?
+    private var handleURL = true
     
     static var sharedInstance: SwiftMobilistenPlugin?
     private var chatActionStore: [String: SIQActionHandler] = [:]
@@ -451,6 +453,105 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
             } else {
                 result(operationFailedError)
             }
+        case "shouldOpenUrl":
+            if let allow = argument as? Bool {
+                handleURL = allow
+            }
+        case "setLoggerEnabled":
+            if let enable = argument as? Bool {
+                ZohoSalesIQ.Logger.setEnabled(enable)
+            }
+        case "isLoggerEnabled":
+            result(ZohoSalesIQ.Logger.isEnabled)
+        case "clearLogsForiOS":
+            ZohoSalesIQ.Logger.clear()
+        case "writeLogForiOS": 
+            if let args = call.argumentDictionary, let log = args["log"] as? String, let level = args["level"] as? String {
+                var logLevel: SIQDebugLogLevel = .info
+                if level == "INFO" {
+                    logLevel = .info
+                } else if level == "WARNING" {
+                    logLevel = .warning
+                } else if level == "ERROR" {
+                    logLevel = .error
+                }
+                ZohoSalesIQ.Logger.write(log, logLevel: logLevel, success: { (success) in
+                     if success {
+                        result(nil)
+                    } else {
+                        result(self.operationFailedError)
+                    }
+                })
+            }
+        case "setTabOrder":
+            var tabs:[Int] = []
+            if let tabList = call.argumentList as? [String] {
+                for tab in tabList {
+                    if tab == "TAB_CONVERSATIONS" {
+                        tabs.append(SIQTabBarComponent.conversation.rawValue)
+                    } else if tab == "TAB_FAQ" {
+                        tabs.append(SIQTabBarComponent.knowledgeBase.rawValue)
+                    }
+                }        
+            }
+            ZohoSalesIQ.setTabOrder(tabs)
+        case "sendEvent":
+            if let args = call.argumentDictionary, let eventName = args["eventName"] as? String, let values = args["values"] as? [AnyObject] {
+                 var logLevel: SIQDebugLogLevel = .info
+                    logLevel = .error
+                    ZohoSalesIQ.Logger.write("performChatAction", logLevel: logLevel, success: { (success) in
+
+                    })
+                if eventName == "OPEN_URL" {
+                    for value in values {
+                        if let stringURL = value as? String, let url = URL(string: stringURL) {
+                            ZohoSalesIQ.openURL(url)
+                            break
+                        }
+                    }
+                } else if eventName == "COMPLETE_CHAT_ACTION" {
+                    var uuid: String?
+                    var success = false
+                    var message: String?
+                    for index in 0..<values.count {
+                        switch index {
+                            case 0:
+                                if let id = values[index] as? String {
+                                    uuid = id
+                                }
+                            case 1:
+                                if let complete = values[index] as? Bool {
+                                    success = complete
+                                }
+                            case 2:
+                                if let msg = values[index] as? String {
+                                    message = msg
+                                }
+                            default:
+                                break
+                        }
+                    }
+                    if let uniqueID = uuid, let handler = chatActionStore[uniqueID] {
+                        if message == nil {
+                            handler.success()
+                        } else {
+                            if success {
+                                handler.success(message: message)
+                            } else {
+                                handler.faliure(message: message)
+                            }
+                        }
+                        chatActionStore.removeValue(forKey: uniqueID)
+                    } else {
+                        result(operationFailedError)
+                    }
+                }
+            }
+        case "setPathForiOS":
+            if let path = argument as? String {
+                let pathURL = NSURL.fileURL(withPath: path)
+                ZohoSalesIQ.Logger.setPath(pathURL)
+            } 
         default:
             result(FlutterMethodNotImplemented)
         }
@@ -462,6 +563,22 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
         var event: [String: Any] = [:]
         event[MobilistenEvent.nameKey] = name.rawValue
         event[dataLabel] = data
+        return formEventData(name: name, dataLabel: dataLabel, event: event)
+    }
+
+    private func formEventData(name: MobilistenEvent, dataLabel: String, event: [String: Any]) -> [String: Any]?  {
+        switch name.rawValue {
+            case "handleURL":
+                var eventData = event
+                if var chat = (eventData["chat"] as? [String: Any]) {
+                    let url = chat.removeValue(forKey: "url")
+                    eventData["url"] = url
+                    eventData[dataLabel] = chat
+                }
+                return eventData
+            default:
+                return event
+        }
         return event
     }
     
@@ -736,15 +853,16 @@ extension SwiftMobilistenPlugin {
         chatDictionary["status"] = chat.status.string
         chatDictionary["unreadCount"] = chat.unreadCount
         
-        if let lastMessage = chat.lastMessage {
+        if let lastMessage = chat.lastMessage.text {
             chatDictionary["lastMessage"] = lastMessage
         }
-        if let lastMessageTime = chat.lastMessageTime {
-            chatDictionary["lastMessageTime"] = lastMessageTime.milliSecondIntervalSince1970
+        if let lastmessageTime = chat.lastMessage.time?.milliSecondIntervalSince1970 {
+            chatDictionary["lastMessageTime"] = lastmessageTime
         }
-        if let lastMessageSender = chat.lastMessageSender {
-            chatDictionary["lastMessageSender"] = lastMessageSender
+        if let lastmessageSender = chat.lastMessage.sender {
+            chatDictionary["lastMessageSender"] = lastmessageSender
         }
+        
         let queuePosition = chat.queuePosition
         if queuePosition > 0 {
             chatDictionary["queuePosition"] = queuePosition
@@ -783,9 +901,7 @@ extension SwiftMobilistenPlugin {
     private func getCategoryObject(_ category: SIQFAQCategory) -> [String: Any] {
         var categoryDictionary: [String: Any] = [:]
         categoryDictionary["id"] = category.id
-        if let name = category.name {
-            categoryDictionary["name"] = name
-        }
+        categoryDictionary["name"] = category.name
         categoryDictionary["articleCount"] = category.articleCount
         return categoryDictionary
     }
@@ -941,6 +1057,15 @@ extension SwiftMobilistenPlugin: ZohoSalesIQFAQDelegate {
 }
 
 extension SwiftMobilistenPlugin: ZohoSalesIQChatDelegate {
+    public func shouldOpenURL(_ url: URL, in chat: Mobilisten.SIQVisitorChat?) -> Bool {
+        if let chat = chat {
+            var chatData = getChatObject(chat)
+            chatData["url"] = String(describing: url)
+            sendChatEvent(name: .handleURL, data:chatData)
+        }
+        return handleURL
+    }
+    
     
     public func chatOpened(chat: SIQVisitorChat?) {
         guard let chatData = chat else { return }
