@@ -1,5 +1,7 @@
 import 'dart:async';
+
 import 'package:flutter/services.dart';
+
 import 'launcher.dart';
 import 'tab.dart';
 
@@ -25,7 +27,7 @@ class ZohoSalesIQ {
       EventChannel(_mobilistenArticleEventChannel).receiveBroadcastStream();
 
   /// Initializes Mobilisten using the [appKey] and [accessKey] generated for the bundle ID/package name of an application.
-  static Future<Null> init(String appKey, String accessKey) async {
+  static Future<Null> init(String? appKey, String? accessKey) async {
     Map<String, dynamic> args = <String, dynamic>{};
     args.putIfAbsent("appKey", () => appKey);
     args.putIfAbsent("accessKey", () => accessKey);
@@ -510,7 +512,7 @@ class ZohoSalesIQ {
     await _channel.invokeMethod('sendEvent', map);
   }
 
-  /// Sets the properties for the launcher using [LauncherProperties]. 
+  /// Sets the properties for the launcher using [LauncherProperties].
   /// This API is used to customize launcher's mode, y position, sides and icon.
   ///
   /// Applies only for Android
@@ -539,7 +541,7 @@ class ZohoSalesIQ {
   ///
   /// Applies only for Android
   ///
-  /// params: resourceName  - specifies the name of the resource 
+  /// params: resourceName  - specifies the name of the resource
   ///                         in the drawable folder
   static void setNotificationIconForAndroid(String resourceName) {
     _channel.invokeMethod('setNotificationIconForAndroid', resourceName);
