@@ -11,6 +11,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_web_plugins:
+    sdk: flutter
 
 dev_dependencies:
   flutter_test:
@@ -24,3 +26,7 @@ flutter:
         pluginClass: MobilistenPlugin
       ios:
         pluginClass: MobilistenPlugin
+      web:
+        pluginClass: MobilistenWebPlugin
+        fileName: salesiq_mobilisten_web.dart
+
