@@ -35,6 +35,15 @@ external Future _setVisitorAddInfo(String key, dynamic value);
 @JS("startChat")
 external Future _startChat(String? question);
 
+@JS("showFloatingWindow")
+external Future _showFloatingWindow();
+@JS("showFloatingButton")
+external Future _showFloatingButton();
+@JS("hideFloatingButton")
+external Future _hideFloatingButton();
+@JS("triggerFloatButtonVisibility")
+external Future _triggerFloatButtonVisibility();
+
 /// A web implementation of the SalesiqMobilistenFlutter plugin.
 class MobilistenWebPlugin {
   static void registerWith(Registrar registrar) {
@@ -105,6 +114,14 @@ class MobilistenWebPlugin {
         return startChat(call.arguments as String?);
       case 'show':
         return startChat(null);
+      case 'showFloatingWindow':
+        return showFloatingWindow();
+      case 'triggerFloatButtonVisibility':
+        return triggerFloatButtonVisibility();
+      case 'showFloatingButton':
+        return showFloatingButton();
+      case 'hideFloatingButton':
+        return hideFloatingButton();
       default:
         throw PlatformException(
           code: 'Unimplemented',
@@ -166,6 +183,26 @@ class MobilistenWebPlugin {
 
   Future<void> startChat(String? question) async {
     final promise = _startChat(question ?? "");
+    return await promiseToFuture(promise);
+  }
+
+  Future<void> showFloatingWindow() async {
+    final promise = _showFloatingWindow();
+    return await promiseToFuture(promise);
+  }
+
+  Future<void> triggerFloatButtonVisibility() async {
+    final promise = _triggerFloatButtonVisibility();
+    return await promiseToFuture(promise);
+  }
+
+  Future<void> showFloatingButton() async {
+    final promise = _showFloatingButton();
+    return await promiseToFuture(promise);
+  }
+
+  Future<void> hideFloatingButton() async {
+    final promise = _hideFloatingButton();
     return await promiseToFuture(promise);
   }
 }

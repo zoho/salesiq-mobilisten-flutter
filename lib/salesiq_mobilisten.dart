@@ -39,6 +39,16 @@ class ZohoSalesIQ {
     _channel.invokeMethod('shouldOpenUrl', openUrl);
   }
 
+  static void showFloatingWindow() {
+    _channel.invokeMethod(
+      'showFloatingWindow',
+    );
+  }
+
+  static void triggerFloatButtonVisibility() {
+    _channel.invokeMethod("triggerFloatButtonVisibility");
+  }
+
   /// Controls the visibility of the default launcher using the value provided for [show].
   static Future<Null> showLauncher(bool show) async {
     await _channel.invokeMethod('showLauncher', show);
@@ -47,6 +57,18 @@ class ZohoSalesIQ {
   /// Sets the language used by Mobilisten using the language code provided in [language].
   static Future<Null> setLanguage(String language) async {
     await _channel.invokeMethod('setLanguage', language);
+  }
+
+  static Future<Null> showFloatingButton() async {
+    await _channel.invokeMethod(
+      'showFloatingButton',
+    );
+  }
+
+  static Future<Null> hideFloatingButton() async {
+    await _channel.invokeMethod(
+      'hideFloatingButton',
+    );
   }
 
   /// Sets the department to which all chat requests are routed by default.
