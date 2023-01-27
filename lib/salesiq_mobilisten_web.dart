@@ -36,7 +36,7 @@ external Future _setVisitorAddInfo(String key, dynamic value);
 external Future _startChat(String? question);
 
 @JS("showFloatingWindow")
-external Future _showFloatingWindow();
+external Future _showFloatingWindow(String? message);
 @JS("showFloatingButton")
 external Future _showFloatingButton();
 @JS("hideFloatingButton")
@@ -115,7 +115,7 @@ class MobilistenWebPlugin {
       case 'show':
         return startChat(null);
       case 'showFloatingWindow':
-        return showFloatingWindow();
+        return showFloatingWindow(call.arguments as String?);
       case 'triggerFloatButtonVisibility':
         return triggerFloatButtonVisibility();
       case 'showFloatingButton':
@@ -186,8 +186,8 @@ class MobilistenWebPlugin {
     return await promiseToFuture(promise);
   }
 
-  Future<void> showFloatingWindow() async {
-    final promise = _showFloatingWindow();
+  Future<void> showFloatingWindow(String? message) async {
+    final promise = _showFloatingWindow(message);
     return await promiseToFuture(promise);
   }
 

@@ -39,10 +39,8 @@ class ZohoSalesIQ {
     _channel.invokeMethod('shouldOpenUrl', openUrl);
   }
 
-  static void showFloatingWindow() {
-    _channel.invokeMethod(
-      'showFloatingWindow',
-    );
+  static void showFloatingWindow(String? message) {
+    _channel.invokeMethod('showFloatingWindow', message);
   }
 
   static void triggerFloatButtonVisibility() {
