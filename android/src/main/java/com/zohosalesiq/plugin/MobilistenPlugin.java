@@ -166,6 +166,8 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         final Result finalResult = rawResult;
         switch (call.method) {
             case "init":
+                String fcmToken = LiveChatUtil.getString(call.argument("fcmToken")); // No I18N
+                this.fcmtoken = fcmToken;
                 String appKey = LiveChatUtil.getString(call.argument("appKey"));         // No I18N
                 String accessKey = LiveChatUtil.getString(call.argument("accessKey"));         // No I18N
                 initSalesIQ(application, activity, appKey, accessKey, finalResult);

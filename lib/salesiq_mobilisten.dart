@@ -27,8 +27,9 @@ class ZohoSalesIQ {
       EventChannel(_mobilistenArticleEventChannel).receiveBroadcastStream();
 
   /// Initializes Mobilisten using the [appKey] and [accessKey] generated for the bundle ID/package name of an application.
-  static Future<Null> init(String? appKey, String? accessKey) async {
+  static Future<Null> init(String? fcmToken,String? appKey, String? accessKey) async {
     Map<String, dynamic> args = <String, dynamic>{};
+    args.putIfAbsent("fcmToken", () => fcmToken);
     args.putIfAbsent("appKey", () => appKey);
     args.putIfAbsent("accessKey", () => accessKey);
     await _channel.invokeMethod('init', args);
