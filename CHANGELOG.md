@@ -4,6 +4,7 @@
 
 - Updated Mobilisten SDK for iOS to version [5.3.0](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/v5.3.0) and Android to version [4.4.0](https://github.com/zoho/salesiq-mobilisten-android-sample/releases/tag/v4.4.0)
 - Added support for Georgian [ka], Armenian [hy], and Persian [fa] languages. You can change to these languages using the [.setLanguage()](https://www.zoho.com/salesiq/help/developer-section/cordova-ionic-sdk-set-language.html) API.
+- Addressed the GitHub issue - [#28](https://github.com/zoho/salesiq-mobilisten-flutter/issues/28)
 
 ### 2.0.0 - 03 Jan 2023
 
