@@ -27,7 +27,7 @@ class ZohoSalesIQLogger {
     args.putIfAbsent("level", () => level.toString());
     await methodChannel.invokeMethod('writeLogForiOS', args);
   }
- 
+
   /// Use this API to clear the Debug log
   static void clearLogsForiOS() {
     methodChannel.invokeMethod('clearLogsForiOS');

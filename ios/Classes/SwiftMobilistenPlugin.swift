@@ -475,7 +475,7 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
                 } else if level == "ERROR" {
                     logLevel = .error
                 }
-                ZohoSalesIQ.Logger.write(log, logLevel: logLevel, success: { (success) in
+                ZohoSalesIQ.Logger.write(log, logLevel: logLevel, file: nil, line: nil, function: nil, fileID: nil, filePath: nil, column: nil, success: { (success) in
                      if success {
                         result(nil)
                     } else {

@@ -1,5 +1,10 @@
 ## Mobilisten Plugin Changelog
 
+### 2.1.0 - 03 Jan 2023
+
+- Updated Mobilisten SDK for iOS to version [5.3.0](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/v5.3.0) and Android to version [4.4.0](https://github.com/zoho/salesiq-mobilisten-android-sample/releases/tag/v4.4.0)
+- Added support for Georgian [ka], Armenian [hy], and Persian [fa] languages. You can change to these languages using the [.setLanguage()](https://www.zoho.com/salesiq/help/developer-section/cordova-ionic-sdk-set-language.html) API.
+
 ### 2.0.0 - 03 Jan 2023
 
 - Experience the brand new version of iOS SDK [5.0.0](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/v5.0.0) and improved Android SDK [4.3.3](https://github.com/zoho/salesiq-mobilisten-android-sample/releases/tag/v4.3.3).
