@@ -97,6 +97,10 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
     private static var mobilistenPluginFlags: [MobilistenPluginFlag: Bool] = [.autoHandlePushNotifications: true,
                                                                               .enableDisabledEvents: false]
     
+    private func getErrorMessage(_ error: String?) -> FlutterError {
+           return FlutterError(code: "1000", message: error ?? "operation failed", details: nil)
+    }
+    
     public static func register(with registrar: FlutterPluginRegistrar) {
         
         let methodChannel = MobilistenChannel.plugin.createMethodChannel(registrar: registrar)
@@ -139,7 +143,7 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
                     if success {
                         result(nil)
                     } else {
-                        result(self.operationFailedError)
+                        result(self.getErrorMessage("Mobilisten initialization failed"))
                     }
                 })
                 ZohoSalesIQ.delegate = self
@@ -189,7 +193,7 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
                     if status {
                         result(nil)
                     } else {
-                        result(self.operationFailedError)
+                        result(self.getErrorMessage("Failed to register visitor"))
                     }
                 }
             }
@@ -198,7 +202,7 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
                 if status {
                     result(nil)
                 } else {
-                    result(self.operationFailedError)
+                    result(self.getErrorMessage("Failed to unregister visitor"))
                 }
             }
         case "setPageTitle":
@@ -366,16 +370,16 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
                             return
                         }
                         guard let attenderImage = image, let base64String = attenderImage.toBase64String(compressionQuality: 0.5) else {
-                            result(self.operationFailedError)
+                            result(self.getErrorMessage("Failed to fetch attender image"))
                             return
                         }
                         result(base64String)
                     }
                 } else {
-                    result(operationFailedError)
+                    result(self.getErrorMessage("Failed to fetch attender image"))
                 }
             } else {
-                result(operationFailedError)
+                result(self.getErrorMessage("Failed to fetch attender image"))
             }
         case "openArticle":
             if let id = argument as? String {
@@ -383,7 +387,7 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
                     result(self.getError(error:error))
                 }
             } else {
-                result(operationFailedError)
+                result(self.getErrorMessage("Failed to open article"))
             }
         case "registerChatAction":
             if let name = argument as? String {
@@ -395,13 +399,13 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
                 }
                 ZohoSalesIQ.ChatActions.register(action: action)
             } else {
-                result(operationFailedError)
+                result(self.getErrorMessage("Failed to register chat action"))
             }
         case "unregisterChatAction":
             if let name = argument as? String {
                 ZohoSalesIQ.ChatActions.unregisterWithName(name: name)
             } else {
-                result(operationFailedError)
+                result(self.getErrorMessage("Failed to unregister chat action"))
             }
         case "unregisterAllChatActions":
             ZohoSalesIQ.ChatActions.unregisterAll()
@@ -409,14 +413,14 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
             if let time = argument as? Int {
                 ZohoSalesIQ.ChatActions.setTimeout(Double(time))
             } else {
-                result(operationFailedError)
+                result(self.getErrorMessage("Failed to set chat action timeout"))
             }
         case "completeChatAction":
             if let uuid = argument as? String, let handler = chatActionStore[uuid] {
                 handler.success()
                 chatActionStore.removeValue(forKey: uuid)
             } else {
-                result(operationFailedError)
+                result(self.getErrorMessage("Failed to complete chat action"))
             }
         case "completeChatActionWithMessage":
             if let args = argument as? [String: Any], let uuid = args["actionUUID"] as? String, let success = args["state"] as? Bool, let message = (args["message"] as? String)?.trimSpace(), let handler = chatActionStore[uuid] {
@@ -428,7 +432,7 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
                 }
                 chatActionStore.removeValue(forKey: uuid)
             } else {
-                result(operationFailedError)
+                result(self.getErrorMessage("Failed to complete chat action"))
             }
         case "isMultipleOpenChatRestricted":
             result(ZohoSalesIQ.Chat.multipleOpenRestricted)
@@ -439,19 +443,19 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
                 let apnsMode: APNSMode = productionMode ? .production : .sandbox
                 ZohoSalesIQ.enablePush(token, isTestDevice: isTestDevice, mode: apnsMode)
             } else {
-                result(operationFailedError)
+                result(self.getErrorMessage("Failed to enable push notifications"))
             }
         case "handleNotificationResponseForiOS":
             if let userInfo = argument as? [AnyHashable: Any] {
                 ZohoSalesIQ.handleNotificationResponse(userInfo)
             } else {
-                result(operationFailedError)
+                result(self.getErrorMessage("Failed to handle Notification Response for iOS"))
             }
         case "processNotificationWithInfoForiOS":
             if let userInfo = argument as? [AnyHashable: Any] {
                 ZohoSalesIQ.processNotificationWithInfo(userInfo)
             } else {
-                result(operationFailedError)
+                result(self.getErrorMessage("Failed to process Notification Response for iOS"))
             }
         case "shouldOpenUrl":
             if let allow = argument as? Bool {
@@ -479,7 +483,7 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
                      if success {
                         result(nil)
                     } else {
-                        result(self.operationFailedError)
+                        result(self.getErrorMessage("Failed to write logs"))
                     }
                 })
             }
@@ -543,7 +547,7 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
                         }
                         chatActionStore.removeValue(forKey: uniqueID)
                     } else {
-                        result(operationFailedError)
+                        result(self.getErrorMessage("Failed chat action event"))
                     }
                 }
             }
