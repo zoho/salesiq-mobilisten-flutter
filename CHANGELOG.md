@@ -1,5 +1,10 @@
 ## Mobilisten Plugin Changelog
 
+
+### 2.1.2 - 13 Apr 2023
+
+- Updated Mobilisten SDK for iOS to version [5.3.2](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/v5.3.2)
+
 ### 2.1.1 - 29 Mar 2023
 
 - Updated Mobilisten SDK for iOS to version [5.3.1](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/v5.3.1)
