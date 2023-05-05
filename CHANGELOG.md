@@ -1,19 +1,37 @@
 ## Mobilisten Plugin Changelog
 
+### 2.2.0 - 5 May 2023
+
+- Experience the brand new version of Android
+  SDK [5.0.0](https://github.com/zoho/salesiq-mobilisten-android-sample/releases/tag/v5.0.0).
+- Addressed the GitHub issues - [#30](https://github.com/zoho/salesiq-mobilisten-flutter/issues/30)
+  , [#31](https://github.com/zoho/salesiq-mobilisten-flutter/issues/31)
+  , [#32](https://github.com/zoho/salesiq-mobilisten-flutter/issues/32).
+- lastMessage, lastMessageSender and lastMessageTime
+  in [getChats()](https://www.zoho.com/salesiq/help/developer-guides/flutter-sdk-chat-getchats.html)
+  and [getChatsWithFilter()](https://www.zoho.com/salesiq/help/developer-guides/flutter-sdk-getChatsWithFilter.html)
+  APIs is deprecated. Use recentMessage instead.
 
 ### 2.1.2 - 13 Apr 2023
 
-- Updated Mobilisten SDK for iOS to version [5.3.2](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/v5.3.2)
+- Updated Mobilisten SDK for iOS to
+  version [5.3.2](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/v5.3.2).
 
 ### 2.1.1 - 29 Mar 2023
 
-- Updated Mobilisten SDK for iOS to version [5.3.1](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/v5.3.1)
+- Updated Mobilisten SDK for iOS to
+  version [5.3.1](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/v5.3.1).
 
 ### 2.1.0 - 13 Mar 2023
 
-- Updated Mobilisten SDK for iOS to version [5.3.0](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/v5.3.0) and Android to version [4.4.0](https://github.com/zoho/salesiq-mobilisten-android-sample/releases/tag/v4.4.0)
-- Added support for Georgian [ka], Armenian [hy], and Persian [fa] languages. You can change to these languages using the [.setLanguage()](https://www.zoho.com/salesiq/help/developer-section/cordova-ionic-sdk-set-language.html) API.
-- Addressed the GitHub issue - [#28](https://github.com/zoho/salesiq-mobilisten-flutter/issues/28)
+- Updated Mobilisten SDK for iOS to
+  version [5.3.0](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/v5.3.0) and Android to
+  version [4.4.0](https://github.com/zoho/salesiq-mobilisten-android-sample/releases/tag/v4.4.0).
+- Added support for Georgian [ka], Armenian [hy], and Persian [fa] languages. You can change to
+  these languages using
+  the [.setLanguage()](https://www.zoho.com/salesiq/help/developer-section/cordova-ionic-sdk-set-language.html)
+  API.
+- Addressed the GitHub issue - [#28](https://github.com/zoho/salesiq-mobilisten-flutter/issues/28).
 
 ### 2.0.0 - 03 Jan 2023
 

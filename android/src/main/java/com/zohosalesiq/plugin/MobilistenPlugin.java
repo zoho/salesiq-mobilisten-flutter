@@ -16,8 +16,9 @@ import androidx.annotation.NonNull;
 import com.zoho.commons.ChatComponent;
 import com.zoho.commons.LauncherProperties;
 import com.zoho.commons.LauncherModes;
+import com.zoho.livechat.android.provider.MobilistenInitProvider;
 import com.zoho.livechat.android.NotificationListener;
-import com.zoho.livechat.android.SIQDepartment; 
+import com.zoho.livechat.android.SIQDepartment;
 import com.zoho.livechat.android.SIQVisitor;
 import com.zoho.livechat.android.SIQVisitorLocation;
 import com.zoho.livechat.android.SalesIQCustomAction;
@@ -88,6 +89,11 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
     private static final String TYPE_ENDED = "ended";         // No I18N
     private static final String TYPE_MISSED = "missed";         // No I18N
     private static final String TYPE_WAITING = "waiting";         // No I18N
+
+    private static final String SENDING = "sending";         // No I18N
+    private static final String SENT = "sent";         // No I18N
+    private static final String UPLOADING = "uploading";         // No I18N
+    private static final String FAILURE = "failure";         // No I18N
 
     private static final String INVALID_FILTER_CODE = "604";         // No I18N
     private static final String INVALID_FILTER_TYPE = "invalid filter type";         // No I18N
@@ -658,18 +664,18 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
 
             case "getChatUnreadCount":
                 finalResult.success(ZohoLiveChat.Notification.getBadgeCount());
-                break;        
+                break;
             case "setNotificationIconForAndroid":
                 ZohoSalesIQ.Notification.setIcon(getResourceId(LiveChatUtil.getString(call.arguments)));
                 break;
             case "printDebugLogsForAndroid":
                 ZohoSalesIQ.printDebugLogs(LiveChatUtil.getBoolean(call.arguments));
                 break;
-            case "setTabOrder":            
-                setTabOrder((ArrayList) call.arguments);            
+            case "setTabOrder":
+                setTabOrder((ArrayList) call.arguments);
                 break;
-            case "shouldOpenUrl":            
-                shouldOpenUrl((Boolean) call.arguments);            
+            case "shouldOpenUrl":
+                shouldOpenUrl((Boolean) call.arguments);
                 break;
             case "sendEvent":
                 sendEvent((String) call.argument("eventName"), (ArrayList) call.argument("values"));    // No I18N
@@ -680,8 +686,8 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
             case "setLoggerEnabled":
                 setLoggerEnabled((Boolean) call.arguments);
             break;
-            case "setLauncherPropertiesForAndroid":            
-                setLauncherPropertiesForAndroid((Map<String, Object>) call.arguments);                                    
+            case "setLauncherPropertiesForAndroid":
+                setLauncherPropertiesForAndroid((Map<String, Object>) call.arguments);
             break;
             case "syncThemeWithOSForAndroid":
                 ZohoSalesIQ.syncThemeWithOS((Boolean) call.arguments);
@@ -785,18 +791,58 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         if (chat.getChatStatus() != null){
             visitorMap.put("status", chat.getChatStatus().toLowerCase());         // No I18N
         }
-        if (chat.getLastMessage() != null){
-            visitorMap.put("lastMessage", chat.getLastMessage());         // No I18N
-        }
-        if (chat.getLastMessageSender() != null){
-            visitorMap.put("lastMessageSender", chat.getLastMessageSender());         // No I18N
-        }
-        if (chat.getLastMessageTime() > 0){
-            if (isEventStream) {
-                visitorMap.put("lastMessageTime", LiveChatUtil.getString(chat.getLastMessageTime()));         // No I18N
-            } else {
-                visitorMap.put("lastMessageTime", LiveChatUtil.getDouble(chat.getLastMessageTime()));         // No I18N
+        Map<String, Object> lastMessageMap = new HashMap<String, Object>();
+        VisitorChat.SalesIQMessage lastMessage = chat.getLastMessage();
+        if (lastMessage != null) {
+            if (lastMessage.getText() != null){
+                visitorMap.put("lastMessage", lastMessage.getText());         // No I18N
             }
+            if (lastMessage.getSender() != null){
+                visitorMap.put("lastMessageSender", lastMessage.getSender());         // No I18N
+            }
+            if (lastMessage.getTime() != null && lastMessage.getTime() > 0) {
+                if (isEventStream) {
+                    visitorMap.put("lastMessageTime", LiveChatUtil.getString(lastMessage.getTime()));         // No I18N
+                    lastMessageMap.put("time", LiveChatUtil.getString(lastMessage.getTime()));         // No I18N
+                } else {
+                    visitorMap.put("lastMessageTime", LiveChatUtil.getDouble(lastMessage.getTime()));
+                    lastMessageMap.put("time", LiveChatUtil.getDouble(lastMessage.getTime()));
+                }
+            }
+            lastMessageMap.put("sender", lastMessage.getSender());
+            lastMessageMap.put("sender_id", lastMessage.getSenderId());
+            lastMessageMap.put("text", lastMessage.getText());
+            lastMessageMap.put("type", lastMessage.getType());
+            lastMessageMap.put("is_read", lastMessage.isRead());
+            lastMessageMap.put("sent_by_visitor", lastMessage.getSentByVisitor());
+            if (lastMessage.getStatus() != null) {
+                String status = null;
+                switch (lastMessage.getStatus()) {
+                    case Sending:
+                        status = SENDING;
+                        break;
+                    case Uploading:
+                        status = UPLOADING;
+                        break;
+                    case Sent:
+                        status = SENT;
+                        break;
+                    case Failure:
+                        status = FAILURE;
+                        break;
+                }
+                lastMessageMap.put("status", status);
+            }
+            VisitorChat.SalesIQMessage.SalesIQFile salesIQFile = lastMessage.getFile();
+            Map<String, Object> fileMap = new HashMap<String, Object>();
+            if (salesIQFile != null) {
+                fileMap.put("name", salesIQFile.getName());
+                fileMap.put("content_type", salesIQFile.getContentType());
+                fileMap.put("comment", salesIQFile.getComment());
+                fileMap.put("size", salesIQFile.getSize());
+                lastMessageMap.put("file", fileMap);
+            }
+            visitorMap.put("recentMessage", lastMessageMap);         // No I18N
         }
         if (chat.getAttenderName() != null) {
             visitorMap.put("attenderName", chat.getAttenderName());         // No I18N
@@ -939,7 +985,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         fcmtoken = token;
         istestdevice = testdevice;
     }
-    
+
     private Drawable getDrawable(final String resourceName) {
         int resourceId = getResourceId(resourceName);
         Drawable drawable = null;
@@ -949,7 +995,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         return drawable;
     }
 
-    private void setLauncherPropertiesForAndroid(final Map<String, Object> launcherPropertiesMap) {        
+    private void setLauncherPropertiesForAndroid(final Map<String, Object> launcherPropertiesMap) {
         int mode = mode = LiveChatUtil.getInteger(launcherPropertiesMap.getOrDefault("mode", LauncherModes.FLOATING));  // No I18N
         LauncherProperties launcherProperties = new LauncherProperties(mode);
         int y = (int) launcherPropertiesMap.getOrDefault("y", -1);  // No I18N
@@ -997,7 +1043,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 launcherProperties.setIcon(drawable);
             }
         }
-        ZohoSalesIQ.setLauncherProperties(launcherProperties);        
+        ZohoSalesIQ.setLauncherProperties(launcherProperties);
     }
 
     boolean shouldOpenUrl = true;
@@ -1261,7 +1307,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
 
         @Override
         public boolean handleUri(Uri uri, VisitorChat visitorChat) {
-            Map<String, Object> eventMap = new HashMap<String, Object>();        
+            Map<String, Object> eventMap = new HashMap<String, Object>();
             Map<String, Object> chatMapObject = getChatMapObject(visitorChat, true);
             eventMap.put("eventName", SIQEvent.handleURL);
             eventMap.put("chat", chatMapObject);
@@ -1341,7 +1387,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
             if (faqEventSink != null) {
                 faqEventSink.success(eventMap);
             }
-        }    
+        }
     }
 
     static class SIQEvent{

@@ -867,6 +867,22 @@ extension SwiftMobilistenPlugin {
             chatDictionary["lastMessageSender"] = lastmessageSender
         }
         
+        var recentMessageDict: [String: Any] = [:]
+        recentMessageDict["text"] = chat.lastMessage.text
+        recentMessageDict["sender"] = chat.lastMessage.sender
+        recentMessageDict["time"] = chat.lastMessage.time?.milliSecondIntervalSince1970
+        recentMessageDict["is_read"] = chat.lastMessage.isRead
+
+        if let file = chat.lastMessage.file {
+            var recentMessageFileDict: [String: Any] = [:]
+            recentMessageFileDict["name"] = file.name
+            recentMessageFileDict["comment"] = file.comment
+            recentMessageFileDict["content_type"] = file.contentType
+            recentMessageFileDict["size"] = file.size
+            recentMessageDict["file"] = recentMessageFileDict
+        }
+        chatDictionary["recentMessage"] = recentMessageDict
+        
         let queuePosition = chat.queuePosition
         if queuePosition > 0 {
             chatDictionary["queuePosition"] = queuePosition

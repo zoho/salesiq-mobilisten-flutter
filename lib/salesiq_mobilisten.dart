@@ -1,5 +1,8 @@
 import 'dart:async';
+
 import 'package:flutter/services.dart';
+import 'package:salesiq_mobilisten/last_message.dart';
+
 import 'launcher.dart';
 import 'tab.dart';
 
@@ -394,6 +397,7 @@ class ZohoSalesIQ {
       if (lastMessageTimeMS != null) {
         lastMessageTime = _convertDoubleToDateTime(lastMessageTimeMS);
       }
+      SIQMessage recentMessage = SIQMessage.getObject(map["recentMessage"]);
       int? queuePosition = map["queuePosition"];
       String? rating = map["rating"];
       String? feedback = map["feedback"];
@@ -416,6 +420,7 @@ class ZohoSalesIQ {
             lastMessage,
             lastMessageTime,
             lastMessageSender,
+            recentMessage,
             feedback,
             rating);
         chatList.add(chat);
@@ -573,12 +578,20 @@ class SIQChat {
   final SIQChatStatus status;
   final int unreadCount;
 
+  @Deprecated(
+      'lastMessage was deprecated after v2.1.2, Use recentMessage.text instead.')
   final String? lastMessage;
+  @Deprecated(
+      'lastMessageTime was deprecated after v2.1.2, Use recentMessage.time instead.')
   final DateTime? lastMessageTime;
+  @Deprecated(
+      'lastMessageSender was deprecated after v2.1.2, Use recentMessage.sender instead.')
   final String? lastMessageSender;
+  final SIQMessage? recentMessage;
 
   final String? feedback;
   final String? rating;
+
   SIQChat(
       this.id,
       this.question,
@@ -593,6 +606,7 @@ class SIQChat {
       this.lastMessage,
       this.lastMessageTime,
       this.lastMessageSender,
+      this.recentMessage,
       this.feedback,
       this.rating);
 }
