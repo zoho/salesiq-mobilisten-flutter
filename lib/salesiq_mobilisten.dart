@@ -104,8 +104,13 @@ class ZohoSalesIQ {
   }
 
   /// Performs a custom action using the action name provided in [actionName].
-  static Future<Null> performCustomAction(String actionName) async {
-    await _channel.invokeMethod('performCustomAction', actionName);
+  static Future<Null> performCustomAction(String actionName,
+      [bool shouldOpenChatWindow = false]) async {
+    Map<String, dynamic> arguments = <String, dynamic>{};
+    arguments.putIfAbsent("action_name", () => actionName);
+    arguments.putIfAbsent(
+        "should_open_chat_window", () => shouldOpenChatWindow);
+    await _channel.invokeMethod('performCustomAction', arguments);
   }
 
   /// Enables in-app notifications from Mobilisten if previously disabled.
@@ -667,6 +672,7 @@ class SIQEvent {
   static const String operatorsOffline = "operatorsOffline";
   static const String visitorIPBlocked = "visitorIPBlocked";
   static const String customTrigger = "customTrigger";
+  static const String botTrigger = "botTrigger";
   static const String chatViewOpened = "chatViewOpened";
   static const String chatViewClosed = "chatViewClosed";
   static const String chatOpened = "chatOpened";

@@ -35,6 +35,7 @@ import com.zoho.livechat.android.listeners.InitListener;
 import com.zoho.livechat.android.listeners.OpenArticleListener;
 import com.zoho.livechat.android.listeners.OperatorImageListener;
 import com.zoho.livechat.android.listeners.RegisterListener;
+import com.zoho.livechat.android.listeners.UnRegisterListener;
 import com.zoho.livechat.android.listeners.SalesIQActionListener;
 import com.zoho.livechat.android.listeners.SalesIQChatListener;
 import com.zoho.livechat.android.listeners.SalesIQCustomActionListener;
@@ -234,6 +235,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 ZohoSalesIQ.registerVisitor(LiveChatUtil.getString(call.arguments), new RegisterListener() {
                     @Override
                     public void onSuccess() {
+                        ZohoSalesIQ.Chat.setVisibility(ChatComponent.screenshot, false);
                         finalResult.success("Success");    //No I18N
                     }
 
@@ -245,7 +247,17 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 break;
 
             case "unregisterVisitor":  //need to pass the current activity
-                ZohoSalesIQ.unregisterVisitor(activity);  //need to pass the current activity
+                ZohoSalesIQ.unregisterVisitor(activity, new UnRegisterListener() {//need to pass the current activity
+                    @Override
+                    public void onSuccess() {
+                        ZohoSalesIQ.Chat.setVisibility(ChatComponent.screenshot, false);
+                    }
+
+                    @Override
+                    public void onFailure(int code, String message) {
+                        ZohoSalesIQ.Chat.setVisibility(ChatComponent.screenshot, false);
+                    }
+                });
                 break;
 
             case "setPageTitle":
@@ -253,7 +265,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 break;
 
             case "performCustomAction":
-                ZohoSalesIQ.Tracking.setCustomAction(LiveChatUtil.getString(call.arguments));
+                ZohoSalesIQ.Tracking.setCustomAction(LiveChatUtil.getString(call.argument("action_name")), LiveChatUtil.getBoolean(call.argument("should_open_chat_window")));  // No I18N
                 break;
 
             case "enableInAppNotification":
@@ -1198,6 +1210,15 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         }
 
         @Override
+        public void handleBotTrigger() {
+            Map<String, Object> eventMap = new HashMap<String, Object>();
+            eventMap.put("eventName",  SIQEvent.botTrigger);
+            if (eventSink != null) {
+                eventSink.success(eventMap);
+            }
+        }
+
+        @Override
         public void handleChatViewOpen(String chatID) {
             Map<String, Object> eventMap = new HashMap<String, Object>();
             eventMap.put("eventName", SIQEvent.chatViewOpened);
@@ -1397,6 +1418,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         static String operatorsOffline = "operatorsOffline";                                   // No I18N
         static String visitorIPBlocked = "visitorIPBlocked";                                   // No I18N
         static String customTrigger = "customTrigger";                                   // No I18N
+        static String botTrigger = "botTrigger";                                   // No I18N
         static String chatViewOpened = "chatViewOpened";                                   // No I18N
         static String chatViewClosed = "chatViewClosed";                                   // No I18N
         static String chatOpened = "chatOpened";                                   // No I18N

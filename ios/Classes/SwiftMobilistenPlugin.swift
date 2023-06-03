@@ -68,6 +68,7 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
         case homeViewClosed = "homeViewClosed"
         case chatUnreadCountChanged = "chatUnreadCountChanged"
         case handleURL = "handleURL"
+        case botTrigger = "botTrigger"
         
         var enabled: Bool {
             switch self {
@@ -210,8 +211,12 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
                 ZohoSalesIQ.Tracking.setPageTitle(pageTitle)
             }
         case "performCustomAction":
-            if let customAction = argument as? String {
-                ZohoSalesIQ.Visitor.performCustomAction(customAction)
+            if let args = call.argumentDictionary, let action = args["action_name"] as? String {
+                var shouldOpenChatWindow: Bool = false
+                if let openChatWindow = args["should_open_chat_window"] as? Bool {
+                    shouldOpenChatWindow = openChatWindow
+                }
+                ZohoSalesIQ.Visitor.performCustomAction(action, shouldOpenChatWindow: shouldOpenChatWindow)
             }
         case "enableInAppNotification":
             ZohoSalesIQ.Chat.setVisibility(.inAppNotifications, visible: true)
@@ -1052,6 +1057,10 @@ extension SwiftMobilistenPlugin: ZohoSalesIQDelegate {
     
     public func handleTrigger(name: String, visitorInformation: SIQVisitor) {
         sendCustomTriggerEvent(triggerName: name, visitor: visitorInformation)
+    }
+    
+    public func handleBotTrigger() {
+        sendEvent(name: .botTrigger)
     }
     
 }

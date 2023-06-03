@@ -6,8 +6,7 @@ class SIQMessage {
   late final DateTime? time;
   // final Status? status;
 
-  SIQMessage(this.text,this.sender,
-      this.time, this.isRead, this.file);
+  SIQMessage(this.text, this.sender, this.time, this.isRead, this.file);
 
   static SIQMessage getObject(Map map) {
     String? sender = map["sender"];
@@ -25,11 +24,10 @@ class SIQMessage {
     int size = fileMap?["size"] ?? 0;
     File? file = File(name, comment, contentType, size);
     DateTime? time;
-  if (_time != null) {
+    if (_time != null) {
       time = _convertDoubleToDateTime(_time);
-  }
-    SIQMessage message =
-        SIQMessage(text, sender, time, isRead, file);
+    }
+    SIQMessage message = SIQMessage(text, sender, time, isRead, file);
     return message;
   }
 
