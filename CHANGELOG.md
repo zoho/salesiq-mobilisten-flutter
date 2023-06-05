@@ -1,5 +1,14 @@
 ## Mobilisten Plugin Changelog
 
+### 2.3.0 - 3 Jun 2023
+
+- Updated the Android SDK to
+  version [5.1.0](https://github.com/zoho/salesiq-mobilisten-android-sample/releases/tag/v5.1.0) and
+  iOS SDK version to [5.4.0](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/v5.4.0).
+- The ZohoSalesIQ.setCustomAction() API now includes the 'shouldOpenChatWindow' parameter, allowing
+  you to open the chat window when there is a trigger.
+- Miscellaneous bug fixes and performance improvements.
+
 ### 2.2.0 - 5 May 2023
 
 - Experience the brand new version of Android
