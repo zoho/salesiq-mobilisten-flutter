@@ -202,6 +202,11 @@ class ZohoSalesIQ {
     await _channel.invokeMethod('setThemeColorForiOS', hexColor);
   }
 
+  /// Sets the given theme in the Android platform.
+  static Future<Null> setThemeForAndroid(String id) async {
+    await _channel.invokeMethod('setThemeForAndroid', id);
+  }
+
   /// Enables showing the operator's image in the default launcher.
   static Future<Null> showOperatorImageInLauncher(bool show) async {
     await _channel.invokeMethod('showOperatorImageInLauncher', show);

@@ -1,22 +1,22 @@
 package com.zohosalesiq.plugin;
 
-import android.net.Uri;
 import android.app.Activity;
 import android.app.Application;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Base64;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.zoho.commons.ChatComponent;
-import com.zoho.commons.LauncherProperties;
 import com.zoho.commons.LauncherModes;
-import com.zoho.livechat.android.provider.MobilistenInitProvider;
+import com.zoho.commons.LauncherProperties;
 import com.zoho.livechat.android.NotificationListener;
 import com.zoho.livechat.android.SIQDepartment;
 import com.zoho.livechat.android.SIQVisitor;
@@ -32,19 +32,22 @@ import com.zoho.livechat.android.listeners.DepartmentListener;
 import com.zoho.livechat.android.listeners.FAQCategoryListener;
 import com.zoho.livechat.android.listeners.FAQListener;
 import com.zoho.livechat.android.listeners.InitListener;
-import com.zoho.livechat.android.listeners.OpenArticleListener;
 import com.zoho.livechat.android.listeners.OperatorImageListener;
 import com.zoho.livechat.android.listeners.RegisterListener;
-import com.zoho.livechat.android.listeners.UnRegisterListener;
 import com.zoho.livechat.android.listeners.SalesIQActionListener;
 import com.zoho.livechat.android.listeners.SalesIQChatListener;
 import com.zoho.livechat.android.listeners.SalesIQCustomActionListener;
-import com.zoho.livechat.android.listeners.SalesIQFAQListener;
 import com.zoho.livechat.android.listeners.SalesIQListener;
+import com.zoho.livechat.android.listeners.UnRegisterListener;
 import com.zoho.livechat.android.models.SalesIQArticle;
 import com.zoho.livechat.android.models.SalesIQArticleCategory;
+import com.zoho.livechat.android.modules.knowledgebase.ui.entities.Resource;
+import com.zoho.livechat.android.modules.knowledgebase.ui.listeners.OpenResourceListener;
+import com.zoho.livechat.android.modules.knowledgebase.ui.listeners.ResourcesListener;
+import com.zoho.livechat.android.modules.knowledgebase.ui.listeners.SalesIQKnowledgeBaseListener;
 import com.zoho.livechat.android.utils.LiveChatUtil;
 import com.zoho.livechat.android.operation.SalesIQApplicationManager;
+import com.zoho.livechat.android.utils.LiveChatUtil;
 import com.zoho.salesiqembed.ZohoSalesIQ;
 
 import java.io.ByteArrayOutputStream;
@@ -64,9 +67,6 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
-import android.content.res.AssetManager;
-import android.content.res.AssetFileDescriptor;
-import io.flutter.view.FlutterView;
 
 
 public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, ActivityAware {
@@ -105,7 +105,9 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
 
     static class Tab {
         static String CONVERSATIONS = "TAB_CONVERSATIONS";  // No I18N
+        @Deprecated
         static String FAQ = "TAB_FAQ";  // No I18N
+        static String KNOWLEDGE_BASE = "TAB_KNOWLEDGE_BASE";  // No I18N
     }
 
     static class ReturnEvent {
@@ -125,7 +127,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "salesiq_mobilisten");         // No I18N
         channel.setMethodCallHandler(this);
 
-        handler =  new Handler(Looper.getMainLooper());
+        handler = new Handler(Looper.getMainLooper());
 
         eventChannel = new EventChannel(flutterPluginBinding.getBinaryMessenger(), mobilistenEventChannel);
         chatEventChannel = new EventChannel(flutterPluginBinding.getBinaryMessenger(), mobilistenChatEventChannel);
@@ -180,7 +182,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 SalesIQListeners listener = new SalesIQListeners();
                 ZohoSalesIQ.setListener(listener);
                 ZohoSalesIQ.Chat.setListener(listener);
-                ZohoSalesIQ.FAQ.setListener(listener);
+                ZohoSalesIQ.KnowledgeBase.setListener(listener);
                 ZohoSalesIQ.ChatActions.setListener(listener);
                 ZohoSalesIQ.Notification.setListener(listener);
                 break;
@@ -228,7 +230,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 break;
 
             case "setFAQVisibility":
-                ZohoSalesIQ.FAQ.setVisibility(LiveChatUtil.getBoolean(call.arguments));
+                ZohoSalesIQ.KnowledgeBase.setVisibility(ZohoSalesIQ.ResourceType.Articles, LiveChatUtil.getBoolean(call.arguments));
                 break;
 
             case "registerVisitor":
@@ -386,14 +388,14 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
 
             case "getDepartments":
                 handler = new Handler(Looper.getMainLooper());
-                handler.post(new Runnable(){
-                    public void run(){
+                handler.post(new Runnable() {
+                    public void run() {
                         ZohoSalesIQ.Chat.getDepartments(new DepartmentListener() {
                             @Override
                             public void onSuccess(ArrayList<SIQDepartment> arrayList) {
-                                if (arrayList != null){
+                                if (arrayList != null) {
                                     final List<Map<String, Object>> departmentList = new ArrayList<Map<String, Object>>();
-                                    for (int i=0; i<arrayList.size(); i++){
+                                    for (int i = 0; i < arrayList.size(); i++) {
                                         Map<String, Object> chatMapObject = getDepartmentMapObject(arrayList.get(i));
                                         departmentList.add(chatMapObject);
                                     }
@@ -425,7 +427,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                     @Override
                     public void onSuccess(ArrayList<VisitorChat> arrayList) {
                         List<Map<String, Object>> chatList = new ArrayList<Map<String, Object>>();
-                        for (int i=0; i< arrayList.size(); i++) {
+                        for (int i = 0; i < arrayList.size(); i++) {
                             Map<String, Object> chatMapObject = getChatMapObject(arrayList.get(i), false);
                             chatList.add(chatMapObject);
                         }
@@ -470,8 +472,8 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                         ZohoSalesIQ.FAQ.getArticles(new FAQListener() {
                             @Override
                             public void onSuccess(ArrayList<SalesIQArticle> arrayList) {
-                                if (arrayList != null){
-                                    final List<Map<String, Object>> articleList = new ArrayList<Map<String, Object>>();
+                                if (arrayList != null) {
+                                    final List<Map<String, Object>> articleList = new ArrayList<>();
                                     for (int i = 0; i < arrayList.size(); i++) {
                                         Map<String, Object> chatMapObject = getArticleMapObject(arrayList.get(i));
                                         articleList.add(chatMapObject);
@@ -487,7 +489,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
 
                             @Override
                             public void onFailure(int code, String message) {
-                                finalResult.error(""+code, message, null);
+                                finalResult.error("" + code, message, null);
                             }
                         });
                     }
@@ -496,27 +498,25 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
 
             case "getArticlesWithCategoryID":
                 String categoryID = LiveChatUtil.getString(call.arguments);
-                ZohoSalesIQ.FAQ.getArticles(categoryID, new FAQListener() {
+                ZohoSalesIQ.KnowledgeBase.getResources(ZohoSalesIQ.ResourceType.Articles, null, categoryID, null, new ResourcesListener() {
                     @Override
-                    public void onSuccess(ArrayList<SalesIQArticle> arrayList) {
-                        if (arrayList != null){
-                            final List<Map<String, Object>> articleList = new ArrayList<Map<String, Object>>();
-                            for (int i = 0; i < arrayList.size(); i++) {
-                                Map<String, Object> chatMapObject = getArticleMapObject(arrayList.get(i));
-                                articleList.add(chatMapObject);
-                            }
-                            handler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    finalResult.success(articleList);
-                                }
-                            });
+                    public void onSuccess(@NonNull List<Resource> resources, boolean moreDataAvailable) {
+                        final List<Map<String, Object>> articleList = new ArrayList<>();
+                        for (int i = 0; i < resources.size(); i++) {
+                            Map<String, Object> chatMapObject = getArticleMapObject(resources.get(i));
+                            articleList.add(chatMapObject);
                         }
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                finalResult.success(articleList);
+                            }
+                        });
                     }
 
                     @Override
-                    public void onFailure(int code, String message) {
-                        finalResult.error(""+code, message, null);
+                    public void onFailure(int code, @Nullable String message) {
+                        finalResult.error("" + code, message, null);
                     }
                 });
                 break;
@@ -525,11 +525,11 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 ZohoSalesIQ.FAQ.getCategories(new FAQCategoryListener() {
                     @Override
                     public void onSuccess(ArrayList<SalesIQArticleCategory> arrayList) {
-                        final List<Map<String, Object>> categoryList = new ArrayList<Map<String, Object>>();
-                        if (arrayList != null){
-                            for (int i=0; i<arrayList.size(); i++) {
+                        final List<Map<String, Object>> categoryList = new ArrayList<>();
+                        if (arrayList != null) {
+                            for (int i = 0; i < arrayList.size(); i++) {
                                 SalesIQArticleCategory category = arrayList.get(i);
-                                Map<String, Object> categoryMap = new HashMap<String, Object>();
+                                Map<String, Object> categoryMap = new HashMap<>();
                                 categoryMap.put("id", category.getCategoryId());         // No I18N
                                 categoryMap.put("name", category.getCategoryName());         // No I18N
                                 categoryMap.put("articleCount", category.getCount());         // No I18N
@@ -562,7 +562,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 ZohoLiveChat.Chat.fetchAttenderImage(attenderID, fetchDefaultImage, new OperatorImageListener() {
                     @Override
                     public void onSuccess(Drawable drawable) {
-                        Bitmap bitmap = ((BitmapDrawable)drawable).getBitmap();
+                        Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
 
                         ByteArrayOutputStream baos = new ByteArrayOutputStream();
                         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos); //bm is the bitmap object
@@ -570,35 +570,34 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
 
                         String encodedImage = Base64.encodeToString(byteArrayImage, Base64.DEFAULT);
 
-                        encodedImage = encodedImage.replace("\n","");         // No I18N
+                        encodedImage = encodedImage.replace("\n", "");         // No I18N
 
                         finalResult.success(encodedImage);
                     }
 
                     @Override
                     public void onFailure(int errorCode, String errorMessage) {
-                        finalResult.error(""+errorCode, errorMessage, null);
+                        finalResult.error("" + errorCode, errorMessage, null);
                     }
                 });
                 break;
 
 
             case "openArticle":
-                ZohoLiveChat.FAQ.openArticle(LiveChatUtil.getString(call.arguments), new OpenArticleListener() {
+                ZohoSalesIQ.KnowledgeBase.open(ZohoSalesIQ.ResourceType.Articles, LiveChatUtil.getString(call.arguments), new OpenResourceListener() {
                     @Override
                     public void onSuccess() {
-                        finalResult.success("SUCCESS");                                      // No I18N
+                        finalResult.success("SUCCESS"); // No I18N
                     }
 
                     @Override
-                    public void onFailure(int code, String message) {
-                        finalResult.error(""+code, message, null);
+                    public void onFailure(int code, @Nullable String message) {
+                        finalResult.error("" + code, message, null); // No I18N
                     }
                 });
                 break;
 
             case "registerChatAction":
-                UUID uuid = UUID.randomUUID();
                 ZohoLiveChat.ChatActions.register(LiveChatUtil.getString(call.arguments));
                 break;
 
@@ -611,11 +610,11 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 break;
 
             case "setChatActionTimeout":
-                final long timeout =  LiveChatUtil.getLong(call.arguments);
+                final long timeout = LiveChatUtil.getLong(call.arguments);
                 handler = new Handler(Looper.getMainLooper());
                 handler.post(new Runnable() {
                     public void run() {
-                        ZohoSalesIQ.ChatActions.setTimeout(timeout*1000);
+                        ZohoSalesIQ.ChatActions.setTimeout(timeout * 1000);
                     }
                 });
                 break;
@@ -627,7 +626,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                     public void run() {
                         SalesIQCustomActionListener listener;
                         listener = actionsList.get(actionID);
-                        if (listener != null){
+                        if (listener != null) {
                             listener.onSuccess();
                         }
                         if (actionsList != null) {
@@ -645,20 +644,17 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 handler1.post(new Runnable() {
                     public void run() {
                         SalesIQCustomActionListener listener = actionsList.get(actionId);
-                        if (listener != null){
+                        if (listener != null) {
                             if (state) {
                                 if (message != null && message.length() > 0) {
                                     listener.onSuccess(message);
-                                }
-                                else{
+                                } else {
                                     listener.onSuccess();
                                 }
-                            }
-                            else{
+                            } else {
                                 if (message != null && message.length() > 0) {
                                     listener.onFailure(message);
-                                }
-                                else{
+                                } else {
                                     listener.onFailure();
                                 }
                             }
@@ -678,8 +674,15 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 finalResult.success(ZohoLiveChat.Notification.getBadgeCount());
                 break;
             case "setNotificationIconForAndroid":
-                ZohoSalesIQ.Notification.setIcon(getResourceId(LiveChatUtil.getString(call.arguments)));
+                ZohoSalesIQ.Notification.setIcon(getDrawableResourceId(LiveChatUtil.getString(call.arguments)));
                 break;
+            case "setThemeForAndroid": {
+                int resourceId = getStyleResourceId(LiveChatUtil.getString(call.arguments));
+                if (resourceId > 0) {
+                    ZohoSalesIQ.setTheme(resourceId);
+                }
+                break;
+            }
             case "printDebugLogsForAndroid":
                 ZohoSalesIQ.printDebugLogs(LiveChatUtil.getBoolean(call.arguments));
                 break;
@@ -694,13 +697,13 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 break;
             case "isLoggerEnabled":
                 isLoggerEnabled(finalResult);
-            break;
+                break;
             case "setLoggerEnabled":
                 setLoggerEnabled((Boolean) call.arguments);
-            break;
+                break;
             case "setLauncherPropertiesForAndroid":
                 setLauncherPropertiesForAndroid((Map<String, Object>) call.arguments);
-            break;
+                break;
             case "syncThemeWithOSForAndroid":
                 ZohoSalesIQ.syncThemeWithOS((Boolean) call.arguments);
                 break;
@@ -708,7 +711,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
             case "writeLogForiOS":
             case "clearLogForiOS":
             case "setPathForiOS":
-            break;
+                break;
             default:
                 finalResult.notImplemented();
                 break;
@@ -757,7 +760,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                         });
                     }
                 });
-            } catch (Exception e){
+            } catch (Exception e) {
                 LiveChatUtil.log(e);
             }
         }
@@ -789,27 +792,27 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
 
     }
 
-    public Map<String, Object> getChatMapObject(VisitorChat chat, boolean isEventStream){
+    public Map<String, Object> getChatMapObject(VisitorChat chat, boolean isEventStream) {
         Map<String, Object> visitorMap = new HashMap<String, Object>();
         visitorMap.put("id", chat.getChatID());         // No I18N
         visitorMap.put("unreadCount", chat.getUnreadCount());         // No I18N
         visitorMap.put("isBotAttender", chat.isBotAttender());         // No I18N
-        if (chat.getQuestion() != null){
+        if (chat.getQuestion() != null) {
             visitorMap.put("question", chat.getQuestion());         // No I18N
         }
-        if (chat.getDepartmentName() != null){
+        if (chat.getDepartmentName() != null) {
             visitorMap.put("departmentName", chat.getDepartmentName());         // No I18N
         }
-        if (chat.getChatStatus() != null){
+        if (chat.getChatStatus() != null) {
             visitorMap.put("status", chat.getChatStatus().toLowerCase());         // No I18N
         }
         Map<String, Object> lastMessageMap = new HashMap<String, Object>();
         VisitorChat.SalesIQMessage lastMessage = chat.getLastMessage();
         if (lastMessage != null) {
-            if (lastMessage.getText() != null){
+            if (lastMessage.getText() != null) {
                 visitorMap.put("lastMessage", lastMessage.getText());         // No I18N
             }
-            if (lastMessage.getSender() != null){
+            if (lastMessage.getSender() != null) {
                 visitorMap.put("lastMessageSender", lastMessage.getSender());         // No I18N
             }
             if (lastMessage.getTime() != null && lastMessage.getTime() > 0) {
@@ -875,6 +878,31 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
             visitorMap.put("queuePosition", chat.getQueuePosition());         // No I18N
         }
         return visitorMap;
+    }
+
+    public Map<String, Object> getArticleMapObject(Resource article) {
+        Map<String, Object> articleMap = new HashMap<>();
+        articleMap.put("id", article.getId());         // No I18N
+        articleMap.put("name", article.getTitle());         // No I18N
+        if (article.getCategory() != null) {
+            if (article.getCategory().getId() != null) {
+                articleMap.put("categoryID", article.getCategory().getId());         // No I18N
+            }
+            if (article.getCategory().getId() != null) {
+                articleMap.put("categoryName", article.getCategory().getName());         // No I18N
+            }
+        }
+        if (article.getStats() != null) {
+            articleMap.put("viewCount", article.getStats().getViewed());         // No I18N
+            articleMap.put("likeCount", article.getStats().getLiked());         // No I18N
+            articleMap.put("dislikeCount", article.getStats().getDisliked());         // No I18N
+        }
+        if (article.getDepartmentId() != null) {
+            articleMap.put("departmentID", article.getDepartmentId());         // No I18N
+        }
+        articleMap.put("createdTime", LiveChatUtil.getDouble(article.getCreatedTime()));         // No I18N
+        articleMap.put("modifiedTime", LiveChatUtil.getDouble(article.getModifiedTime()));         // No I18N
+        return articleMap;
     }
 
     public Map<String, Object> getArticleMapObject(SalesIQArticle article) {
@@ -946,7 +974,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
             infoMap.put("totalTimeSpent", siqVisitor.getTotalTimeSpent());         // No I18N
         }
         infoMap.put("numberOfVisits", LiveChatUtil.getString(siqVisitor.getNumberOfVisits()));         // No I18N
-        infoMap.put("noOfDaysVisited",LiveChatUtil.getString(siqVisitor.getNoOfDaysVisited()));         // No I18N
+        infoMap.put("noOfDaysVisited", LiveChatUtil.getString(siqVisitor.getNoOfDaysVisited()));         // No I18N
         if (siqVisitor.getState() != null) {
             infoMap.put("state", siqVisitor.getState());         // No I18N
         }
@@ -959,7 +987,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         return infoMap;
     }
 
-    private Boolean isValidFilterName(String filterName){
+    private Boolean isValidFilterName(String filterName) {
         for (ConversationType type : ConversationType.values()) {
             if (type.name().equalsIgnoreCase(filterName)) {
                 return true;
@@ -968,26 +996,33 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         return false;
     }
 
-    private ConversationType getFilterName(String filter){
-        switch (filter){
-            case TYPE_CONNECTED : return ConversationType.CONNECTED;
-            case TYPE_WAITING : return ConversationType.WAITING;
-            case TYPE_OPEN : return ConversationType.OPEN;
-            case TYPE_CLOSED : return ConversationType.CLOSED;
-            case TYPE_ENDED : return ConversationType.ENDED;
-            case TYPE_MISSED : return ConversationType.MISSED;
-            default: return ConversationType.OPEN;
+    private ConversationType getFilterName(String filter) {
+        switch (filter) {
+            case TYPE_CONNECTED:
+                return ConversationType.CONNECTED;
+            case TYPE_WAITING:
+                return ConversationType.WAITING;
+            case TYPE_OPEN:
+                return ConversationType.OPEN;
+            case TYPE_CLOSED:
+                return ConversationType.CLOSED;
+            case TYPE_ENDED:
+                return ConversationType.ENDED;
+            case TYPE_MISSED:
+                return ConversationType.MISSED;
+            default:
+                return ConversationType.OPEN;
         }
     }
 
-    public static void handleNotification(final Application application, final Map extras){
+    public static void handleNotification(final Application application, final Map extras) {
         SharedPreferences sharedPreferences = application.getSharedPreferences("siq_session", 0);         // No I18N
         final String appKey = sharedPreferences.getString("salesiq_appkey", null);         // No I18N
         final String accessKey = sharedPreferences.getString("salesiq_accesskey", null);         // No I18N
         Handler handler = new Handler(Looper.getMainLooper());
         handler.post(new Runnable() {
             public void run() {
-                initSalesIQ(application,  null, appKey, accessKey, null);
+                initSalesIQ(application, null, appKey, accessKey, null);
                 ZohoSalesIQ.Notification.handle(application, extras);
             }
         });
@@ -998,81 +1033,77 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         istestdevice = testdevice;
     }
 
-    private Drawable getDrawable(final String resourceName) {
-        int resourceId = getResourceId(resourceName);
-        Drawable drawable = null;
-        if (resourceId > 0 && ZohoSalesIQ.getApplicationManager() != null && ZohoSalesIQ.getApplicationManager().getApplication() != null) {
-            drawable = ZohoSalesIQ.getApplicationManager().getApplication().getDrawable(resourceId);
-        }
-        return drawable;
-    }
-
     private void setLauncherPropertiesForAndroid(final Map<String, Object> launcherPropertiesMap) {
-        int mode = mode = LiveChatUtil.getInteger(launcherPropertiesMap.getOrDefault("mode", LauncherModes.FLOATING));  // No I18N
-        LauncherProperties launcherProperties = new LauncherProperties(mode);
-        int y = (int) launcherPropertiesMap.getOrDefault("y", -1);  // No I18N
-        if (y > -1) {
-            launcherProperties.setY(y);
-        }
+        if (launcherPropertiesMap != null) {
+            Object objectMode = launcherPropertiesMap.get("mode");
+            int mode = LiveChatUtil.getInteger(objectMode != null ? objectMode : LauncherModes.FLOATING);
+            LauncherProperties launcherProperties = new LauncherProperties(mode);
+            Object objectY = launcherPropertiesMap.get("y");
+            int y = (int) (objectY != null ? objectY : -1);
+            if (y > -1) {
+                launcherProperties.setY(y);
+            }
 
-        if (launcherPropertiesMap.containsKey("horizontal_direction")) {
-            LauncherProperties.Horizontal horizontalDirection = null;
-            if (Launcher.HORIZONTAL_LEFT.equals(
-                (String) launcherPropertiesMap.get("horizontal_direction")  // No I18N
-            )) {
-                horizontalDirection = LauncherProperties.Horizontal.LEFT;
-            } else if (Launcher.HORIZONTAL_RIGHT.equals(
-                (String) launcherPropertiesMap.get("horizontal_direction")  // No I18N
-            )) {
-                horizontalDirection = LauncherProperties.Horizontal.RIGHT;
+            if (launcherPropertiesMap.containsKey("horizontal_direction")) {
+                LauncherProperties.Horizontal horizontalDirection = null;
+                if (Launcher.HORIZONTAL_LEFT.equals(
+                        (String) launcherPropertiesMap.get("horizontal_direction")  // No I18N
+                )) {
+                    horizontalDirection = LauncherProperties.Horizontal.LEFT;
+                } else if (Launcher.HORIZONTAL_RIGHT.equals(
+                        (String) launcherPropertiesMap.get("horizontal_direction")  // No I18N
+                )) {
+                    horizontalDirection = LauncherProperties.Horizontal.RIGHT;
+                }
+                if (horizontalDirection != null) {
+                    launcherProperties.setDirection(horizontalDirection);
+                }
             }
-            if (horizontalDirection != null) {
-                launcherProperties.setDirection(horizontalDirection);
+            if (launcherPropertiesMap.containsKey("vertical_direction")) {
+                LauncherProperties.Vertical verticalDirection = null;
+                if (Launcher.VERTICAL_TOP.equals(
+                        (String) launcherPropertiesMap.get("vertical_direction")    // No I18N
+                )) {
+                    verticalDirection = LauncherProperties.Vertical.TOP;
+                } else if (Launcher.VERTICAL_BOTTOM.equals(
+                        (String) launcherPropertiesMap.get("vertical_direction")    // No I18N
+                )) {
+                    verticalDirection = LauncherProperties.Vertical.BOTTOM;
+                }
+                if (verticalDirection != null) {
+                    launcherProperties.setDirection(verticalDirection);
+                }
             }
+            if (launcherPropertiesMap.containsKey("icon") &&
+                    ZohoSalesIQ.getApplicationManager() != null &&
+                    ZohoSalesIQ.getApplicationManager().getApplication() != null
+            ) {
+                int resourceId = getDrawableResourceId((String) launcherPropertiesMap.get("icon"));
+                Drawable drawable = ZohoSalesIQ.getApplicationManager().getApplication().getDrawable(resourceId);
+                if (resourceId > 0 && drawable != null) {
+                    launcherProperties.setIcon(drawable);
+                }
+            }
+            ZohoSalesIQ.setLauncherProperties(launcherProperties);
         }
-        if (launcherPropertiesMap.containsKey("vertical_direction")) {
-            LauncherProperties.Vertical verticalDirection = null;
-            if (Launcher.VERTICAL_TOP.equals(
-                (String) launcherPropertiesMap.get("vertical_direction")    // No I18N
-                    )) {
-                verticalDirection = LauncherProperties.Vertical.TOP;
-            } else if (Launcher.VERTICAL_BOTTOM.equals(
-                (String) launcherPropertiesMap.get("vertical_direction")    // No I18N
-            )) {
-                verticalDirection = LauncherProperties.Vertical.BOTTOM;
-            }
-            if (verticalDirection != null) {
-                launcherProperties.setDirection(verticalDirection);
-            }
-        }
-        if (launcherPropertiesMap.containsKey("icon") &&
-                ZohoSalesIQ.getApplicationManager() != null &&
-                ZohoSalesIQ.getApplicationManager().getApplication() != null
-        ) {
-            int resourceId = getResourceId((String) launcherPropertiesMap.get("icon"));
-            Drawable drawable = ZohoSalesIQ.getApplicationManager().getApplication().getDrawable(resourceId);
-            if (resourceId > 0 && drawable != null) {
-                launcherProperties.setIcon(drawable);
-            }
-        }
-        ZohoSalesIQ.setLauncherProperties(launcherProperties);
     }
 
     boolean shouldOpenUrl = true;
+
     private void shouldOpenUrl(final boolean value) {
         shouldOpenUrl = value;
     }
 
     private void setTabOrder(final ArrayList<String> tabNames) {
-        int minimumTabOrdersSize = Math.min(tabNames.size(), ZohoSalesIQ.Tab.values().length);
+        int minimumTabOrdersSize = Math.min(tabNames.size(), (ZohoSalesIQ.Tab.values().length - 1)); // -1 is added for deprecated FAQ value
         ZohoSalesIQ.Tab[] tabOrder = new ZohoSalesIQ.Tab[minimumTabOrdersSize];
         int insertIndex = 0;
         for (int index = 0; index < minimumTabOrdersSize; index++) {
             String tabName = tabNames.get(index);
             if (Tab.CONVERSATIONS.equals(tabName)) {
                 tabOrder[insertIndex++] = ZohoSalesIQ.Tab.Conversations;
-            } else if (Tab.FAQ.equals(tabName)) {
-                tabOrder[insertIndex++] = ZohoSalesIQ.Tab.FAQ;
+            } else if (Tab.FAQ.equals(tabName) || Tab.KNOWLEDGE_BASE.equals(tabName)) {
+                tabOrder[insertIndex++] = ZohoSalesIQ.Tab.KnowledgeBase;
             }
         }
         ZohoSalesIQ.setTabOrder(tabOrder);
@@ -1082,14 +1113,19 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         ZohoSalesIQ.printDebugLogs(value);
     }
 
-    private void setNotificationIconForAndroid(final String drawableName) {
-        int resourceId = getResourceId(drawableName);
-        if (resourceId > 0) {
-            ZohoSalesIQ.Notification.setIcon(resourceId);
+    private int getStyleResourceId(String id) {
+        SalesIQApplicationManager salesIQApplicationManager = ZohoSalesIQ.getApplicationManager();
+        int resourceId = 0;
+        if (salesIQApplicationManager != null) {
+            resourceId = salesIQApplicationManager.getApplication().getResources().getIdentifier(
+                    id, "style",   // No I18N
+                    ZohoSalesIQ.getApplicationManager().getApplication().getPackageName());
+
         }
+        return resourceId;
     }
 
-    private int getResourceId(String drawableName) {
+    private int getDrawableResourceId(String drawableName) {
         SalesIQApplicationManager salesIQApplicationManager = ZohoSalesIQ.getApplicationManager();
         int resourceId = 0;
         if (salesIQApplicationManager != null) {
@@ -1151,7 +1187,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         }
     }
 
-    public class SalesIQListeners implements SalesIQListener, SalesIQChatListener, SalesIQFAQListener, SalesIQActionListener, NotificationListener {
+    public class SalesIQListeners implements SalesIQListener, SalesIQChatListener, SalesIQKnowledgeBaseListener, SalesIQActionListener, NotificationListener {
         @Override
         public void handleSupportOpen() {
             Map<String, String> eventMap = new HashMap<>();
@@ -1182,7 +1218,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         @Override
         public void handleOperatorsOffline() {
             Map<String, Object> eventMap = new HashMap<String, Object>();
-            eventMap.put("eventName",  SIQEvent.operatorsOffline);
+            eventMap.put("eventName", SIQEvent.operatorsOffline);
             if (eventSink != null) {
                 eventSink.success(eventMap);
             }
@@ -1191,7 +1227,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         @Override
         public void handleIPBlock() {
             Map<String, Object> eventMap = new HashMap<String, Object>();
-            eventMap.put("eventName",  SIQEvent.visitorIPBlocked);
+            eventMap.put("eventName", SIQEvent.visitorIPBlocked);
             if (eventSink != null) {
                 eventSink.success(eventMap);
             }
@@ -1201,8 +1237,8 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         public void handleTrigger(String triggerName, SIQVisitor siqVisitor) {
             Map<String, Object> eventMap = new HashMap<String, Object>();
             Map<String, Object> mapObject = getVisitorInfoObject(siqVisitor);
-            eventMap.put("eventName",  SIQEvent.customTrigger);
-            eventMap.put("triggerName",  triggerName);
+            eventMap.put("eventName", SIQEvent.customTrigger);
+            eventMap.put("triggerName", triggerName);
             eventMap.put("visitorInformation", mapObject);
             if (eventSink != null) {
                 eventSink.success(eventMap);
@@ -1212,7 +1248,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         @Override
         public void handleBotTrigger() {
             Map<String, Object> eventMap = new HashMap<String, Object>();
-            eventMap.put("eventName",  SIQEvent.botTrigger);
+            eventMap.put("eventName", SIQEvent.botTrigger);
             if (eventSink != null) {
                 eventSink.success(eventMap);
             }
@@ -1308,7 +1344,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         public void handleFeedback(VisitorChat visitorChat) {
             Map<String, Object> eventMap = new HashMap<String, Object>();
             Map<String, Object> chatMapObject = getChatMapObject(visitorChat, true);
-            eventMap.put("eventName",  SIQEvent.feedbackReceived);
+            eventMap.put("eventName", SIQEvent.feedbackReceived);
             eventMap.put("chat", chatMapObject);
             if (chatEventSink != null) {
                 chatEventSink.success(eventMap);
@@ -1371,47 +1407,55 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         }
 
         @Override
-        public void handleArticleOpened(String articleID) {
-            Map<String, Object> eventMap = new HashMap<String, Object>();
-            eventMap.put("eventName", SIQEvent.articleOpened);
-            eventMap.put("articleID", articleID);
-            if (faqEventSink != null) {
-                faqEventSink.success(eventMap);
+        public void handleResourceOpened(@NonNull ZohoSalesIQ.ResourceType resourceType, @Nullable Resource resource) {
+            if (resource != null) {
+                Map<String, Object> eventMap = new HashMap<String, Object>();
+                eventMap.put("eventName", SIQEvent.articleOpened);
+                eventMap.put("articleID", resource.getId());
+                if (faqEventSink != null) {
+                    faqEventSink.success(eventMap);
+                }
             }
         }
 
         @Override
-        public void handleArticleClosed(String articleID) {
-            Map<String, Object> eventMap = new HashMap<String, Object>();
-            eventMap.put("eventName", SIQEvent.articleClosed);
-            eventMap.put("articleID", articleID);
-            if (faqEventSink != null) {
-                faqEventSink.success(eventMap);
+        public void handleResourceClosed(@NonNull ZohoSalesIQ.ResourceType resourceType, @Nullable Resource resource) {
+            if (resource != null) {
+                Map<String, Object> eventMap = new HashMap<String, Object>();
+                eventMap.put("eventName", SIQEvent.articleClosed);
+                eventMap.put("articleID", resource.getId());
+                if (faqEventSink != null) {
+                    faqEventSink.success(eventMap);
+                }
             }
         }
 
         @Override
-        public void handleArticleLiked(String articleID) {
-            Map<String, Object> eventMap = new HashMap<String, Object>();
-            eventMap.put("eventName", SIQEvent.articleLiked);
-            eventMap.put("articleID", articleID);
-            if (faqEventSink != null) {
-                faqEventSink.success(eventMap);
+        public void handleResourceLiked(@NonNull ZohoSalesIQ.ResourceType resourceType, @Nullable Resource resource) {
+            if (resource != null) {
+                Map<String, Object> eventMap = new HashMap<String, Object>();
+                eventMap.put("eventName", SIQEvent.articleLiked);
+                eventMap.put("articleID", resource.getId());
+                if (faqEventSink != null) {
+                    faqEventSink.success(eventMap);
+                }
             }
         }
 
         @Override
-        public void handleArticleDisliked(String articleID) {
-            Map<String, Object> eventMap = new HashMap<String, Object>();
-            eventMap.put("eventName", SIQEvent.articleDisliked);
-            eventMap.put("articleID", articleID);
-            if (faqEventSink != null) {
-                faqEventSink.success(eventMap);
+        public void handleResourceDisliked(@NonNull ZohoSalesIQ.ResourceType resourceType, @Nullable Resource resource) {
+            if (resource != null) {
+                Map<String, Object> eventMap = new HashMap<String, Object>();
+                eventMap.put("eventName", SIQEvent.articleDisliked);
+                eventMap.put("articleID", resource.getId());
+                if (faqEventSink != null) {
+                    faqEventSink.success(eventMap);
+                }
             }
         }
     }
 
-    static class SIQEvent{
+    static class SIQEvent {
         static String supportOpened = "supportOpened";                                   // No I18N
         static String supportClosed = "supportClosed";                                   // No I18N
         static String operatorsOnline = "operatorsOnline";                                   // No I18N
