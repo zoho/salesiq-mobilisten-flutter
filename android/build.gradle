@@ -30,5 +30,5 @@ android {
 }
 
 dependencies {
-    implementation 'com.zoho.salesiq:mobilisten:6.0.1'
+    implementation 'com.zoho.salesiq:mobilisten:6.0.2'
 }
