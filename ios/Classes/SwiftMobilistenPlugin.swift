@@ -10,6 +10,8 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
         case main
         case chat
         case faq
+        case knowledgebase
+        case resource
         
         var name: String {
             switch self {
@@ -21,6 +23,10 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
                 return "mobilistenChatEventChannel"
             case .faq:
                 return "mobilistenFAQEventChannel"
+            case .knowledgebase:
+                return "salesiq_knowledge_base"
+            case .resource:
+                return "mobilisten_knowledge_base_events"
             }
         }
         
@@ -69,6 +75,11 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
         case chatUnreadCountChanged = "chatUnreadCountChanged"
         case handleURL = "handleURL"
         case botTrigger = "botTrigger"
+        case resourceOpened = "resourceOpened"
+        case resourceClosed = "resourceClosed"
+        case resourceLiked = "resourceLiked"
+        case resourceDisliked = "resourceDisliked"
+        
         
         var enabled: Bool {
             switch self {
@@ -84,13 +95,16 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
     private static var eventChannel: FlutterEventChannel?
     private static var faqEventChannel: FlutterEventChannel?
     private static var chatEventChannel: FlutterEventChannel?
+    private static var resourceEventChannel: FlutterEventChannel?
     @objc public static var emptyChatInstance: SIQVisitorChat?
     
     var eventSink: FlutterEventSink?
     var faqEventSink: FlutterEventSink?
     var chatEventSink: FlutterEventSink?
+    var resorceEventSink: FlutterEventSink?
     private var handleURL = true
     
+    static var knowledgebaseInstance: KnowledgeBasePlugin?
     static var sharedInstance: SwiftMobilistenPlugin?
     private var chatActionStore: [String: SIQActionHandler] = [:]
     private let operationFailedError = FlutterError(code: "1000", message: "operation failed", details: nil)
@@ -105,24 +119,31 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
     public static func register(with registrar: FlutterPluginRegistrar) {
         
         let methodChannel = MobilistenChannel.plugin.createMethodChannel(registrar: registrar)
+        let knowledgebaseChannel = MobilistenChannel.knowledgebase.createMethodChannel(registrar: registrar)
+        
         eventChannel = MobilistenChannel.main.createEventChannel(registrar: registrar)
         faqEventChannel = MobilistenChannel.faq.createEventChannel(registrar: registrar)
         chatEventChannel = MobilistenChannel.chat.createEventChannel(registrar: registrar)
+        resourceEventChannel = MobilistenChannel.resource.createEventChannel(registrar: registrar)
         
         let instance = SwiftMobilistenPlugin()
+        let knowledgebase = KnowledgeBasePlugin()
         sharedInstance = instance
+        knowledgebaseInstance = knowledgebase
         
         let eventStreamHandler = MobilistenEventStreamHandler(plugin: instance)
         let chatEventStreamHandler = MobilistenChatEventStreamHandler(plugin: instance)
         let faqEventStreamHandler = MobilistenFAQEventStreamHandler(plugin: instance)
+        let resourceEventStreamHandler = MobilistenResourceEventStreamHandler(plugin: instance)
         
         eventChannel?.setStreamHandler(eventStreamHandler)
         faqEventChannel?.setStreamHandler(faqEventStreamHandler)
         chatEventChannel?.setStreamHandler(chatEventStreamHandler)
+        resourceEventChannel?.setStreamHandler(resourceEventStreamHandler)
         
         registrar.addApplicationDelegate(instance)
         registrar.addMethodCallDelegate(instance, channel: methodChannel)
-        
+        registrar.addMethodCallDelegate(knowledgebase, channel: knowledgebaseChannel)
     }
     
     // MARK: Perform any additional setup after initialisation.
@@ -150,6 +171,7 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
                 ZohoSalesIQ.delegate = self
                 ZohoSalesIQ.FAQ.delegate = self
                 ZohoSalesIQ.Chat.delegate = self
+                ZohoSalesIQ.KnowledgeBase.delegate = self
                 self.performAdditionalSetup()
             }
         case "showLauncher":
@@ -474,7 +496,7 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
             result(ZohoSalesIQ.Logger.isEnabled)
         case "clearLogsForiOS":
             ZohoSalesIQ.Logger.clear()
-        case "writeLogForiOS": 
+        case "writeLogForiOS":
             if let args = call.argumentDictionary, let log = args["log"] as? String, let level = args["level"] as? String {
                 var logLevel: SIQDebugLogLevel = .info
                 if level == "INFO" {
@@ -498,10 +520,10 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
                 for tab in tabList {
                     if tab == "TAB_CONVERSATIONS" {
                         tabs.append(SIQTabBarComponent.conversation.rawValue)
-                    } else if tab == "TAB_FAQ" {
+                    } else if tab == "TAB_FAQ" || tab == "TAB_KNOWLEDGE_BASE" {
                         tabs.append(SIQTabBarComponent.knowledgeBase.rawValue)
                     }
-                }        
+                }
             }
             ZohoSalesIQ.setTabOrder(tabs)
         case "sendEvent":
@@ -560,7 +582,7 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
             if let path = argument as? String {
                 let pathURL = NSURL.fileURL(withPath: path)
                 ZohoSalesIQ.Logger.setPath(pathURL)
-            } 
+            }
         default:
             result(FlutterMethodNotImplemented)
         }
@@ -620,6 +642,178 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
     private func sendFAQEvent(name: MobilistenEvent, dataLabel: String = "articleID", data: Any? = nil) {
         guard let event = createEvent(name: name, dataLabel: dataLabel, data: data) else { return }
         faqEventSink?(event)
+    }
+    
+    private func sendResourceEvent(name: MobilistenEvent, dataLabel: String = "resource", data: Any? = nil) {
+        if name.enabled {
+            var event: [String: Any] = [:]
+            event[MobilistenEvent.nameKey] = name.rawValue
+            if let data = data as? [String: Any] {
+                event["type"] = data["type"] as? Int
+                event["resource"] = data["resource"]
+            }
+            resorceEventSink?(event)
+        } else {
+            resorceEventSink?(nil)
+        }
+    }
+    
+    
+    class KnowledgeBasePlugin: NSObject, FlutterPlugin {
+        static func register(with registrar: FlutterPluginRegistrar) {
+
+        }
+        
+        func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+            var argument: Any? {
+                return call.arguments
+            }
+            
+            switch call.method {
+            case "setVisibility":
+                if let args = call.argumentDictionary, let type = args["type"] as? Int, let enable = args["should_show"] as? Bool {
+                    switch type {
+                    case 0:
+                        ZohoSalesIQ.KnowledgeBase.setVisibility(.articles, enable: enable)
+                    default: break
+                    }
+                }
+            case "combineDepartments":
+                if let args = call.argumentDictionary, let type = args["type"] as? Int, let enable = args["merge"] as? Bool {
+                    switch type {
+                    case 0:
+                        ZohoSalesIQ.KnowledgeBase.combineDepartments(.articles, enable: enable)
+                    default: break
+                    }
+                }
+            case "categorize":
+                if let args = call.argumentDictionary, let type = args["type"] as? Int, let enable = args["should_categorize"] as? Bool {
+                    switch type {
+                    case 0:
+                        ZohoSalesIQ.KnowledgeBase.categorize(.articles, enable: enable)
+                    default: break
+                    }
+                }
+            case "isEnabled":
+                if let type = argument as? Int {
+                    if SIQResourceType(rawValue: type) == .articles {
+                        result(ZohoSalesIQ.KnowledgeBase.isEnabled(.articles))
+                    }
+                }
+            case "setRecentShowLimit":
+                if let limit = argument as? Int {
+                    ZohoSalesIQ.KnowledgeBase.setRecentShowLimit(limit)
+                }
+            case "openResource":
+                if let args = call.argumentDictionary, let type = args["type"] as? Int, let id = args["id"] as? String {
+                    switch type {
+                    case 0:
+                        ZohoSalesIQ.KnowledgeBase.open(.articles, id: id, completion: { success, error in
+                            if error != nil {
+                                result(SwiftMobilistenPlugin().getResourceError(error:error))
+                            } else {
+                                result(success)
+                            }
+                        })
+                    default: break
+                    }
+                } else {
+                    result(SwiftMobilistenPlugin().getErrorMessage("Failed to open article"))
+                }
+            case "getSingleResource":
+                if let args = call.argumentDictionary, let type = args["type"] as? Int, let id = args["id"] as? String {
+                    switch type {
+                    case 0:
+                        ZohoSalesIQ.KnowledgeBase.getSingleResource(.articles, id: id, completion: { success, error, resource in
+                            guard error == nil else {
+                                result(SwiftMobilistenPlugin().getResourceError(error:error))
+                                return
+                            }
+                            guard let resourceObjects = resource else {
+                                result(nil)
+                                return
+                            }
+                            let article = SwiftMobilistenPlugin().getResourceObject(resourceObjects)
+                            result(article)
+                        })
+                    default: break
+                    }
+                } else {
+                    result(SwiftMobilistenPlugin().getErrorMessage("Failed to get single article"))
+                }
+            case "getResources":
+                if let args = call.argumentDictionary, let type = args["type"] as? Int {
+                    switch type {
+                    case 0:
+                        let departmentID = args["departmentId"] as? String ?? nil
+                        let parentCategoryId = args["parentCategoryId"] as? String ?? nil
+                        let searchKey = args["searchKey"] as? String ?? nil
+                        let page = args["page"] as? Int ?? 1
+                        let limit = args["limit"] as? Int ?? 99
+                        
+                        ZohoSalesIQ.KnowledgeBase.getResources(.articles, departmentId: departmentID, parentCategoryId: parentCategoryId, searchKey: searchKey, page: page, limit: limit) { success, error, resources, moreDataAvailable in
+                            guard error == nil else {
+                                result(SwiftMobilistenPlugin().getResourceError(error:error))
+                                return
+                            }
+                            guard let resources = resources else {
+                                result(nil)
+                                return
+                            }
+                            let resourceList = SwiftMobilistenPlugin().getResourceList(resources)
+                            var resourceObject: [String: Any] = [:]
+                            resourceObject["resources"] = resourceList
+                            resourceObject["more_data_available"] = moreDataAvailable
+                            result(resourceObject)
+                        }
+                    default: break
+                    }
+                } else {
+                    result(SwiftMobilistenPlugin().getErrorMessage("Failed to get resource"))
+                }
+            case "getCategories":
+                if let args = call.argumentDictionary, let type = args["type"] as? Int {
+                    switch type {
+                    case 0:
+                        let departmentID = args["departmentId"] as? String ?? nil
+                        let parentCategoryId = args["parentCategoryId"] as? String ?? nil
+                        
+                        ZohoSalesIQ.KnowledgeBase.getCategories(.articles, departmentId: departmentID, parentCategoryId: parentCategoryId) { success, error, resourceCategories in
+                            guard error == nil else {
+                                result(SwiftMobilistenPlugin().getResourceError(error:error))
+                                return
+                            }
+                            guard let categoryObjects = resourceCategories else {
+                                result(nil)
+                                return
+                            }
+                            let article = SwiftMobilistenPlugin().getResourceCategoryList(categoryObjects)
+                            result(article)
+                        }
+                    default: break
+                    }
+                } else {
+                    result(SwiftMobilistenPlugin().getErrorMessage("Failed to get categories"))
+                }
+            case "getResourceDepartments":
+                ZohoSalesIQ.KnowledgeBase.getResourceDepartments(completion: { error,departments in
+                    if let departments = departments {
+                        var list: [[String: Any]] = []
+                        for department in departments {
+                            var deparmentDictionary: [String: Any] = [:]
+                            deparmentDictionary["id"] = department.id
+                            deparmentDictionary["name"] = department.name
+                            list.append(deparmentDictionary)
+                        }
+                        result(list)
+                    } else {
+                        result(SwiftMobilistenPlugin().getResourceError(error:error))
+                    }
+                })
+            default:
+                result(FlutterMethodNotImplemented)
+            }
+        }
     }
     
 }
@@ -766,6 +960,34 @@ extension ChatStatus {
     
 }
 
+extension SIQArticleRatedType {
+    
+    private static var statusMap: [SIQArticleRatedType: String] {
+        return [.liked: "liked",
+                .disliked: "disliked",
+                .none: "none"]
+    }
+    
+    var string: String {
+        if let stringValue = SIQArticleRatedType.statusMap[self] {
+            return stringValue
+        } else {
+            return "none"
+        }
+    }
+    
+    static func statusFromString(_ string: String) -> SIQArticleRatedType {
+        let statusList = statusMap
+        for key in statusList.keys {
+            if let value = statusList[key], value == string {
+                return key
+            }
+        }
+        return .none
+    }
+    
+}
+
 extension String {
     func trimSpace() -> String {
         return self.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
@@ -777,6 +999,11 @@ extension SwiftMobilistenPlugin {
     private func getError(error: NSError?) -> FlutterError? {
         guard let err = error else { return nil }
         return FlutterError(code: String(err.code), message: err.localizedDescription, details: nil)
+    }
+    
+    private func getResourceError(error: SIQError?) -> FlutterError? {
+        guard let err = error else { return nil }
+        return FlutterError(code: String(err.code), message: err.message, details: nil)
     }
     
     private func getVisitorLocation(using locationDictionary: [String: Any]) -> SIQVisitorLocation? {
@@ -942,6 +1169,98 @@ extension SwiftMobilistenPlugin {
         return arguments
     }
     
+    private func getResourceObject(_ resource: SIQKnowledgeBaseResource) -> [String: Any] {
+        var resourceDictionary: [String: Any] = [:]
+        
+        resourceDictionary["id"] = resource.id
+        
+        if let category = resource.category {
+            var resourceCategory: [String: Any] = [:]
+            resourceCategory["id"] = category.id
+            resourceCategory["name"] = category.name
+            resourceDictionary["category"] = resourceCategory
+        }
+        
+        resourceDictionary["title"] = resource.title
+        resourceDictionary["departmentId"] = resource.departmentId
+        
+        if let language = resource.language {
+            var resourceLanguage: [String: Any] = [:]
+            resourceLanguage["id"] = language.id
+            resourceLanguage["code"] = language.code
+            resourceDictionary["language"] = resourceLanguage
+        }
+        
+        if let creator = resource.creator {
+            var resourceCreator: [String: Any] = [:]
+            resourceCreator["id"] = creator.id
+            resourceCreator["name"] = creator.name
+            resourceCreator["email"] = creator.email
+            resourceCreator["displayName"] = creator.displayName
+            resourceCreator["imageUrl"] = creator.imageUrl
+            resourceDictionary["creator"] = resourceCreator
+        }
+        
+        if let modifier = resource.modifier {
+            var resourceModifier: [String: Any] = [:]
+            resourceModifier["id"] = modifier.id
+            resourceModifier["name"] = modifier.name
+            resourceModifier["email"] = modifier.email
+            resourceModifier["displayName"] = modifier.displayName
+            resourceModifier["imageUrl"] = modifier.imageUrl
+            resourceDictionary["modifier"] = resourceModifier
+        }
+        
+        resourceDictionary["createdTime"] = resource.createdTime?.milliSecondIntervalSince1970
+        resourceDictionary["modifiedTime"] = resource.modifiedTime?.milliSecondIntervalSince1970
+        resourceDictionary["publicUrl"] = resource.publicUrl
+        
+        if let stats = resource.stats {
+            var resourceStats: [String: Any] = [:]
+            resourceStats["liked"] = stats.liked
+            resourceStats["disliked"] = stats.disliked
+            resourceStats["used"] = stats.used
+            resourceStats["viewed"] = stats.viewed
+            resourceDictionary["stats"] = resourceStats
+        }
+        
+        resourceDictionary["content"] = resource.content
+        resourceDictionary["ratedType"] = resource.ratedType.string
+
+        return resourceDictionary
+    }
+    
+    private func getResourceCategoryObject(_ category: SIQKnowledgeBaseCategory) -> [String: Any] {
+        var categoryDictionary: [String: Any] = [:]
+        
+        categoryDictionary["id"] = category.id
+        categoryDictionary["name"] = category.name
+        categoryDictionary["departmentId"] = category.departmentId
+        categoryDictionary["count"] = category.count
+        categoryDictionary["childrenCount"] = category.childrenCount
+        categoryDictionary["order"] = category.order
+        categoryDictionary["parentCategoryId"] = category.parentCategoryId
+        categoryDictionary["resourceModifiedTime"] = category.resourceModifiedTime?.milliSecondIntervalSince1970
+        
+        return categoryDictionary
+    }
+    
+    private func getResourceList(_ articles: [SIQKnowledgeBaseResource]) -> [[String: Any]] {
+        var list: [[String: Any]] = []
+        for article in articles {
+            list.append(getResourceObject(article))
+        }
+        return list
+    }
+    
+    private func getResourceCategoryList(_ articles: [SIQKnowledgeBaseCategory]) -> [[String: Any]] {
+        var list: [[String: Any]] = []
+        for article in articles {
+            list.append(getResourceCategoryObject(article))
+        }
+        return list
+    }
+    
     private func getChatObjectList(_ chats: [SIQVisitorChat]) -> [[String: Any]] {
         var list: [[String: Any]] = []
         for chat in chats {
@@ -1002,6 +1321,17 @@ fileprivate class MobilistenChatEventStreamHandler: MobilistenEventStreamHandler
     }
     override func onCancel(withArguments arguments: Any?) -> FlutterError? {
         plugin?.chatEventSink = nil
+        return nil
+    }
+}
+
+fileprivate class MobilistenResourceEventStreamHandler: MobilistenEventStreamHandler {
+    override func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
+        plugin?.resorceEventSink = events
+        return nil
+    }
+    override func onCancel(withArguments arguments: Any?) -> FlutterError? {
+        plugin?.resorceEventSink = nil
         return nil
     }
 }
@@ -1084,6 +1414,35 @@ extension SwiftMobilistenPlugin: ZohoSalesIQFAQDelegate {
     }
     
 }
+extension SwiftMobilistenPlugin: ZohoSalesIQKnowledgeBaseDelegate {
+    public func handleResourceOpened(_ type: Mobilisten.SIQResourceType, resource: Mobilisten.SIQKnowledgeBaseResource?) {
+        guard let resource = resource else { return }
+        let resourceType = type.rawValue
+        let resourceDict: [String: Any] = ["type": resourceType, "resource": getResourceObject(resource)]
+        sendResourceEvent(name: .resourceOpened, data: resourceDict)
+    }
+    
+    public func handleResourceClosed(_ type: Mobilisten.SIQResourceType, resource: Mobilisten.SIQKnowledgeBaseResource?) {
+        guard let resource = resource else { return }
+        let resourceType = type.rawValue
+        let resourceDict: [String: Any] = ["type": resourceType, "resource": getResourceObject(resource)]
+        sendResourceEvent(name: .resourceClosed, data: resourceDict)
+    }
+    
+    public func handleResourceLiked(_ type: Mobilisten.SIQResourceType, resource: Mobilisten.SIQKnowledgeBaseResource?) {
+        guard let resource = resource else { return }
+        let resourceType = type.rawValue
+        let resourceDict: [String: Any] = ["type": resourceType, "resource": getResourceObject(resource)]
+        sendResourceEvent(name: .resourceLiked, data: resourceDict)
+    }
+    
+    public func handleResourceDisliked(_ type: Mobilisten.SIQResourceType, resource: Mobilisten.SIQKnowledgeBaseResource?) {
+        guard let resource = resource else { return }
+        let resourceType = type.rawValue
+        let resourceDict: [String: Any] = ["type": resourceType, "resource": getResourceObject(resource)]
+        sendResourceEvent(name: .resourceDisliked, data: resourceDict)
+    }
+}
 
 extension SwiftMobilistenPlugin: ZohoSalesIQChatDelegate {
     public func shouldOpenURL(_ url: URL, in chat: Mobilisten.SIQVisitorChat?) -> Bool {
@@ -1141,6 +1500,7 @@ extension SwiftMobilistenPlugin: ZohoSalesIQChatDelegate {
     }
     
 }
+ 
 
 fileprivate extension UIImage {
     func toBase64String(compressionQuality: CGFloat) -> String? {

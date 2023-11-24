@@ -1,4 +1,4 @@
-[![SupportedLanguages](https://img.shields.io/badge/Platforms-iOS%20%7C%20%20Android-green.svg)](https://flutter.dev/) [![Version](https://img.shields.io/badge/version-3.1.2-blue.svg)](https://mobilisten.io/)
+[![SupportedLanguages](https://img.shields.io/badge/Platforms-iOS%20%7C%20%20Android-green.svg)](https://flutter.dev/) [![Version](https://img.shields.io/badge/version-4.0.0-blue.svg)](https://mobilisten.io/)
 
 # Zoho SalesIQ Mobilisten Flutter Plugin
 
@@ -11,7 +11,7 @@ Connect with customers at every step of their journey. Give them the best in-app
 Please follow the steps mentioned below to install the Mobilisten plugin in your Flutter mobile application.
 
 ### Requirements
-**Android**: `minSdkVersion` 21 and above is required.
+**Android**: `minSdkVersion` 21 or above is required.
 
 **iOS**: iOS 11 or above is required. The minimum version of Xcode required is Xcode 13.
 
@@ -21,7 +21,7 @@ Please follow the steps mentioned below to install the Mobilisten plugin in your
 dependencies:
   flutter:
     sdk: flutter
-+ salesiq_mobilisten: ^3.1.2
++ salesiq_mobilisten: ^4.0.0
 ```
 
 2. Run `flutter pub get` to fetch dependencies for the project.

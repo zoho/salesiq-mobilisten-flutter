@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:salesiq_mobilisten/last_message.dart';
+import 'package:salesiq_mobilisten/mobilisten_date_time.dart';
+import 'package:salesiq_mobilisten/salesiq_knowledge_base.dart';
 
 import 'launcher.dart';
 import 'tab.dart';
@@ -9,6 +11,7 @@ import 'tab.dart';
 class ZohoSalesIQ {
   static MethodChannel _channel = const MethodChannel('salesiq_mobilisten');
 
+  static KnowledgeBase knowledgeBase = new KnowledgeBase();
   static const String _mobilistenEventChannel = "mobilistenEventChannel";
   static const String _mobilistenChatEventChannel =
       "mobilistenChatEventChannel";
@@ -24,6 +27,9 @@ class ZohoSalesIQ {
       EventChannel(_mobilistenChatEventChannel).receiveBroadcastStream();
 
   /// Stream to receive events related to the knowledge base.
+  /// See [knowledgeBase.eventChannel] in [knowledgeBase]
+  @Deprecated(
+      'This EventChannel was deprecated after v3.1.2, Use eventChannel() in knowledgeBase instead.')
   static final articleEventChannel =
       EventChannel(_mobilistenArticleEventChannel).receiveBroadcastStream();
 
@@ -81,6 +87,9 @@ class ZohoSalesIQ {
   }
 
   /// Enables or disables the FAQs/the Knowledge base using the value provided for [visibility].
+  /// See [knowledgeBase.setVisibility(type, shouldShow)] in [knowledgeBase]
+  @Deprecated(
+      'This method was deprecated after v3.1.2, Use knowledgeBase.setVisibility() method instead.')
   static Future<Null> setFAQVisibility(bool visibility) async {
     await _channel.invokeMethod('setFAQVisibility', visibility);
   }
@@ -267,12 +276,18 @@ class ZohoSalesIQ {
   }
 
   /// Returns a list of articles (Instances of [SIQArticle]).
+  /// See [knowledgeBase.getResources(type)] in [knowledgeBase]
+  @Deprecated(
+      'This method was deprecated after v3.1.2, Use knowledgeBase.getResources() method instead.')
   static Future<List<SIQArticle>> getArticles() async {
     final List articleList = await _channel.invokeMethod('getArticles');
     return _getArticleObjectList(articleList);
   }
 
   /// Returns a list of articles (Instances of [SIQArticle]) belonging to a specific category if provided a [categoryID].
+  /// See [knowledgeBase.getResources(type)] in [knowledgeBase]
+  @Deprecated(
+      'This method was deprecated after v3.1.2, Use knowledgeBase.getResources() method instead.')
   static Future<List<SIQArticle>> getArticlesWithCategoryID(
       String categoryID) async {
     final List articleList =
@@ -281,6 +296,9 @@ class ZohoSalesIQ {
   }
 
   /// Returns a list of article categories (Instances of [SIQArticleCategory]).
+  /// See [knowledgeBase.getCategories(type)] in [knowledgeBase]
+  @Deprecated(
+      'This method was deprecated after v3.1.2, Use knowledgeBase.getCategories() method instead.')
   static Future<List<SIQArticleCategory>> getArticleCategories() async {
     final List categoryList =
         await _channel.invokeMethod('getArticleCategories');
@@ -305,6 +323,9 @@ class ZohoSalesIQ {
   }
 
   /// Opens an article from the knowledge base using the [articleID].
+  /// See [knowledgeBase.openResource(type, id)] in [knowledgeBase]
+  @Deprecated(
+      'This method was deprecated after v3.1.2, Use knowledgeBase.openResource() method instead.')
   static Future<String> openArticle(String articleID) async {
     final String articleList =
         await _channel.invokeMethod('openArticle', articleID);
@@ -384,10 +405,6 @@ class ZohoSalesIQ {
     return await _channel.invokeMethod('getChatUnreadCount');
   }
 
-  static DateTime _convertDoubleToDateTime(double epochTime) {
-    return DateTime.fromMillisecondsSinceEpoch(epochTime.toInt());
-  }
-
   static List<SIQChat> _getChatObjectList(List mapList) {
     List<SIQChat> chatList = [];
     for (int i = 0; i < mapList.length; i++) {
@@ -405,7 +422,8 @@ class ZohoSalesIQ {
       DateTime? lastMessageTime;
       double? lastMessageTimeMS = map["lastMessageTime"];
       if (lastMessageTimeMS != null) {
-        lastMessageTime = _convertDoubleToDateTime(lastMessageTimeMS);
+        lastMessageTime =
+            DateTimeUtils.convertDoubleToDateTime(lastMessageTimeMS);
       }
       SIQMessage recentMessage = SIQMessage.getObject(map["recentMessage"]);
       int? queuePosition = map["queuePosition"];
@@ -415,26 +433,24 @@ class ZohoSalesIQ {
       String statusString = map["status"] ?? "closed";
       SIQChatStatus status = SIQChatStatusString.toChatType(statusString);
 
-      if (id != null) {
-        SIQChat chat = SIQChat(
-            id,
-            question,
-            queuePosition,
-            attenderName,
-            attenderEmail,
-            attenderID,
-            isBotAttender,
-            departmentName,
-            status,
-            unreadCount,
-            lastMessage,
-            lastMessageTime,
-            lastMessageSender,
-            recentMessage,
-            feedback,
-            rating);
-        chatList.add(chat);
-      }
+      SIQChat chat = SIQChat(
+          id,
+          question,
+          queuePosition,
+          attenderName,
+          attenderEmail,
+          attenderID,
+          isBotAttender,
+          departmentName,
+          status,
+          unreadCount,
+          lastMessage,
+          lastMessageTime,
+          lastMessageSender,
+          recentMessage,
+          feedback,
+          rating);
+      chatList.add(chat);
     }
     return chatList;
   }
@@ -454,20 +470,10 @@ class ZohoSalesIQ {
       double? createdTimeMS = map["createdTime"];
       double? modifiedTimeMS = map["modifiedTime"];
 
-      late DateTime createdTime;
-      late DateTime modifiedTime;
-
-      if (createdTimeMS != null) {
-        createdTime = _convertDoubleToDateTime(createdTimeMS);
-      } else {
-        createdTime = DateTime.now();
-      }
-
-      if (modifiedTimeMS != null) {
-        modifiedTime = _convertDoubleToDateTime(modifiedTimeMS);
-      } else {
-        modifiedTime = createdTime;
-      }
+      late DateTime? createdTime =
+          DateTimeUtils.convertDoubleToDateTime(createdTimeMS);
+      late DateTime? modifiedTime =
+          DateTimeUtils.convertDoubleToDateTime(modifiedTimeMS) ?? createdTime;
 
       if (id != null && categoryId != null) {
         SIQArticle article = SIQArticle(id, name, categoryId, categoryName,
@@ -575,7 +581,7 @@ class ZohoSalesIQ {
 }
 
 class SIQChat {
-  final String id;
+  final String? id;
   final String? question;
   final int? queuePosition;
 
@@ -625,22 +631,36 @@ class SIQDepartment {
   final String id;
   final String name;
   final bool available;
+
   SIQDepartment(this.id, this.name, this.available);
 }
 
+/// See [Resource] class .
+// @Deprecated('This class was deprecated after v3.1.2, Use Resource class instead.')
 class SIQArticle {
+  @deprecated
+  @deprecated
   final String id;
+  @deprecated
   final String name;
 
+  @deprecated
   final String categoryId;
+  @deprecated
   final String categoryName;
 
+  @deprecated
   final int viewCount;
+  @deprecated
   final int likeCount;
+  @deprecated
   final int dislikeCount;
 
-  final DateTime createdTime;
-  final DateTime modifiedTime;
+  @deprecated
+  final DateTime? createdTime;
+  @deprecated
+  final DateTime? modifiedTime;
+
   SIQArticle(
       this.id,
       this.name,
@@ -653,10 +673,16 @@ class SIQArticle {
       this.modifiedTime);
 }
 
+/// See [ResourceCategory] class .
+// @Deprecated('This class was deprecated after v3.1.2, Use Resource class instead.')
 class SIQArticleCategory {
+  @deprecated
   final String id;
+  @deprecated
   final String name;
+  @deprecated
   final int articleCount;
+
   SIQArticleCategory(this.id, this.name, this.articleCount);
 }
 
@@ -689,9 +715,25 @@ class SIQEvent {
   static const String performChatAction = "performChatAction";
   static const String chatQueuePositionChange = "chatQueuePositionChange";
   static const String chatReopened = "chatReopened";
+
+  /// See [KnowledgeBaseEvent.resourceLiked].
+  @Deprecated(
+      "This constant was deprecated after v3.1.2, Use KnowledgeBaseEvent.resourceLiked constant instead.")
   static const String articleLiked = "articleLiked";
+
+  /// See [KnowledgeBaseEvent.resourceDisliked].
+  @Deprecated(
+      "This constant was deprecated after v3.1.2, Use KnowledgeBaseEvent.resourceDisliked constant instead.")
   static const String articleDisliked = "articleDisliked";
+
+  /// See [KnowledgeBaseEvent.resourceOpened].
+  @Deprecated(
+      "This constant was deprecated after v3.1.2, Use KnowledgeBaseEvent.resourceOpened constant instead.")
   static const String articleOpened = "articleOpened";
+
+  /// See [KnowledgeBaseEvent.resourceClosed].
+  @Deprecated(
+      "This constant was deprecated after v3.1.2, Use KnowledgeBaseEvent.resourceClosed constant instead.")
   static const String articleClosed = "articleClosed";
   static const String chatUnreadCountChanged = "chatUnreadCountChanged";
   static const String handleURL = "handleURL";
@@ -742,6 +784,7 @@ extension SIQChatStatusString on SIQChatStatus {
 
 class SIQSendEvent {
   const SIQSendEvent._(this.index);
+
   final int index;
 
   static const SIQSendEvent openUrl = SIQSendEvent._(0);

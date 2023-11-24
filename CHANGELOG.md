@@ -1,8 +1,24 @@
 ## Mobilisten Plugin Changelog
 
+### 4.0.0 - 24 Nov 2023
+
+- The article sub-categories are supported.
+- Introduced a new versions of APIs for
+  the [Knowledge base](https://www.zoho.com/salesiq/help/developer-section/flutter-sdk-knowledgebase.html) (
+  Deprecated the old FAQ APIs)
+- An update in
+  the [setTabOrder() API](https://www.zoho.com/salesiq/help/developer-guides/flutter-sdk-set-tab-order.html),
+  the param value "FAQ" is deprecated, and a new value "KnowledgeBase" is introduced.
+- Supported managing the author's information visibility and a provision to like/dislike the
+  articles for the visitors from
+  the [brand settings](https://help.zoho.com/portal/en/kb/salesiq-2-0/for-administrators/setup-brand/articles/personalize#Articles).
+- Multi-lingual support for the articles and their categories.
+- Miscellaneous bug fixes and performance improvements.
+
 ### 3.1.2 - 4 Oct 2023
 
-- Updated Mobilisten SDK for ios to version [6.0.2](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/v6.0.2) and Android to
+- Updated Mobilisten SDK for ios to
+  version [6.0.2](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/v6.0.2) and Android to
   version [6.0.2](https://github.com/zoho/salesiq-mobilisten-android-sample/releases/tag/v6.0.2)
 
 ### 3.1.1 - 30 Aug 2023

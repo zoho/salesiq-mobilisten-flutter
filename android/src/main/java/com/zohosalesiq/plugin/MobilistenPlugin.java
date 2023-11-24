@@ -14,6 +14,7 @@ import android.util.Base64;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.google.gson.reflect.TypeToken;
 import com.zoho.commons.ChatComponent;
 import com.zoho.commons.LauncherModes;
 import com.zoho.commons.LauncherProperties;
@@ -41,22 +42,32 @@ import com.zoho.livechat.android.listeners.SalesIQListener;
 import com.zoho.livechat.android.listeners.UnRegisterListener;
 import com.zoho.livechat.android.models.SalesIQArticle;
 import com.zoho.livechat.android.models.SalesIQArticleCategory;
+import com.zoho.livechat.android.modules.common.DataModule;
 import com.zoho.livechat.android.modules.knowledgebase.ui.entities.Resource;
+import com.zoho.livechat.android.modules.knowledgebase.ui.entities.ResourceCategory;
+import com.zoho.livechat.android.modules.knowledgebase.ui.entities.ResourceDepartment;
 import com.zoho.livechat.android.modules.knowledgebase.ui.listeners.OpenResourceListener;
+import com.zoho.livechat.android.modules.knowledgebase.ui.listeners.ResourceCategoryListener;
+import com.zoho.livechat.android.modules.knowledgebase.ui.listeners.ResourceDepartmentsListener;
+import com.zoho.livechat.android.modules.knowledgebase.ui.listeners.ResourceListener;
 import com.zoho.livechat.android.modules.knowledgebase.ui.listeners.ResourcesListener;
 import com.zoho.livechat.android.modules.knowledgebase.ui.listeners.SalesIQKnowledgeBaseListener;
-import com.zoho.livechat.android.utils.LiveChatUtil;
 import com.zoho.livechat.android.operation.SalesIQApplicationManager;
 import com.zoho.livechat.android.utils.LiveChatUtil;
 import com.zoho.salesiqembed.ZohoSalesIQ;
+import com.zoho.salesiqembed.ktx.GsonExtensionsKt;
+
+import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
@@ -71,7 +82,7 @@ import io.flutter.plugin.common.MethodChannel.Result;
 
 public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, ActivityAware {
 
-    private MethodChannel channel;
+    private MethodChannel channel, knowledgeBaseChannel;
     private EventChannel eventChannel, chatEventChannel, faqEventChannel;
     private Application application;
     private Activity activity;
@@ -79,10 +90,13 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
     private static String fcmtoken = null;
     private static Boolean istestdevice = true;
 
-    private EventChannel.EventSink eventSink, chatEventSink, faqEventSink;
-    private static String mobilistenEventChannel = "mobilistenEventChannel";         // No I18N
-    private static String mobilistenChatEventChannel = "mobilistenChatEventChannel";         // No I18N
-    private static String mobilistenFAQEventChannel = "mobilistenFAQEventChannel";         // No I18N
+    EventChannel.EventSink eventSink, chatEventSink, faqEventSink;
+    static EventChannel.EventSink knowledgeBaseEventSink;
+    private static final String MOBILISTEN_EVENT_CHANNEL = "mobilistenEventChannel";         // No I18N
+    private static final String MOBILISTEN_CHAT_EVENT_CHANNEL = "mobilistenChatEventChannel";         // No I18N
+    private static final String MOBILISTEN_FAQ_EVENT_CHANNEL = "mobilistenFAQEventChannel";         // No I18N
+
+    private static final String MOBILISTEN_KNOWLEDGE_BASE_EVENTS = "mobilisten_knowledge_base_events";         // No I18N
 
     private static final String TYPE_OPEN = "open";         // No I18N
     private static final String TYPE_CONNECTED = "connected";         // No I18N
@@ -103,35 +117,60 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
 
     Handler handler;
 
-    static class Tab {
+    private static class Tab {
         static String CONVERSATIONS = "TAB_CONVERSATIONS";  // No I18N
         @Deprecated
         static String FAQ = "TAB_FAQ";  // No I18N
         static String KNOWLEDGE_BASE = "TAB_KNOWLEDGE_BASE";  // No I18N
     }
 
-    static class ReturnEvent {
-        private static final String EVENT_OPEN_URL = "OPEN_URL";  // No I18N
-        private static final String EVENT_COMPLETE_CHAT_ACTION = "COMPLETE_CHAT_ACTION";// No I18N
+    private static class ReturnEvent {
+        static final String EVENT_OPEN_URL = "OPEN_URL";  // No I18N
+        static final String EVENT_COMPLETE_CHAT_ACTION = "COMPLETE_CHAT_ACTION";// No I18N
     }
 
-    class Launcher {
+    private static class Launcher {
         static final String HORIZONTAL_LEFT = "HORIZONTAL_LEFT";    // No I18N
         static final String HORIZONTAL_RIGHT = "HORIZONTAL_RIGHT";  // No I18N
         static final String VERTICAL_TOP = "VERTICAL_TOP";  // No I18N
         static final String VERTICAL_BOTTOM = "VERTICAL_BOTTOM";    // No I18N
     }
 
+    static class KnowledgeBase {
+        static final String ARTICLES = "Articles";  // No I18N
+    }
+
+    private final MethodCallHandler methodCallHandler = new MethodCallHandler() {
+        @Override
+        public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
+            handleKnowledgeBaseMethodCalls(call, result);
+        }
+    };
+
     @Override
     public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
         channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "salesiq_mobilisten");         // No I18N
         channel.setMethodCallHandler(this);
 
+        knowledgeBaseChannel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "salesiq_knowledge_base");         // No I18N
+        knowledgeBaseChannel.setMethodCallHandler(methodCallHandler);
+
         handler = new Handler(Looper.getMainLooper());
 
-        eventChannel = new EventChannel(flutterPluginBinding.getBinaryMessenger(), mobilistenEventChannel);
-        chatEventChannel = new EventChannel(flutterPluginBinding.getBinaryMessenger(), mobilistenChatEventChannel);
-        faqEventChannel = new EventChannel(flutterPluginBinding.getBinaryMessenger(), mobilistenFAQEventChannel);
+        eventChannel = new EventChannel(flutterPluginBinding.getBinaryMessenger(), MOBILISTEN_EVENT_CHANNEL);
+        chatEventChannel = new EventChannel(flutterPluginBinding.getBinaryMessenger(), MOBILISTEN_CHAT_EVENT_CHANNEL);
+        faqEventChannel = new EventChannel(flutterPluginBinding.getBinaryMessenger(), MOBILISTEN_FAQ_EVENT_CHANNEL);
+        new EventChannel(flutterPluginBinding.getBinaryMessenger(), MOBILISTEN_KNOWLEDGE_BASE_EVENTS).setStreamHandler(new EventChannel.StreamHandler() {
+            @Override
+            public void onListen(Object arguments, EventChannel.EventSink events) {
+                knowledgeBaseEventSink = events;
+            }
+
+            @Override
+            public void onCancel(Object arguments) {
+                knowledgeBaseEventSink = null;
+            }
+        });
 
         eventChannel.setStreamHandler(new EventChannel.StreamHandler() {
             @Override
@@ -168,6 +207,171 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 faqEventSink = null;
             }
         });
+    }
+
+    private static void handleKnowledgeBaseMethodCalls(MethodCall call, Result result) {
+        Integer type = call.arguments != null ? call.argument("type") : null;   // No I18N
+        ZohoSalesIQ.ResourceType resourceType = null;
+        if (type != null && type == 0) {
+            resourceType = ZohoSalesIQ.ResourceType.Articles;
+        }
+//        else {
+//            // TODO: Need to implement FAQs in future.
+//        }
+        if (resourceType != null || Objects.equals(call.method, "getResourceDepartments")) {
+            switch (call.method) {
+                case "setVisibility": {
+                    ZohoSalesIQ.KnowledgeBase.setVisibility(resourceType, LiveChatUtil.getBoolean(call.argument("should_show")));   // No I18N
+                    break;
+                }
+
+                case "combineDepartments": {
+                    ZohoSalesIQ.KnowledgeBase.combineDepartments(resourceType, LiveChatUtil.getBoolean(call.argument("merge")));    // No I18N
+                    break;
+                }
+
+                case "categorize": {
+                    ZohoSalesIQ.KnowledgeBase.categorize(resourceType, LiveChatUtil.getBoolean(call.argument("should_categorize")));    // No I18N
+                    break;
+                }
+
+//            case "isEnabled": {
+//
+//            }
+
+                case "getSingleResource": {
+//                LiveChatUtil.getBoolean(call.argument("should_fallback_to_default_language"))
+                    ZohoSalesIQ.KnowledgeBase.getSingleResource(resourceType, LiveChatUtil.getString(call.argument("id")), true, new ResourceListener() {   // No I18N
+                        @Override
+                        public void onSuccess(@Nullable Resource resource) {
+                            result.success(getMap(resource));
+                        }
+
+                        @Override
+                        public void onFailure(int code, @Nullable String message) {
+                            result.error(LiveChatUtil.getString(code), message, null);
+                        }
+                    });
+                    break;
+                }
+
+                case "getResources": {
+                    ZohoSalesIQ.KnowledgeBase.getResources(resourceType, getStringOrNull(call.argument("departmentId")), getStringOrNull(call.argument("parentCategoryId")), getStringOrNull(call.argument("searchKey")), LiveChatUtil.getInteger(call.argument("page")), LiveChatUtil.getInteger(call.argument("limit")), new ResourcesListener() {  // No I18N
+                        @Override
+                        public void onSuccess(@NonNull List<Resource> resources, boolean moreDataAvailable) {
+                            HashMap<String, Object> finalMap = new HashMap<>();
+                            finalMap.put("resources", getMapList(resources));
+                            finalMap.put("more_data_available", moreDataAvailable);
+                            result.success(finalMap);
+                        }
+
+                        @Override
+                        public void onFailure(int code, @Nullable String message) {
+                            result.error(LiveChatUtil.getString(code), message, null);
+                        }
+                    });
+                    break;
+                }
+
+                case "getResourceDepartments": {
+                    ZohoSalesIQ.KnowledgeBase.getResourceDepartments(new ResourceDepartmentsListener() {
+                        @Override
+                        public void onSuccess(@NonNull List<ResourceDepartment> resourceDepartments) {
+                            result.success(getMapList(resourceDepartments));
+                        }
+
+                        @Override
+                        public void onFailure(int code, @Nullable String message) {
+                            result.error(LiveChatUtil.getString(code), message, null);
+                        }
+                    });
+                    break;
+                }
+
+                case "getCategories": {
+                    ZohoSalesIQ.KnowledgeBase.getCategories(resourceType, getStringOrNull(call.argument("departmentId")), getStringOrNull(call.argument("parentCategoryId")), new ResourceCategoryListener() {    // No I18N
+                        @Override
+                        public void onSuccess(@NonNull List<ResourceCategory> resourceCategories) {
+                            result.success(getMapList(resourceCategories));
+                        }
+
+                        @Override
+                        public void onFailure(int code, @Nullable String message) {
+                            result.error(LiveChatUtil.getString(code), message, null);
+                        }
+                    });
+                    break;
+                }
+
+                case "openResource": {
+                    ZohoSalesIQ.KnowledgeBase.open(resourceType, LiveChatUtil.getString(call.argument("id")), new OpenResourceListener() {  // No I18N
+                        @Override
+                        public void onSuccess() {
+                            result.success(Boolean.TRUE);
+                        }
+
+                        @Override
+                        public void onFailure(int code, @Nullable String message) {
+                            result.error(LiveChatUtil.getString(code), message, null);
+                        }
+                    });
+                    break;
+                }
+            }
+        } else {
+            result.error("100", "Invalid resource type", null); // No I18N
+        }
+    }
+
+    private static @Nullable String getStringOrNull(Object object) {
+        String value;
+        if (object == null) {
+            value = null;
+        } else {
+            value = (String) object;
+        }
+        return value;
+    }
+
+    static HashMap<String, Object> getMap(Object object) {
+        Type mapType = new TypeToken<HashMap<String, Object>>() {}.getType();
+        HashMap<String, Object> hashMap = GsonExtensionsKt.fromJsonSafe(DataModule.getGson(), DataModule.getGson().toJson(object), mapType);
+        HashMap<String, Object> finalHashMap = new HashMap<>();
+        for (Map.Entry<String, Object> entry : hashMap.entrySet()) {
+            if (entry.getValue() instanceof Map) {
+                finalHashMap.put(convertToCamelCase(entry.getKey()), getMap(entry.getValue()));
+            } else {
+                finalHashMap.put(convertToCamelCase(entry.getKey()), entry.getValue());
+            }
+        }
+        return finalHashMap;
+    }
+
+    static String convertToCamelCase(String input) {
+        StringBuilder camelCase = new StringBuilder(30);
+        boolean capitalizeNext = false;
+
+        for (char c : input.toCharArray()) {
+            if (c == '_') {
+                capitalizeNext = true;
+            } else {
+                camelCase.append(capitalizeNext ? Character.toUpperCase(c) : c);
+                capitalizeNext = false;
+            }
+        }
+
+        return camelCase.toString();
+    }
+
+    static List<HashMap<String, Object>> getMapList(Object objects) {
+        ArrayList<HashMap<String, Object>> finalList = new ArrayList<>();
+        if (objects != null) {
+            List<Object> list = (List<Object>) objects;
+            for (int index = 0; index < list.size(); index++) {
+                finalList.add(getMap(list.get(index)));
+            }
+        }
+        return finalList;
     }
 
     @Override
@@ -769,6 +973,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
     @Override
     public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
         channel.setMethodCallHandler(null);
+        knowledgeBaseChannel.setMethodCallHandler(null);
     }
 
     @Override
@@ -1398,9 +1603,9 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
 
         @Override
         public void onBadgeChange(int unreadCount) {
-            Map<String, Object> eventMap = new HashMap<String, Object>();
-            eventMap.put("eventName", SIQEvent.chatUnreadCountChanged);
-            eventMap.put("unreadCount", unreadCount);
+            Map<String, Object> eventMap = new HashMap<>();
+            eventMap.put("eventName", SIQEvent.chatUnreadCountChanged);     // No I18N
+            eventMap.put("unreadCount", unreadCount);       // No I18N
             if (chatEventSink != null) {
                 chatEventSink.success(eventMap);
             }
@@ -1409,7 +1614,14 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         @Override
         public void handleResourceOpened(@NonNull ZohoSalesIQ.ResourceType resourceType, @Nullable Resource resource) {
             if (resource != null) {
-                Map<String, Object> eventMap = new HashMap<String, Object>();
+                Map<String, Object> eventMap = new HashMap<>();
+                eventMap = addResourceType(eventMap, resourceType);
+                eventMap.put("eventName", KnowledgeBaseEvent.resourceOpened);       // No I18N
+                eventMap.put("resource", getMap(resource));       // No I18N
+                if (knowledgeBaseEventSink != null) {
+                    knowledgeBaseEventSink.success(eventMap);
+                }
+                eventMap = new HashMap<String, Object>();
                 eventMap.put("eventName", SIQEvent.articleOpened);
                 eventMap.put("articleID", resource.getId());
                 if (faqEventSink != null) {
@@ -1421,7 +1633,14 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         @Override
         public void handleResourceClosed(@NonNull ZohoSalesIQ.ResourceType resourceType, @Nullable Resource resource) {
             if (resource != null) {
-                Map<String, Object> eventMap = new HashMap<String, Object>();
+                Map<String, Object> eventMap = new HashMap<>();
+                eventMap = addResourceType(eventMap, resourceType);
+                eventMap.put("eventName", KnowledgeBaseEvent.resourceClosed);       // No I18N
+                eventMap.put("resource", getMap(resource));       // No I18N
+                if (knowledgeBaseEventSink != null) {
+                    knowledgeBaseEventSink.success(eventMap);
+                }
+                eventMap = new HashMap<String, Object>();
                 eventMap.put("eventName", SIQEvent.articleClosed);
                 eventMap.put("articleID", resource.getId());
                 if (faqEventSink != null) {
@@ -1433,7 +1652,14 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         @Override
         public void handleResourceLiked(@NonNull ZohoSalesIQ.ResourceType resourceType, @Nullable Resource resource) {
             if (resource != null) {
-                Map<String, Object> eventMap = new HashMap<String, Object>();
+                Map<String, Object> eventMap = new HashMap<>();
+                eventMap = addResourceType(eventMap, resourceType);
+                eventMap.put("eventName", KnowledgeBaseEvent.resourceLiked);        // No I18N
+                eventMap.put("resource", getMap(resource));       // No I18N
+                if (knowledgeBaseEventSink != null) {
+                    knowledgeBaseEventSink.success(eventMap);
+                }
+                eventMap = new HashMap<String, Object>();
                 eventMap.put("eventName", SIQEvent.articleLiked);
                 eventMap.put("articleID", resource.getId());
                 if (faqEventSink != null) {
@@ -1445,7 +1671,14 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         @Override
         public void handleResourceDisliked(@NonNull ZohoSalesIQ.ResourceType resourceType, @Nullable Resource resource) {
             if (resource != null) {
-                Map<String, Object> eventMap = new HashMap<String, Object>();
+                Map<String, Object> eventMap = new HashMap<>();
+                eventMap = addResourceType(eventMap, resourceType);
+                eventMap.put("eventName", KnowledgeBaseEvent.resourceDisliked);     // No I18N
+                eventMap.put("resource", getMap(resource));       // No I18N
+                if (knowledgeBaseEventSink != null) {
+                    knowledgeBaseEventSink.success(eventMap);
+                }
+                eventMap = new HashMap<String, Object>();
                 eventMap.put("eventName", SIQEvent.articleDisliked);
                 eventMap.put("articleID", resource.getId());
                 if (faqEventSink != null) {
@@ -1453,6 +1686,22 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 }
             }
         }
+
+        Map<String, Object> addResourceType(Map<String, Object> map, ZohoSalesIQ.ResourceType resourceType) {
+            switch (resourceType) {
+                case Articles:
+                    map.put("type", 0);        // No I18N
+                    break;
+            }
+            return map;
+        }
+    }
+
+    static class KnowledgeBaseEvent {
+        static String resourceOpened = "resourceOpened";          // No I18N
+        static String resourceClosed = "resourceClosed";          // No I18N
+        static String resourceLiked = "resourceLiked";        // No I18N
+        static String resourceDisliked = "resourceDisliked";          // No I18N
     }
 
     static class SIQEvent {
