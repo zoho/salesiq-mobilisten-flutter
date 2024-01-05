@@ -3,21 +3,21 @@
 ### 5.0.0 - 04 Jan 2024
 
 - Introduced a new set of APIs for more SDK customizations.
-- The [ZohoSalesIQ.Launcher.show()](https://www.zoho.com/salesiq/help/developer-section/flutter-sdk-launcher-show.html)
+- The [ZohoSalesIQ.Launcher.show()](https://www.zoho.com/salesiq/help/developer-guides/flutter-sdk-launcher-show.html)
 API to customize the launcher's visibility (show, hide, or show during an ongoing chat) based on
 your preferences. The previously
-utilized [showLauncher()](https://www.zoho.com/salesiq/help/developer-section/flutter-sdk-show-launcher.html)
+utilized [showLauncher()](https://www.zoho.com/salesiq/help/developer-guides/flutter-sdk-show-launcher.html)
 API has now been deprecated.
-- The [ZohoSalesIQ.Launcher.enableDragToDismiss()](https://www.zoho.com/salesiq/help/developer-section/flutter-sdk-launcher-enable-drag-dismiss.html)
+- The [ZohoSalesIQ.Launcher.enableDragToDismiss()](https://www.zoho.com/salesiq/help/developer-guides/flutter-sdk-launcher-enable-drag-dismiss.html)
 API enables closing the mobilisten launcher by drag and drop.
 - Mobilisten now supports ten regional languages, including Tamil, Kannada, Bengali, Hindi,
   Gujarati, Marathi, Telugu, Punjabi, Oriya, and Malayalam.
-- The [ZohoSalesIQ.dismissUI()](https://www.zoho.com/salesiq/help/developer-section/flutter-sdk-dismiss-ui.html)
+- The [ZohoSalesIQ.dismissUI()](https://www.zoho.com/salesiq/help/developer-guides/flutter-sdk-dismiss-ui.html)
 API allows users to navigate back to your app instantly by dismissing all Mobilisten UI elements.
 - Introducing the ability to add custom icons for rating/feedback in
   both [iOS](https://www.zoho.com/salesiq/help/developer-section/ios-mobile-sdk-theme-customization-feedback.html)
   and [Android](https://www.zoho.com/salesiq/help/developer-guides/android-mobile-sdk-theme-customization-chat-feedback-2.0.html).
-- The [Chat.showFeedbackAfterSkip()](https://www.zoho.com/salesiq/help/developer-section/flutter-sdk-chat-show-feedback-after-skip.html)
+- The [Chat.showFeedbackAfterSkip()](https://www.zoho.com/salesiq/help/developer-guides/flutter-sdk-chat-show-feedback-after-skip.html)
 API to control the flow of rating/feedback after the chat ends.
 - Miscellaneous bug fixes and performance improvements.
 
@@ -94,7 +94,7 @@ API to control the flow of rating/feedback after the chat ends.
   version [4.4.0](https://github.com/zoho/salesiq-mobilisten-android-sample/releases/tag/v4.4.0).
 - Added support for Georgian [ka], Armenian [hy], and Persian [fa] languages. You can change to
   these languages using
-  the [.setLanguage()](https://www.zoho.com/salesiq/help/developer-section/cordova-ionic-sdk-set-language.html)
+  the [.setLanguage()](https://www.zoho.com/salesiq/help/developer-guides/flutter-sdk-chat-setlanguage.html)
   API.
 - Addressed the GitHub issue - [#28](https://github.com/zoho/salesiq-mobilisten-flutter/issues/28).
 
