@@ -1,5 +1,30 @@
+import 'package:flutter/services.dart';
+
+class Launcher {
+  final MethodChannel _channel = const MethodChannel("salesiq_launcher_module");
+
+  void show(VisibilityMode mode) {
+    Map<String, dynamic> arguments = <String, dynamic>{};
+    arguments.putIfAbsent("visibility_mode", () => mode.index);
+    _channel.invokeMethod('show', arguments);
+  }
+
+  void setVisibilityModeToCustomLauncher(VisibilityMode mode) {
+    Map<String, dynamic> arguments = <String, dynamic>{};
+    arguments.putIfAbsent("visibility_mode", () => mode.index);
+    _channel.invokeMethod('setVisibilityModeToCustomLauncher', arguments);
+  }
+
+  void enableDragToDismiss(bool enable) {
+    _channel.invokeMethod('enableDragToDismiss', enable);
+  }
+}
+
+enum VisibilityMode { always, never, whenActiveChat }
+
 class LauncherMode {
   const LauncherMode._(this.index);
+
   final int index;
 
   static const LauncherMode static = LauncherMode._(0);
@@ -19,6 +44,7 @@ class LauncherProperties {
   String? icon;
   Horizontal? horizontalDirection;
   Vertical? verticalDirection;
+
   LauncherProperties(LauncherMode launcherMode) {
     mode = launcherMode;
   }
@@ -26,6 +52,7 @@ class LauncherProperties {
 
 class Horizontal {
   const Horizontal._(this.index);
+
   final int index;
 
   static const Horizontal left = Horizontal._(0);
@@ -44,6 +71,7 @@ class Horizontal {
 
 class Vertical {
   const Vertical._(this.index);
+
   final int index;
 
   static const Vertical top = Vertical._(0);

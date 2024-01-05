@@ -33,10 +33,11 @@ class KnowledgeBase {
     await _channel.invokeMethod('categorize', args);
   }
 
-  // Future<bool> isEnabled(ResourceType type) async {
-  //   int rawValue = type.index;
-  //   return await _channel.invokeMethod('isEnabled', rawValue);
-  // }
+  Future<bool> isEnabled(ResourceType type) async {
+    Map<String, dynamic> arguments = <String, dynamic>{};
+    arguments.putIfAbsent("type", () => type.index);
+    return await _channel.invokeMethod('isEnabled', arguments);
+  }
 
   Future<Resource?> getSingleResource(ResourceType type, String id) async {
     // bool shouldFallbackToDefaultLanguage
@@ -118,9 +119,9 @@ class KnowledgeBase {
     }
   }
 
-  // Future<Null> setRecentShowLimit(int limit) async {
-  //   await _channel.invokeMethod('setRecentShowLimit', limit);
-  // }
+  void setRecentlyViewedCount(int limit) {
+    _channel.invokeMethod('setRecentlyViewedCount', limit);
+  }
 
   Future<bool> open(ResourceType type, String id) async {
     int rawValue = type.index;

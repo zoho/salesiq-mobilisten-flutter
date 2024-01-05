@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:salesiq_mobilisten/last_message.dart';
 import 'package:salesiq_mobilisten/mobilisten_date_time.dart';
+import 'package:salesiq_mobilisten/salesiq_chat_module.dart';
 import 'package:salesiq_mobilisten/salesiq_knowledge_base.dart';
 
 import 'launcher.dart';
@@ -11,7 +12,9 @@ import 'tab.dart';
 class ZohoSalesIQ {
   static MethodChannel _channel = const MethodChannel('salesiq_mobilisten');
 
+  static Launcher launcher = new Launcher();
   static KnowledgeBase knowledgeBase = new KnowledgeBase();
+  static Chat chat = new Chat();
   static const String _mobilistenEventChannel = "mobilistenEventChannel";
   static const String _mobilistenChatEventChannel =
       "mobilistenChatEventChannel";
@@ -47,6 +50,8 @@ class ZohoSalesIQ {
   }
 
   /// Controls the visibility of the default launcher using the value provided for [show].
+  @Deprecated(
+      'This method was deprecated after v4.0.0, Use launcher.show() method instead.')
   static Future<Null> showLauncher(bool show) async {
     await _channel.invokeMethod('showLauncher', show);
   }
@@ -405,6 +410,10 @@ class ZohoSalesIQ {
     return await _channel.invokeMethod('getChatUnreadCount');
   }
 
+  static void dismissUI() {
+    _channel.invokeMethod('dismissUI');
+  }
+
   static List<SIQChat> _getChatObjectList(List mapList) {
     List<SIQChat> chatList = [];
     for (int i = 0; i < mapList.length; i++) {
@@ -737,6 +746,7 @@ class SIQEvent {
   static const String articleClosed = "articleClosed";
   static const String chatUnreadCountChanged = "chatUnreadCountChanged";
   static const String handleURL = "handleURL";
+  static const String customLauncherVisibility = "customLauncherVisibility";
 }
 
 enum SIQChatStatus {

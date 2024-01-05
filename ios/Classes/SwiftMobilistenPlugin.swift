@@ -12,6 +12,8 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
         case faq
         case knowledgebase
         case resource
+        case launcher
+        case chatModule
         
         var name: String {
             switch self {
@@ -27,6 +29,10 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
                 return "salesiq_knowledge_base"
             case .resource:
                 return "mobilisten_knowledge_base_events"
+            case .launcher:
+                return "salesiq_launcher_module"
+            case .chatModule:
+                return "salesiq_chat_module"
             }
         }
         
@@ -74,6 +80,7 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
         case homeViewClosed = "homeViewClosed"
         case chatUnreadCountChanged = "chatUnreadCountChanged"
         case handleURL = "handleURL"
+        case customLauncherVisibility = "customLauncherVisibility"
         case botTrigger = "botTrigger"
         case resourceOpened = "resourceOpened"
         case resourceClosed = "resourceClosed"
@@ -96,6 +103,8 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
     private static var faqEventChannel: FlutterEventChannel?
     private static var chatEventChannel: FlutterEventChannel?
     private static var resourceEventChannel: FlutterEventChannel?
+    private static var launcherEventChannel: FlutterEventChannel?
+    private static var chatModuleEventChannel: FlutterEventChannel?
     @objc public static var emptyChatInstance: SIQVisitorChat?
     
     var eventSink: FlutterEventSink?
@@ -105,6 +114,8 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
     private var handleURL = true
     
     static var knowledgebaseInstance: KnowledgeBasePlugin?
+    static var launcherInstance: LauncherPlugin?
+    static var chatModuleInstance: ChatModulePlugin?
     static var sharedInstance: SwiftMobilistenPlugin?
     private var chatActionStore: [String: SIQActionHandler] = [:]
     private let operationFailedError = FlutterError(code: "1000", message: "operation failed", details: nil)
@@ -120,16 +131,24 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
         
         let methodChannel = MobilistenChannel.plugin.createMethodChannel(registrar: registrar)
         let knowledgebaseChannel = MobilistenChannel.knowledgebase.createMethodChannel(registrar: registrar)
+        let launcherChannel = MobilistenChannel.launcher.createMethodChannel(registrar: registrar)
+        let chatModuleChannel = MobilistenChannel.chatModule.createMethodChannel(registrar: registrar)
         
         eventChannel = MobilistenChannel.main.createEventChannel(registrar: registrar)
         faqEventChannel = MobilistenChannel.faq.createEventChannel(registrar: registrar)
         chatEventChannel = MobilistenChannel.chat.createEventChannel(registrar: registrar)
         resourceEventChannel = MobilistenChannel.resource.createEventChannel(registrar: registrar)
+        launcherEventChannel = MobilistenChannel.launcher.createEventChannel(registrar: registrar)
+        chatModuleEventChannel = MobilistenChannel.chatModule.createEventChannel(registrar: registrar)
         
         let instance = SwiftMobilistenPlugin()
         let knowledgebase = KnowledgeBasePlugin()
+        let launcher = LauncherPlugin()
+        let chatModule = ChatModulePlugin()
         sharedInstance = instance
         knowledgebaseInstance = knowledgebase
+        launcherInstance = launcher
+        chatModuleInstance = chatModule
         
         let eventStreamHandler = MobilistenEventStreamHandler(plugin: instance)
         let chatEventStreamHandler = MobilistenChatEventStreamHandler(plugin: instance)
@@ -140,10 +159,14 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
         faqEventChannel?.setStreamHandler(faqEventStreamHandler)
         chatEventChannel?.setStreamHandler(chatEventStreamHandler)
         resourceEventChannel?.setStreamHandler(resourceEventStreamHandler)
+        launcherEventChannel?.setStreamHandler(eventStreamHandler)
+        chatModuleEventChannel?.setStreamHandler(eventStreamHandler)
         
         registrar.addApplicationDelegate(instance)
         registrar.addMethodCallDelegate(instance, channel: methodChannel)
         registrar.addMethodCallDelegate(knowledgebase, channel: knowledgebaseChannel)
+        registrar.addMethodCallDelegate(launcher, channel: launcherChannel)
+        registrar.addMethodCallDelegate(chatModule, channel: chatModuleChannel)
     }
     
     // MARK: Perform any additional setup after initialisation.
@@ -583,6 +606,8 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
                 let pathURL = NSURL.fileURL(withPath: path)
                 ZohoSalesIQ.Logger.setPath(pathURL)
             }
+        case "dismissUI":
+            ZohoSalesIQ.dismissUI()
         default:
             result(FlutterMethodNotImplemented)
         }
@@ -695,12 +720,12 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
                     }
                 }
             case "isEnabled":
-                if let type = argument as? Int {
+                if let args = call.argumentDictionary, let type = args["type"] as? Int {
                     if SIQResourceType(rawValue: type) == .articles {
                         result(ZohoSalesIQ.KnowledgeBase.isEnabled(.articles))
                     }
                 }
-            case "setRecentShowLimit":
+            case "setRecentlyViewedCount":
                 if let limit = argument as? Int {
                     ZohoSalesIQ.KnowledgeBase.setRecentShowLimit(limit)
                 }
@@ -814,6 +839,77 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
                 result(FlutterMethodNotImplemented)
             }
         }
+    }
+    
+    class LauncherPlugin: NSObject, FlutterPlugin {
+        static func register(with registrar: FlutterPluginRegistrar) {
+        
+        }
+        
+        func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+            var argument: Any? {
+                return call.arguments
+            }
+            
+            switch call.method {
+            case "show":
+                if let args = call.argumentDictionary, let type = args["visibility_mode"] as? Int {
+                    switch type {
+                    case 0:
+                        ZohoSalesIQ.Launcher.show(.always)
+                    case 1:
+                        ZohoSalesIQ.Launcher.show(.never)
+                    case 2:
+                        ZohoSalesIQ.Launcher.show(.whenActiveChat)
+                    default: break
+                    }
+                }
+            case "setVisibilityModeToCustomLauncher":
+                if let args = call.argumentDictionary, let type = args["visibility_mode"] as? Int {
+                    switch type {
+                    case 0:
+                        ZohoSalesIQ.Launcher.setVisibilityModeToCustomLauncher(.always)
+                    case 1:
+                        ZohoSalesIQ.Launcher.setVisibilityModeToCustomLauncher(.never)
+                    case 2:
+                        ZohoSalesIQ.Launcher.setVisibilityModeToCustomLauncher(.whenActiveChat)
+                    default: break
+                    }
+                }
+            case "enableDragToDismiss":
+                if let enable = argument as? Bool {
+                    ZohoSalesIQ.Launcher.enableDragToDismiss(enable)
+                }
+            default:
+                result(FlutterMethodNotImplemented)
+            }
+        }
+    }
+    
+    class ChatModulePlugin: NSObject, FlutterPlugin {
+        static func register(with registrar: FlutterPluginRegistrar) {
+            
+        }
+        
+        func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+            var argument: Any? {
+                return call.arguments
+            }
+            
+            switch call.method {
+            case "showFeedbackUpTo":
+                if let args = call.argumentDictionary, let duration = args["up_to_duration"] as? Int {
+                    ZohoSalesIQ.Chat.showFeedback(uptoDuration: Double(duration))
+                }
+            case "showFeedbackAfterSkip":
+                if let args = call.argumentDictionary, let show = args["enable"] as? Bool {
+                    ZohoSalesIQ.Chat.showFeedbackAfterSkip(show)
+                }
+            default:
+                result(FlutterMethodNotImplemented)
+            }
+        }
+        
     }
     
 }
@@ -1391,6 +1487,11 @@ extension SwiftMobilistenPlugin: ZohoSalesIQDelegate {
     
     public func handleBotTrigger() {
         sendEvent(name: .botTrigger)
+    }
+    
+    public func handleCustomLauncherVisibility(_ visible: Bool) {
+        let event: [String: Any] = [MobilistenEvent.nameKey: MobilistenEvent.customLauncherVisibility.rawValue,"visible": visible]
+        eventSink?(event)
     }
     
 }
