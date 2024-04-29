@@ -18,6 +18,10 @@ class Launcher {
   void enableDragToDismiss(bool enable) {
     _channel.invokeMethod('enableDragToDismiss', enable);
   }
+
+  void setMinimumPressDuration(int value) {
+    _channel.invokeMethod('setLauncherMinimumPressDuration', value);
+  }
 }
 
 enum VisibilityMode { always, never, whenActiveChat }

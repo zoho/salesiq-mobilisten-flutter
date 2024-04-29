@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:salesiq_mobilisten/last_message.dart';
 import 'package:salesiq_mobilisten/mobilisten_date_time.dart';
+import 'package:salesiq_mobilisten/notification.dart';
 import 'package:salesiq_mobilisten/salesiq_chat_module.dart';
 import 'package:salesiq_mobilisten/salesiq_knowledge_base.dart';
 
@@ -14,6 +15,7 @@ class ZohoSalesIQ {
 
   static Launcher launcher = new Launcher();
   static KnowledgeBase knowledgeBase = new KnowledgeBase();
+  static Notification notification = new Notification();
   static Chat chat = new Chat();
   static const String _mobilistenEventChannel = "mobilistenEventChannel";
   static const String _mobilistenChatEventChannel =
@@ -151,6 +153,11 @@ class ZohoSalesIQ {
   /// Opens the chat window for a specified chat if provided the [chatID].
   static Future<Null> openChatWithID(String chatID) async {
     await _channel.invokeMethod('openChatWithID', chatID);
+  }
+
+   /// This method is used to refresh the launcher, it brings the launcher view to the front.
+  void refreshLauncher() {
+   _channel.invokeMethod('refreshLauncher');
   }
 
   /// Opens a new chat window for creating a new chat.
@@ -587,6 +594,10 @@ class ZohoSalesIQ {
   static void printDebugLogsForAndroid(bool value) {
     _channel.invokeMethod('printDebugLogsForAndroid', value);
   }
+
+  static void registerLocalizationFileForiOS (String value) {
+    _channel.invokeMethod('registerLocalizationFileForiOS', value);
+  }
 }
 
 class SIQChat {
@@ -790,6 +801,11 @@ extension SIQChatStatusString on SIQChatStatus {
     }
     return SIQChatStatus.closed;
   }
+}
+
+enum ActionSource {
+  app,
+  sdk
 }
 
 class SIQSendEvent {

@@ -14,6 +14,8 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
         case resource
         case launcher
         case chatModule
+        case notificationModule
+        case notificationEvent
         
         var name: String {
             switch self {
@@ -33,6 +35,10 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
                 return "salesiq_launcher_module"
             case .chatModule:
                 return "salesiq_chat_module"
+            case .notificationModule:
+                return "salesiqNotificationModule"
+            case .notificationEvent:
+                return "mobilistenNotificationEvents"
             }
         }
         
@@ -86,6 +92,7 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
         case resourceClosed = "resourceClosed"
         case resourceLiked = "resourceLiked"
         case resourceDisliked = "resourceDisliked"
+        case notificationClicked = "notificationClicked"
         
         
         var enabled: Bool {
@@ -104,17 +111,20 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
     private static var chatEventChannel: FlutterEventChannel?
     private static var resourceEventChannel: FlutterEventChannel?
     private static var launcherEventChannel: FlutterEventChannel?
+    private static var notificationEventChannel: FlutterEventChannel?
     private static var chatModuleEventChannel: FlutterEventChannel?
     @objc public static var emptyChatInstance: SIQVisitorChat?
     
     var eventSink: FlutterEventSink?
     var faqEventSink: FlutterEventSink?
     var chatEventSink: FlutterEventSink?
+    var notificationEventSint: FlutterEventSink?
     var resorceEventSink: FlutterEventSink?
     private var handleURL = true
     
     static var knowledgebaseInstance: KnowledgeBasePlugin?
     static var launcherInstance: LauncherPlugin?
+    static var notificationInstance: NotificationPlugin?
     static var chatModuleInstance: ChatModulePlugin?
     static var sharedInstance: SwiftMobilistenPlugin?
     private var chatActionStore: [String: SIQActionHandler] = [:]
@@ -132,6 +142,7 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
         let methodChannel = MobilistenChannel.plugin.createMethodChannel(registrar: registrar)
         let knowledgebaseChannel = MobilistenChannel.knowledgebase.createMethodChannel(registrar: registrar)
         let launcherChannel = MobilistenChannel.launcher.createMethodChannel(registrar: registrar)
+        let notificationChannel = MobilistenChannel.notificationModule.createMethodChannel(registrar: registrar)
         let chatModuleChannel = MobilistenChannel.chatModule.createMethodChannel(registrar: registrar)
         
         eventChannel = MobilistenChannel.main.createEventChannel(registrar: registrar)
@@ -139,26 +150,31 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
         chatEventChannel = MobilistenChannel.chat.createEventChannel(registrar: registrar)
         resourceEventChannel = MobilistenChannel.resource.createEventChannel(registrar: registrar)
         launcherEventChannel = MobilistenChannel.launcher.createEventChannel(registrar: registrar)
+        notificationEventChannel = MobilistenChannel.notificationEvent.createEventChannel(registrar: registrar)
         chatModuleEventChannel = MobilistenChannel.chatModule.createEventChannel(registrar: registrar)
         
         let instance = SwiftMobilistenPlugin()
         let knowledgebase = KnowledgeBasePlugin()
         let launcher = LauncherPlugin()
+        let notification = NotificationPlugin()
         let chatModule = ChatModulePlugin()
         sharedInstance = instance
         knowledgebaseInstance = knowledgebase
         launcherInstance = launcher
+        notificationInstance = notification
         chatModuleInstance = chatModule
         
         let eventStreamHandler = MobilistenEventStreamHandler(plugin: instance)
         let chatEventStreamHandler = MobilistenChatEventStreamHandler(plugin: instance)
         let faqEventStreamHandler = MobilistenFAQEventStreamHandler(plugin: instance)
         let resourceEventStreamHandler = MobilistenResourceEventStreamHandler(plugin: instance)
+        let notificationEventStreamHandler = MobilistenNotificationEventStreamHandler(plugin: instance)
         
         eventChannel?.setStreamHandler(eventStreamHandler)
         faqEventChannel?.setStreamHandler(faqEventStreamHandler)
         chatEventChannel?.setStreamHandler(chatEventStreamHandler)
         resourceEventChannel?.setStreamHandler(resourceEventStreamHandler)
+        notificationEventChannel?.setStreamHandler(notificationEventStreamHandler)
         launcherEventChannel?.setStreamHandler(eventStreamHandler)
         chatModuleEventChannel?.setStreamHandler(eventStreamHandler)
         
@@ -166,6 +182,7 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
         registrar.addMethodCallDelegate(instance, channel: methodChannel)
         registrar.addMethodCallDelegate(knowledgebase, channel: knowledgebaseChannel)
         registrar.addMethodCallDelegate(launcher, channel: launcherChannel)
+        registrar.addMethodCallDelegate(notification, channel: notificationChannel)
         registrar.addMethodCallDelegate(chatModule, channel: chatModuleChannel)
     }
     
@@ -185,7 +202,7 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
             ZohoSalesIQ.setPlatform(platform: "Flutter")
             if let args = call.argumentDictionary, let appKey = args["appKey"] as? String, let accessKey = args["accessKey"] as? String {
                 ZohoSalesIQ.initWithAppKey(appKey, accessKey: accessKey, completion: { (success) in
-                    if success {
+                    if (success == nil) {
                         result(nil)
                     } else {
                         result(self.getErrorMessage("Mobilisten initialization failed"))
@@ -608,6 +625,12 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
             }
         case "dismissUI":
             ZohoSalesIQ.dismissUI()
+        case "registerLocalizationFileForiOS":
+            if let fileName = argument as? String {
+                ZohoSalesIQ.registerLocalizationFile(with: fileName)
+            }
+        case "refreshLauncher":
+            ZohoSalesIQ.refreshLauncher()
         default:
             result(FlutterMethodNotImplemented)
         }
@@ -880,9 +903,73 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
                 if let enable = argument as? Bool {
                     ZohoSalesIQ.Launcher.enableDragToDismiss(enable)
                 }
+            case "setLauncherMinimumPressDuration":
+                if let duration = argument as? Int {
+                    ZohoSalesIQ.Launcher.minimumPressDuration(Double(duration))
+                }
             default:
                 result(FlutterMethodNotImplemented)
             }
+        }
+    }
+    
+    class NotificationPlugin: NSObject, FlutterPlugin {
+        static func register(with registrar: FlutterPluginRegistrar) {
+        
+        }
+        
+        func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+            var argument: Any? {
+                return call.arguments
+            }
+            
+            switch call.method {
+            case "registerPush":
+                if let args = call.argumentDictionary, let token = args["token"] as? String, let isTestDevice = args["isTestDevice"] as? Bool {
+                    let mode: Mobilisten.APNSMode = isTestDevice ? .sandbox : .production
+                    ZohoSalesIQ.enablePush(token, isTestDevice: isTestDevice, mode: mode)
+                }
+            case "isSDKMessage":
+                if let userInfo = argument as? [AnyHashable: Any] {
+                    result(ZohoSalesIQ.isMobilistenNotification(userInfo))
+                } else {
+                    result(SwiftMobilistenPlugin().getErrorMessage("Failed to process isSDKMessage Response for iOS"))
+                }
+            case "setNotificationActionSource":
+                if let type = argument as? String {
+                    ZohoSalesIQ.Notification.setAction(with: type == "app" ? .app : .sdk)
+                }
+            case "getNotificationPayload":
+                if let userInfo = argument as? [AnyHashable: Any] {
+                    NotificationPlugin().getPayloadObject(userInfo: userInfo, completionhandler: { payload in
+                        result(payload)
+                    })
+                }
+            default:
+                result(FlutterMethodNotImplemented)
+            }
+        }
+        
+        func getPayloadObject(userInfo: [AnyHashable: Any], completionhandler: @escaping (_ payload: [String: Any]?) -> Void) {
+            ZohoSalesIQ.Notification.getPayload(userInfo, completion: { payload in
+                let payloadObject: [String: Any] = NotificationPlugin().getPayloadObjectEventDictionary(payload)
+                completionhandler(payloadObject)
+            })
+        }
+        
+        func getPayloadObjectEventDictionary(_ payload: SalesIQNotificationPayload?) -> [String: Any] {
+            var payloadObject: [String: Any] = [:]
+            if let chatPayload = payload as? SalesIQChatNotificationPayload {
+                payloadObject["type"] = "chat"
+                payloadObject["payload"] = chatPayload.toDictionary()
+            } else if let endChatPayload = payload as? SalesIQEndChatNotificationPayload {
+                payloadObject["type"] = "endChatDetails"
+                payloadObject["payload"] = endChatPayload.toDictionary()
+            } else if let visitorHistoryPayload = payload as? SalesIQVisitorHistoryNotificationPayload {
+                payloadObject["type"] = "visitorHistory"
+                payloadObject["payload"] = visitorHistoryPayload.toDictionary()
+            }
+            return payloadObject
         }
     }
     
@@ -904,6 +991,20 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
             case "showFeedbackAfterSkip":
                 if let args = call.argumentDictionary, let show = args["enable"] as? Bool {
                     ZohoSalesIQ.Chat.showFeedbackAfterSkip(show)
+                }
+            case "hideQueueTime":
+                if let hide = argument as? Bool {
+                    ZohoSalesIQ.Chat.hideQueueTime(hide)
+                }
+            case "showPayloadChat":
+                if let args = call.argumentDictionary, let type = args["type"] as? String, let payload = args["payload"] as? [String: Any] {
+                    if type == "chat" {
+                        let chatObject = SalesIQChatNotificationPayload(dictionary: payload)
+                        ZohoSalesIQ.Chat.open(with: chatObject)
+                    } else if type == "endChatDetails" {
+                        let endChatObject = SalesIQEndChatNotificationPayload(dictionary: payload)
+                        ZohoSalesIQ.Chat.open(with: endChatObject)
+                    }
                 }
             default:
                 result(FlutterMethodNotImplemented)
@@ -1443,6 +1544,19 @@ fileprivate class MobilistenFAQEventStreamHandler: MobilistenEventStreamHandler 
     }
 }
 
+fileprivate class MobilistenNotificationEventStreamHandler: MobilistenEventStreamHandler {
+    override func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
+        plugin?.notificationEventSint = events
+        ZohoSalesIQ.registerNotificationListener(true)
+        return nil
+    }
+    override func onCancel(withArguments arguments: Any?) -> FlutterError? {
+        plugin?.notificationEventSint = nil
+        ZohoSalesIQ.registerNotificationListener(false)
+        return nil
+    }
+}
+
 extension SwiftMobilistenPlugin: ZohoSalesIQDelegate {
     
     public func agentsOnline() {
@@ -1600,6 +1714,11 @@ extension SwiftMobilistenPlugin: ZohoSalesIQChatDelegate {
         sendChatEvent(name: .chatUnreadCountChanged, dataLabel: "unreadCount", data: count)
     }
     
+    public func handleNotificationAction(_ payload: SalesIQNotificationPayload?) {
+        let notificationPayload = NotificationPlugin().getPayloadObjectEventDictionary(payload)
+        let event: [String: Any] = [MobilistenEvent.nameKey: MobilistenEvent.notificationClicked.rawValue,"payload": notificationPayload]
+        self.notificationEventSint?(event)
+    }
 }
  
 

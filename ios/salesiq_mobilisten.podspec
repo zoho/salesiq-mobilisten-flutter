@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'salesiq_mobilisten'
-  s.version          = '8.0.0'
+  s.version          = '8.1.2'
   s.summary          = 'A new Flutter plugin for SalesIQ Mobilisten'
   s.description      = <<-DESC
 SalesIQ Mobilisten Flutter Plugin
