@@ -155,9 +155,9 @@ class ZohoSalesIQ {
     await _channel.invokeMethod('openChatWithID', chatID);
   }
 
-   /// This method is used to refresh the launcher, it brings the launcher view to the front.
+  /// This method is used to refresh the launcher, it brings the launcher view to the front.
   void refreshLauncher() {
-   _channel.invokeMethod('refreshLauncher');
+    _channel.invokeMethod('refreshLauncher');
   }
 
   /// Opens a new chat window for creating a new chat.
@@ -595,7 +595,7 @@ class ZohoSalesIQ {
     _channel.invokeMethod('printDebugLogsForAndroid', value);
   }
 
-  static void registerLocalizationFileForiOS (String value) {
+  static void registerLocalizationFileForiOS(String value) {
     _channel.invokeMethod('registerLocalizationFileForiOS', value);
   }
 }
@@ -658,7 +658,6 @@ class SIQDepartment {
 /// See [Resource] class .
 // @Deprecated('This class was deprecated after v3.1.2, Use Resource class instead.')
 class SIQArticle {
-  @deprecated
   @deprecated
   final String id;
   @deprecated
@@ -803,10 +802,7 @@ extension SIQChatStatusString on SIQChatStatus {
   }
 }
 
-enum ActionSource {
-  app,
-  sdk
-}
+enum ActionSource { app, sdk }
 
 class SIQSendEvent {
   const SIQSendEvent._(this.index);

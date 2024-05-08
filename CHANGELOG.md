@@ -1,11 +1,15 @@
 ## Mobilisten Plugin Changelog
 
+### 6.0.0 - 8 May 2024
+- Updated Mobilisten SDK for iOS to
+  version [9.0.1](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/v9.0.1) 
+  
 ### 5.1.1 - 30 Apr 2024
-- Updated Mobilisten SDK for ios to
+- Updated Mobilisten SDK for iOS to
   version [8.1.3](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/v8.1.3)
 
 ### 5.1.0 - 29 Apr 2024
-- Updated Mobilisten SDK for ios to
+- Updated Mobilisten SDK for iOS to
   version [8.1.1](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/v8.1.1) and Android to
   version [7.1.1](https://github.com/zoho/salesiq-mobilisten-android-sample/releases/tag/v7.1.1)
 
@@ -47,7 +51,7 @@ API to control the flow of rating/feedback after the chat ends.
 
 ### 3.1.2 - 4 Oct 2023
 
-- Updated Mobilisten SDK for ios to
+- Updated Mobilisten SDK for iOS to
   version [6.0.2](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/v6.0.2) and Android to
   version [6.0.2](https://github.com/zoho/salesiq-mobilisten-android-sample/releases/tag/v6.0.2)
 
