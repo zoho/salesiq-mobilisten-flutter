@@ -1,8 +1,8 @@
-[![SupportedLanguages](https://img.shields.io/badge/Platforms-iOS%20%7C%20%20Android-green.svg)](https://flutter.dev/) [![Version](https://img.shields.io/badge/version-6.0.0-blue.svg)](https://mobilisten.io/)
+[![SupportedLanguages](https://img.shields.io/badge/Platforms-iOS%20%7C%20%20Android-green.svg)](https://flutter.dev/) [![Version](https://img.shields.io/badge/version-6.1.0-blue.svg)](https://mobilisten.io/)
 
 # Zoho SalesIQ Mobilisten Flutter Plugin
 
-Connect with customers at every step of their journey. Give them the best in-app live chat experience with Mobilisten. Mobilisten enables customers to reach you from any screen on your app, get their questions answered, and make better purchase decisions.  
+Connect with customers at every step of their journey. Give them the best in-app live chat experience with Mobilisten. Mobilisten enables customers to reach you from any screen on your app, get their questions answered, and make better purchase decisions.
 
 >__**Note**__
 >Zoho SalesIQ is GDPR Compliant! The configurations for the website and Mobile SDK remain the same; if you have already configured on your site, it will be automatically reflected in Mobile SDK. If not, then [learn how to configure](https://www.zoho.com/salesiq/help/portal-settings-enable-gdpr.html) now.
@@ -21,7 +21,7 @@ Please follow the steps mentioned below to install the Mobilisten plugin in your
 dependencies:
   flutter:
     sdk: flutter
-+ salesiq_mobilisten: ^6.0.0
++ salesiq_mobilisten: ^6.1.0
 ```
 
 2. Run `flutter pub get` to fetch dependencies for the project.
@@ -85,4 +85,4 @@ if (io.Platform.isIOS || io.Platform.isAndroid) {
 
 ## API Documentation
 
-You can find the list of all APIs and their documentation  [here](https://www.zoho.com/salesiq/help/developer-guides/flutter-sdk-show-launcher.html)  under the  **API Reference**  section.
+You can find the list of all APIs and their documentation [here](https://www.zoho.com/salesiq/help/developer-guides/flutter-sdk-show-launcher.html) under the **API Reference** section.
