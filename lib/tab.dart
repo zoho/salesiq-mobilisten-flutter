@@ -8,7 +8,7 @@ class SIQTab {
 
   /// See [knowledgeBase].
   @Deprecated(
-      "This constant was deprecated after v3.1.2, Use knowledgeBaseEvent constant instead.")
+      "This constant was deprecated after v3.1.2, Use knowledgeBase constant instead.")
   static const SIQTab faq = SIQTab._(2);
 
   static const List<SIQTab> values = <SIQTab>[

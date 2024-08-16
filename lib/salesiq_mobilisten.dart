@@ -6,9 +6,10 @@ import 'package:salesiq_mobilisten/mobilisten_date_time.dart';
 import 'package:salesiq_mobilisten/notification.dart';
 import 'package:salesiq_mobilisten/salesiq_chat_module.dart';
 import 'package:salesiq_mobilisten/salesiq_knowledge_base.dart';
-
 import 'launcher.dart';
 import 'tab.dart';
+import 'siqtheme.dart';
+
 
 class ZohoSalesIQ {
   static MethodChannel _channel = const MethodChannel('salesiq_mobilisten');
@@ -46,6 +47,13 @@ class ZohoSalesIQ {
     await _channel.invokeMethod('init', args);
   }
 
+  static Future<bool> present([SIQTab? tab = null, String? id = null]) async {
+    Map<String, dynamic> args = <String, dynamic>{};
+    args.putIfAbsent("tab", () => tab?.toString());
+    args.putIfAbsent("id", () => id);
+    return await _channel.invokeMethod('present', args);
+  }
+
   /// This API controls the behaviour of url opening behaviour
   static void shouldOpenUrl(bool openUrl) {
     _channel.invokeMethod('shouldOpenUrl', openUrl);
@@ -79,6 +87,8 @@ class ZohoSalesIQ {
   }
 
   /// Automatically attempts to starts a chat using the text provided in [question] as the question.
+  @Deprecated(
+      'This method was deprecated after v6.1.0, Use chat.start() method instead.')
   static Future<Null> startChat(String question) async {
     await _channel.invokeMethod('startChat', question);
   }
@@ -253,6 +263,10 @@ class ZohoSalesIQ {
     await _channel.invokeMethod('setRatingVisibility', visibility);
   }
 
+  static Future<Null> setThemeForiOS(SIQTheme theme) async {
+    await _channel.invokeMethod('setThemeColor', theme.toMap());
+  }
+
   /// Enables the option to capture screenshots from the attachments menu.
   static Future<Null> enableScreenshotOption() async {
     await _channel.invokeMethod('enableScreenshotOption');
@@ -424,49 +438,7 @@ class ZohoSalesIQ {
   static List<SIQChat> _getChatObjectList(List mapList) {
     List<SIQChat> chatList = [];
     for (int i = 0; i < mapList.length; i++) {
-      Map map = mapList[i];
-      String? id = map["id"];
-      String? question = map["question"];
-      bool isBotAttender = map["isBotAttender"] ?? false;
-      String? attenderEmail = map["attenderEmail"];
-      String? attenderID = map["attenderID"];
-      String? attenderName = map["attenderName"];
-      String? departmentName = map["departmentName"];
-      int unreadCount = map["unreadCount"] ?? 0;
-      String? lastMessage = map["lastMessage"];
-      String? lastMessageSender = map["lastMessageSender"];
-      DateTime? lastMessageTime;
-      double? lastMessageTimeMS = map["lastMessageTime"];
-      if (lastMessageTimeMS != null) {
-        lastMessageTime =
-            DateTimeUtils.convertDoubleToDateTime(lastMessageTimeMS);
-      }
-      SIQMessage recentMessage = SIQMessage.getObject(map["recentMessage"]);
-      int? queuePosition = map["queuePosition"];
-      String? rating = map["rating"];
-      String? feedback = map["feedback"];
-
-      String statusString = map["status"] ?? "closed";
-      SIQChatStatus status = SIQChatStatusString.toChatType(statusString);
-
-      SIQChat chat = SIQChat(
-          id,
-          question,
-          queuePosition,
-          attenderName,
-          attenderEmail,
-          attenderID,
-          isBotAttender,
-          departmentName,
-          status,
-          unreadCount,
-          lastMessage,
-          lastMessageTime,
-          lastMessageSender,
-          recentMessage,
-          feedback,
-          rating);
-      chatList.add(chat);
+      chatList.add(SIQChat.fromMap(mapList[i]));
     }
     return chatList;
   }
@@ -645,6 +617,51 @@ class SIQChat {
       this.recentMessage,
       this.feedback,
       this.rating);
+
+  static SIQChat fromMap(Map<dynamic, dynamic> map) {
+    String? id = map["id"];
+    String? question = map["question"];
+    bool isBotAttender = map["isBotAttender"] ?? false;
+    String? attenderEmail = map["attenderEmail"];
+    String? attenderID = map["attenderID"];
+    String? attenderName = map["attenderName"];
+    String? departmentName = map["departmentName"];
+    int unreadCount = map["unreadCount"] ?? 0;
+    String? lastMessage = map["lastMessage"];
+    String? lastMessageSender = map["lastMessageSender"];
+    DateTime? lastMessageTime;
+    double? lastMessageTimeMS = map["lastMessageTime"];
+    if (lastMessageTimeMS != null) {
+      lastMessageTime =
+          DateTimeUtils.convertDoubleToDateTime(lastMessageTimeMS);
+    }
+    SIQMessage recentMessage = SIQMessage.getObject(map["recentMessage"]);
+    int? queuePosition = map["queuePosition"];
+    String? rating = map["rating"];
+    String? feedback = map["feedback"];
+
+    String statusString = map["status"] ?? "closed";
+    SIQChatStatus status = SIQChatStatusString.toChatType(statusString);
+
+    SIQChat chat = SIQChat(
+        id,
+        question,
+        queuePosition,
+        attenderName,
+        attenderEmail,
+        attenderID,
+        isBotAttender,
+        departmentName,
+        status,
+        unreadCount,
+        lastMessage,
+        lastMessageTime,
+        lastMessageSender,
+        recentMessage,
+        feedback,
+        rating);
+    return chat;
+  }
 }
 
 class SIQDepartment {
@@ -824,4 +841,30 @@ class SIQSendEvent {
       1: 'COMPLETE_CHAT_ACTION'
     }[index]!;
   }
+}
+
+ String? colorToHex(dynamic color) {
+  if (color == null) {
+    return null;
+  }
+
+    if (color.contains("0x")) {
+        final regex = RegExp(r'0x(\w{8})');
+        final match = regex.firstMatch(color);
+        if (match != null) {
+          
+          final argb = match.group(1)!;
+          final alphaHex = argb.substring(0, 2);
+          final redHex = argb.substring(2, 4);
+          final greenHex = argb.substring(4, 6);
+          final blueHex = argb.substring(6, 8);
+
+          final alpha = int.parse(alphaHex, radix: 16);
+          final red = int.parse(redHex, radix: 16);
+          final green = int.parse(greenHex, radix: 16);
+          final blue = int.parse(blueHex, radix: 16);
+          return 'rgba($red, $green, $blue, ${alpha / 255.0})';
+        }
+    }
+    return color;
 }

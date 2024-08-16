@@ -362,6 +362,10 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
                 theme.themeColor = themeColor
                 ZohoSalesIQ.Theme.setTheme(theme: theme)
             }
+        case "setThemeColor":
+            if let colors = call.argumentDictionary {
+                ZohoSalesIQ.Theme.setTheme(theme: SIQTheme(colors: colors))
+            }
         case "getChats", "getChatsWithFilter":
             var status: ChatStatus = .all
             if let stringFilterValue = argument as? String {
@@ -631,6 +635,30 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
             }
         case "refreshLauncher":
             ZohoSalesIQ.refreshLauncher()
+        case "present":
+            if let args = call.argumentDictionary {
+                var tab = args["tab"] as? String
+                let id = args["id"] as? String ?? nil
+                
+                let tabBarItem: Int? = {
+                    switch tab {
+                    case "TAB_CONVERSATIONS":
+                        return SIQTabBarComponent.conversation.rawValue
+                    case "TAB_FAQ", "TAB_KNOWLEDGE_BASE":
+                        return SIQTabBarComponent.knowledgeBase.rawValue
+                    default:
+                        return nil
+                    }
+                }()
+                
+                ZohoSalesIQ.present(tabBarItem: tabBarItem, referenceID: id) { error, success in
+                    if let error = error {
+                        result(SwiftMobilistenPlugin().getResourceError(error:error))
+                    } else {
+                        result(success)
+                    }
+                }
+            }
         default:
             result(FlutterMethodNotImplemented)
         }
@@ -1006,6 +1034,47 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
                         ZohoSalesIQ.Chat.open(with: endChatObject)
                     }
                 }
+            case "startNewChat":
+                if let args = call.argumentDictionary, let question = args["question"] as? String {
+                    let customChatId: String? = args["custom_chat_id"] as? String ?? nil
+                    let departmentName: String? = args["department_name"] as? String ?? nil
+                    ZohoSalesIQ.Chat.start(question: question, chatID: customChatId, department: departmentName) { error, success in
+                        if let object = success {
+                            let visitorObject = SwiftMobilistenPlugin().getChatObject(object)
+                            result(visitorObject)
+                        } else {
+                            result(SwiftMobilistenPlugin().getResourceError(error:error))
+                        }
+                    }
+                }
+            case "startNewChatWithTrigger":
+                if let args = call.argumentDictionary {
+                    let customChatId: String? = args["custom_chat_id"] as? String ?? nil
+                    let departmentName: String? = args["department_name"] as? String ?? nil
+                    ZohoSalesIQ.Chat.startWithTrigger(chatID: customChatId, department: departmentName) { error, success in
+                        if let object = success {
+                            let visitorObject = SwiftMobilistenPlugin().getChatObject(object)
+                            result(visitorObject)
+                        } else {
+                            result(SwiftMobilistenPlugin().getResourceError(error:error))
+                        }
+                    }
+                }
+            case "getChat":
+                if let args = call.argumentDictionary, let chatId = args["chat_id"] as? String {
+                    ZohoSalesIQ.Chat.get(chatID: chatId) { error, chat in
+                        if let object = chat {
+                            let visitorObject = SwiftMobilistenPlugin().getChatObject(object)
+                            result(visitorObject)
+                        } else {
+                            result(SwiftMobilistenPlugin().getResourceError(error:error))
+                        }
+                    }
+                }
+            case "setChatWaitingTime":
+                if let time = argument as? Int {
+                    ZohoSalesIQ.Chat.setWaitingTime(upTo: time)
+                }
             default:
                 result(FlutterMethodNotImplemented)
             }
@@ -1260,7 +1329,7 @@ extension SwiftMobilistenPlugin {
         return visitorInfo
     }
     
-    private func getChatObject(_ chat: SIQVisitorChat) -> [String: Any] {
+    func getChatObject(_ chat: SIQVisitorChat) -> [String: Any] {
         var chatDictionary: [String: Any] = [:]
         if let id = chat.referenceID {
             chatDictionary["id"] = id

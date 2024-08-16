@@ -408,6 +408,67 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 ZohoSalesIQ.Chat.hideQueueTime(LiveChatUtil.getBoolean(call.arguments));
                 break;
             }
+
+            case "setChatWaitingTime": {
+                ZohoSalesIQ.Chat.setWaitingTime(LiveChatUtil.getInteger(call.arguments));
+                break;
+            }
+
+            case "startNewChat": {
+                // TODO: Need to remove this fallback case if everything is fine from native end.
+                final boolean[] canSubmitCallback = {true};
+                ZohoSalesIQ.Chat.start(LiveChatUtil.getString(call.argument("question")), getStringOrNull(call.argument("custom_chat_id")), getStringOrNull(call.argument("department_name")), chatResult -> {  // No I18N
+                    if (canSubmitCallback[0]) {
+                        canSubmitCallback[0] = false;
+                        if (chatResult.isSuccess()) {
+                            result.success(getChatMapObject(chatResult.getData(), false));
+                        } else {
+                            SalesIQError salesIQError = chatResult.getError();
+                            if (salesIQError != null) {
+                                result.error(LiveChatUtil.getString(salesIQError.getCode()), salesIQError.getMessage(), null);
+                            } else {
+                                result.error("100", "Unknown error", null); // No I18N
+                            }
+                        }
+                    }
+                });
+                break;
+            }
+            case "startNewChatWithTrigger": {
+                final boolean[] canSubmitCallback = {true};
+                ZohoSalesIQ.Chat.startWithTrigger(getStringOrNull(call.argument("custom_chat_id")), getStringOrNull(call.argument("department_name")), chatResult -> {  // No I18N
+                    if (canSubmitCallback[0]) {
+                        canSubmitCallback[0] = false;
+                        if (chatResult.isSuccess()) {
+                            result.success(getChatMapObject(chatResult.getData(), false));
+                        } else {
+                            SalesIQError salesIQError = chatResult.getError();
+                            if (salesIQError != null) {
+                                result.error(LiveChatUtil.getString(salesIQError.getCode()), salesIQError.getMessage(), null);
+                            } else {
+                                result.error("100", "Unknown error", null); // No I18N
+                            }
+                        }
+                    }
+                });
+                break;
+            }
+
+            case "getChat": {
+                ZohoSalesIQ.Chat.get(LiveChatUtil.getString(call.argument("chat_id")), chatResult -> {
+                    if (chatResult.isSuccess()) {
+                        result.success(getChatMapObject(chatResult.getData(), false));
+                    } else {
+                        SalesIQError salesIQError = chatResult.getError();
+                        if (salesIQError != null) {
+                            result.error(LiveChatUtil.getString(salesIQError.getCode()), salesIQError.getMessage(), null);
+                        } else {
+                            result.error("100", "Unknown error", null); // No I18N
+                        }
+                    }
+                });
+                break;
+            }
         }
     }
 
@@ -547,11 +608,13 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         Type mapType = new TypeToken<HashMap<String, Object>>() {}.getType();
         HashMap<String, Object> hashMap = GsonExtensionsKt.fromJsonSafe(DataModule.getGson(), DataModule.getGson().toJson(object), mapType);
         HashMap<String, Object> finalHashMap = new HashMap<>();
-        for (Map.Entry<String, Object> entry : hashMap.entrySet()) {
-            if (entry.getValue() instanceof Map) {
-                finalHashMap.put(convertToCamelCase(entry.getKey()), getMap(entry.getValue()));
-            } else {
-                finalHashMap.put(convertToCamelCase(entry.getKey()), entry.getValue());
+        if (hashMap != null) {
+            for (Map.Entry<String, Object> entry : hashMap.entrySet()) {
+                if (entry.getValue() instanceof Map) {
+                    finalHashMap.put(convertToCamelCase(entry.getKey()), getMap(entry.getValue()));
+                } else {
+                    finalHashMap.put(convertToCamelCase(entry.getKey()), entry.getValue());
+                }
             }
         }
         return finalHashMap;
@@ -595,6 +658,11 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 initSalesIQ(application, activity, appKey, accessKey, finalResult);
                 ZohoSalesIQ.setPlatformName(SalesIQConstants.Platform.FLUTTER_ANDROID);
                 break;
+
+            case "present": {
+                present(getStringOrNull(call.argument("tab")), getStringOrNull(call.argument("id")), finalResult);  // No I18N
+                break;
+            }
 
             case "showLauncher":
                 ZohoSalesIQ.showLauncher(LiveChatUtil.getBoolean(call.arguments));
@@ -1177,6 +1245,35 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 LiveChatUtil.log(e);
             }
         }
+    }
+
+    private static void present(@Nullable String tab, @Nullable String id, Result result) {
+        final boolean[] canSubmitCallback = {true};
+        ZohoSalesIQ.present(getTab(tab), id, presentResult -> {
+            if (canSubmitCallback[0]) {
+                canSubmitCallback[0] = false;
+                if (presentResult.isSuccess()) {
+                    result.success("Success");    //No I18N
+                } else {
+                    SalesIQError salesIQError = presentResult.getError();
+                    if (salesIQError != null) {
+                        result.error(LiveChatUtil.getString(salesIQError.getCode()), salesIQError.getMessage(), null);
+                    } else {
+                        result.error("100", "Unknown error", null); // No I18N
+                    }
+                }
+            }
+        });    
+    }
+
+    private static @Nullable ZohoSalesIQ.Tab getTab(@Nullable String tab) {
+        ZohoSalesIQ.Tab tabType = null;
+        if (Tab.CONVERSATIONS.equals(tab)) {
+            tabType = ZohoSalesIQ.Tab.Conversations;
+        } else if (Tab.KNOWLEDGE_BASE.equals(tab) || Tab.FAQ.equals(tab)) {
+            tabType = ZohoSalesIQ.Tab.KnowledgeBase;
+        }
+        return tabType;
     }
 
     @Override

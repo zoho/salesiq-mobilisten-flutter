@@ -1,19 +1,28 @@
 ## Mobilisten Plugin Changelog
 
+### 6.2.0 - 16 Aug 2024
+- Updated Mobilisten SDK for iOS to version [9.1.1](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/v9.1.1) Android to version [8.0.3](https://github.com/zoho/salesiq-mobilisten-android-sample/releases/tag/v8.0.3)
+
+- The [Chat.start()](https://www.zoho.com/salesiq/help/developer-guides/flutter-sdk-chat-start.html) API helps initiate a chat.
+- The [Chat.startWithTrigger()](https://www.zoho.com/salesiq/help/developer-guides/flutter-sdk-chat-start-trigger.html) API allows initiating a chatbot-triggered chat.
+- The [Chat.setWaitingTime()](https://www.zoho.com/salesiq/help/developer-guides/flutter-sdk-chat-wait-time.html) API allows customizing the chat's waiting time.
+- The [Chat.get()](https://www.zoho.com/salesiq/help/developer-guides/flutter-sdk-chat-get.html) API retrieves chat details for the specified chat ID.
+- The [present()](https://www.zoho.com/salesiq/help/developer-guides/flutter-sdk-present.html) API allows displaying the SDK (Conversation or Knowledge Base) as per your requirement.
+
 ### 6.1.0 - 14 Jun 2024
 - Updated Mobilisten SDK for Android to
   version [8.0.0](https://github.com/zoho/salesiq-mobilisten-android-sample/releases/tag/v8.0.0)
 
 ### 6.0.0 - 8 May 2024
-- Updated Mobilisten SDK for ios to
+- Updated Mobilisten SDK for iOS to
   version [9.0.1](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/v9.0.1) 
   
 ### 5.1.1 - 30 Apr 2024
-- Updated Mobilisten SDK for ios to
+- Updated Mobilisten SDK for iOS to
   version [8.1.3](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/v8.1.3)
 
 ### 5.1.0 - 29 Apr 2024
-- Updated Mobilisten SDK for ios to
+- Updated Mobilisten SDK for iOS to
   version [8.1.1](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/v8.1.1) and Android to
   version [7.1.1](https://github.com/zoho/salesiq-mobilisten-android-sample/releases/tag/v7.1.1)
 
@@ -55,7 +64,7 @@ API to control the flow of rating/feedback after the chat ends.
 
 ### 3.1.2 - 4 Oct 2023
 
-- Updated Mobilisten SDK for ios to
+- Updated Mobilisten SDK for iOS to
   version [6.0.2](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/v6.0.2) and Android to
   version [6.0.2](https://github.com/zoho/salesiq-mobilisten-android-sample/releases/tag/v6.0.2)
 
