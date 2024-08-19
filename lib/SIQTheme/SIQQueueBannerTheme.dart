@@ -27,7 +27,8 @@ class SIQQueueBannerTheme {
       'subtitleTimeColor': colorToHex(subtitleTimeColor),
       'positionTextColor': colorToHex(positionTextColor),
       'positionSubtitleColor': colorToHex(positionSubtitleColor),
-      'positionContainerBackgroundColor': colorToHex(positionContainerBackgroundColor),
+      'positionContainerBackgroundColor':
+          colorToHex(positionContainerBackgroundColor),
     };
   }
 }

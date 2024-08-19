@@ -9,7 +9,6 @@ import 'package:salesiq_mobilisten/SIQTheme/SIQInfoMessageTheme.dart';
 import 'package:salesiq_mobilisten/SIQTheme/SIQArticleMessageTheme.dart';
 import 'package:salesiq_mobilisten/SIQTheme/SIQFileMessageTheme.dart';
 
-
 class SIQMessageTheme {
   SIQMessageCommonTheme common;
   SIQSuggestionTheme suggestion;
@@ -33,16 +32,16 @@ class SIQMessageTheme {
     SIQInfoMessageTheme? infoMessage,
     SIQArticleMessageTheme? article,
     SIQFileMessageTheme? file,
-  }):  common = common ?? SIQMessageCommonTheme(),
-       suggestion = suggestion ?? SIQSuggestionTheme(),
-       skipActionButton = skipActionButton ?? SIQSkipActionButtonTheme(),
-       audioPlayer = audioPlayer ?? SIQAudioPlayerTheme(),
-       selection = selection ?? SIQSelectionComponentTheme(),
-       inputCard = inputCard ?? SIQInputCardTheme(),
-       slider = slider ?? SIQSliderCardTheme(),
-       infoMessage = infoMessage ?? SIQInfoMessageTheme(),
-       article = article ?? SIQArticleMessageTheme(),
-       file = file ?? SIQFileMessageTheme();
+  })  : common = common ?? SIQMessageCommonTheme(),
+        suggestion = suggestion ?? SIQSuggestionTheme(),
+        skipActionButton = skipActionButton ?? SIQSkipActionButtonTheme(),
+        audioPlayer = audioPlayer ?? SIQAudioPlayerTheme(),
+        selection = selection ?? SIQSelectionComponentTheme(),
+        inputCard = inputCard ?? SIQInputCardTheme(),
+        slider = slider ?? SIQSliderCardTheme(),
+        infoMessage = infoMessage ?? SIQInfoMessageTheme(),
+        article = article ?? SIQArticleMessageTheme(),
+        file = file ?? SIQFileMessageTheme();
 
   Map<String, dynamic> toMap() {
     return {

@@ -58,18 +58,22 @@ class SIQChatInputTheme {
   Map<String, dynamic> toMap() {
     return {
       'backgroundColor': colorToHex(backgroundColor),
-      'audioRecordHintBackgroundColor': colorToHex(audioRecordHintBackgroundColor),
+      'audioRecordHintBackgroundColor':
+          colorToHex(audioRecordHintBackgroundColor),
       'audioRecordHintTextColor': colorToHex(audioRecordHintTextColor),
       'textFieldBorderColor': colorToHex(textFieldBorderColor),
       'textFieldTintColor': colorToHex(textFieldTintColor),
       'textFieldBackgroundColor': colorToHex(textFieldBackgroundColor),
       'textFieldPlaceholderColor': colorToHex(textFieldPlaceholderColor),
       'textFieldTextColor': colorToHex(textFieldTextColor),
-      'attachmentButtonBackgroundColor': colorToHex(attachmentButtonBackgroundColor),
+      'attachmentButtonBackgroundColor':
+          colorToHex(attachmentButtonBackgroundColor),
       'recordButtonBackgroundColor': colorToHex(recordButtonBackgroundColor),
-      'recordSoundPulseBackgroundColor': colorToHex(recordSoundPulseBackgroundColor),
+      'recordSoundPulseBackgroundColor':
+          colorToHex(recordSoundPulseBackgroundColor),
       'sendButtonBackgroundColor': colorToHex(sendButtonBackgroundColor),
-      'buttonDisabledBackgroundColor': colorToHex(buttonDisabledBackgroundColor),
+      'buttonDisabledBackgroundColor':
+          colorToHex(buttonDisabledBackgroundColor),
       'recordTimerBackgroundColor': colorToHex(recordTimerBackgroundColor),
       'recordTimerTextColor': colorToHex(recordTimerTextColor),
       'recordTimerIndicatorColor': colorToHex(recordTimerIndicatorColor),

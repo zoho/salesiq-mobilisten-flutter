@@ -39,7 +39,8 @@ class SIQChatFormTheme {
       'textFieldTintColor': colorToHex(textFieldTintColor),
       'textFieldPlaceholderColor': colorToHex(textFieldPlaceholderColor),
       'textFieldTitleColor': colorToHex(textFieldTitleColor),
-      'textFieldRequiredIndicatorColor': colorToHex(textFieldRequiredIndicatorColor),
+      'textFieldRequiredIndicatorColor':
+          colorToHex(textFieldRequiredIndicatorColor),
       'errorColor': colorToHex(errorColor),
       'submitButtonBackgroundColor': colorToHex(submitButtonBackgroundColor),
       'submitButtonTextColor': colorToHex(submitButtonTextColor),

@@ -77,11 +77,13 @@ class SIQMessageCommonTheme {
     this.incomingMessageReplyIconColor,
     this.outgoingMessageReplyIconColor,
     SIQLoadMoreViewTheme? loadMore,
-  }) : incomingProgressButton = incomingProgressButton ?? SIQProgressButtonTheme(),
-       outgoingProgressButton = outgoingProgressButton ?? SIQProgressButtonTheme(),
-       outgoingRepliedMessage = outgoingRepliedMessage ?? SIQReplyViewTheme(),
-       incomingRepliedMessage = incomingRepliedMessage ?? SIQReplyViewTheme(),
-       loadMore = loadMore ?? SIQLoadMoreViewTheme();
+  })  : incomingProgressButton =
+            incomingProgressButton ?? SIQProgressButtonTheme(),
+        outgoingProgressButton =
+            outgoingProgressButton ?? SIQProgressButtonTheme(),
+        outgoingRepliedMessage = outgoingRepliedMessage ?? SIQReplyViewTheme(),
+        incomingRepliedMessage = incomingRepliedMessage ?? SIQReplyViewTheme(),
+        loadMore = loadMore ?? SIQLoadMoreViewTheme();
 
   Map<String, dynamic> toMap() {
     return {
@@ -104,17 +106,23 @@ class SIQMessageCommonTheme {
       'outgoingProgressButton': outgoingProgressButton.toMap(),
       'outgoingRepliedMessage': outgoingRepliedMessage.toMap(),
       'incomingRepliedMessage': incomingRepliedMessage.toMap(),
-      'incomingMessageEditedTagColor': colorToHex(incomingMessageEditedTagColor),
-      'outgoingMessageEditedTagColor': colorToHex(outgoingMessageEditedTagColor),
-      'incomingMessageTimeStampColor': colorToHex(incomingMessageTimeStampColor),
-      'outgoingMessageTimeStampColor': colorToHex(outgoingMessageTimeStampColor),
+      'incomingMessageEditedTagColor':
+          colorToHex(incomingMessageEditedTagColor),
+      'outgoingMessageEditedTagColor':
+          colorToHex(outgoingMessageEditedTagColor),
+      'incomingMessageTimeStampColor':
+          colorToHex(incomingMessageTimeStampColor),
+      'outgoingMessageTimeStampColor':
+          colorToHex(outgoingMessageTimeStampColor),
       'incomingDeletedMessageColor': colorToHex(incomingDeletedMessageColor),
       'outgoingDeletedMessageColor': colorToHex(outgoingDeletedMessageColor),
       'deletingMessageTitleColor': colorToHex(deletingMessageTitleColor),
       'deliveryStatusIconColor': colorToHex(deliveryStatusIconColor),
       'repliedMessageHighLightColor': colorToHex(repliedMessageHighLightColor),
-      'incomingMessageReplyIconColor': colorToHex(incomingMessageReplyIconColor),
-      'outgoingMessageReplyIconColor': colorToHex(outgoingMessageReplyIconColor),
+      'incomingMessageReplyIconColor':
+          colorToHex(incomingMessageReplyIconColor),
+      'outgoingMessageReplyIconColor':
+          colorToHex(outgoingMessageReplyIconColor),
       'LoadMore': loadMore.toMap(),
     };
   }

@@ -29,10 +29,14 @@ class SIQFileMessageTheme {
       'incomingSubTitleColor': colorToHex(incomingSubTitleColor),
       'outgoingTitleColor': colorToHex(outgoingTitleColor),
       'outgoingSubTitleColor': colorToHex(outgoingSubTitleColor),
-      'incomingFileViewBackgroundColor': colorToHex(incomingFileViewBackgroundColor),
-      'outgoingFileViewBackgroundColor': colorToHex(outgoingFileViewBackgroundColor),
-      'incomingCommentBackgoundColor': colorToHex(incomingCommentBackgoundColor),
-      'outgoingCommentBackgoundColor': colorToHex(outgoingCommentBackgoundColor),
+      'incomingFileViewBackgroundColor':
+          colorToHex(incomingFileViewBackgroundColor),
+      'outgoingFileViewBackgroundColor':
+          colorToHex(outgoingFileViewBackgroundColor),
+      'incomingCommentBackgoundColor':
+          colorToHex(incomingCommentBackgoundColor),
+      'outgoingCommentBackgoundColor':
+          colorToHex(outgoingCommentBackgoundColor),
     };
   }
 }

@@ -1,7 +1,6 @@
 import 'package:salesiq_mobilisten/SIQTheme/ColorUtils.dart';
 import 'package:salesiq_mobilisten/SIQTheme/SIQLauncherUnreadBadgeTheme.dart';
 
-
 class SIQChatScrollButtonTheme {
   String? iconColor;
   String? backgroundColor;

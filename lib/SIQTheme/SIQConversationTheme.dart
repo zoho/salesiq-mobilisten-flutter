@@ -1,5 +1,6 @@
 import 'package:salesiq_mobilisten/SIQTheme/ColorUtils.dart';
 import 'package:salesiq_mobilisten/SIQTheme/SIQConversationListItemTheme.dart';
+
 class SIQConversationTheme {
   String? backgroundColor;
   SIQConversationListItemTheme listItem;

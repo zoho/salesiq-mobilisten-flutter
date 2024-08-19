@@ -27,7 +27,7 @@ class SIQTheme {
   SIQFeedbackTheme feedback;
   SIQInAppNotificationTheme inAppNotification;
 
-   SIQTheme({
+  SIQTheme({
     this.themeColor,
     SIQLauncherTheme? launcher,
     SIQTabBarTheme? tabBar,
@@ -46,7 +46,8 @@ class SIQTheme {
         navigation = navigation ?? SIQNavigationTheme(),
         emptyView = emptyView ?? SIQEmptyViewTheme(),
         offlineBanner = offlineBanner ?? SIQOfflineBannerTheme(),
-        networkWaitingBanner = networkWaitingBanner ?? SIQNoNetworkBannerTheme(),
+        networkWaitingBanner =
+            networkWaitingBanner ?? SIQNoNetworkBannerTheme(),
         conversation = conversation ?? SIQConversationTheme(),
         faq = faq ?? SIQFAQTheme(),
         chat = chat ?? SIQChatWindowTheme(),
@@ -54,7 +55,7 @@ class SIQTheme {
         feedback = feedback ?? SIQFeedbackTheme(),
         inAppNotification = inAppNotification ?? SIQInAppNotificationTheme();
 
-   Map<String, dynamic> toMap() {
+  Map<String, dynamic> toMap() {
     return {
       'themeColor': colorToHex(themeColor),
       'Launcher': launcher.toMap(),

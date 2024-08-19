@@ -25,8 +25,8 @@ class Chat {
     _channel.invokeMethod('showPayloadChat', data.toMap());
   }
 
-  Future<SIQChat> start(
-      String question, [String? customChatId = null, String? departmentName = null]) async {
+  Future<SIQChat> start(String question,
+      [String? customChatId = null, String? departmentName = null]) async {
     return _channel.invokeMethod('startNewChat', <String, dynamic>{
       'question': question,
       'custom_chat_id': customChatId,
