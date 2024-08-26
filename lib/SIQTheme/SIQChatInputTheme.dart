@@ -1,5 +1,5 @@
-import 'package:salesiq_mobilisten/SIQTheme/ColorUtils.dart';
-import 'package:salesiq_mobilisten/SIQTheme/SIQReplyViewTheme.dart';
+import 'package:salesiq_mobilisten/siqtheme/colorutils.dart';
+import 'package:salesiq_mobilisten/siqtheme/siqreplyviewtheme.dart';
 
 class SIQChatInputTheme {
   String? backgroundColor;

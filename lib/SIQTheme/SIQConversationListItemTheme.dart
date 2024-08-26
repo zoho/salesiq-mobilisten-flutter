@@ -1,5 +1,5 @@
-import 'package:salesiq_mobilisten/SIQTheme/ColorUtils.dart';
-import 'package:salesiq_mobilisten/SIQTheme/SIQLauncherUnreadBadgeTheme.dart';
+import 'package:salesiq_mobilisten/siqtheme/colorutils.dart';
+import 'package:salesiq_mobilisten/siqtheme/siqlauncherunreadbadgetheme.dart';
 
 class SIQConversationListItemTheme {
   String? backgroundColor;

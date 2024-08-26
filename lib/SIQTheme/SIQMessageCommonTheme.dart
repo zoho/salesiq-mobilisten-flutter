@@ -1,7 +1,7 @@
-import 'package:salesiq_mobilisten/SIQTheme/ColorUtils.dart';
-import 'package:salesiq_mobilisten/SIQTheme/SIQProgressButtonTheme.dart';
-import 'package:salesiq_mobilisten/SIQTheme/SIQReplyViewTheme.dart';
-import 'package:salesiq_mobilisten/SIQTheme/SIQLoadMoreViewTheme.dart';
+import 'package:salesiq_mobilisten/siqtheme/colorutils.dart';
+import 'package:salesiq_mobilisten/siqtheme/siqprogressbuttontheme.dart';
+import 'package:salesiq_mobilisten/siqtheme/siqreplyviewtheme.dart';
+import 'package:salesiq_mobilisten/siqtheme/siqloadmoreviewtheme.dart';
 
 class SIQMessageCommonTheme {
   int? botTypingIndicatorStyle;

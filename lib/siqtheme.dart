@@ -1,16 +1,16 @@
-import 'package:salesiq_mobilisten/SIQTheme/SIQLauncherTheme.dart';
-import 'package:salesiq_mobilisten/SIQTheme/SIQTabBarTheme.dart';
-import 'package:salesiq_mobilisten/SIQTheme/SIQNavigationTheme.dart';
-import 'package:salesiq_mobilisten/SIQTheme/SIQEmptyViewTheme.dart';
-import 'package:salesiq_mobilisten/SIQTheme/SIQOfflineBannerTheme.dart';
-import 'package:salesiq_mobilisten/SIQTheme/SIQNoNetworkBannerTheme.dart';
-import 'package:salesiq_mobilisten/SIQTheme/SIQConversationTheme.dart';
-import 'package:salesiq_mobilisten/SIQTheme/SIQFAQTheme.dart';
-import 'package:salesiq_mobilisten/SIQTheme/SIQChatWindowTheme.dart';
-import 'package:salesiq_mobilisten/SIQTheme/SIQChatFormTheme.dart';
-import 'package:salesiq_mobilisten/SIQTheme/SIQFeedbackTheme.dart';
-import 'package:salesiq_mobilisten/SIQTheme/SIQInAppNotificationTheme.dart';
-import 'package:salesiq_mobilisten/SIQTheme/ColorUtils.dart';
+import 'package:salesiq_mobilisten/siqtheme/siqlaunchertheme.dart';
+import 'package:salesiq_mobilisten/siqtheme/siqtabbartheme.dart';
+import 'package:salesiq_mobilisten/siqtheme/siqnavigationtheme.dart';
+import 'package:salesiq_mobilisten/siqtheme/siqemptyviewtheme.dart';
+import 'package:salesiq_mobilisten/siqtheme/siqofflinebannertheme.dart';
+import 'package:salesiq_mobilisten/siqtheme/siqnonetworkbannertheme.dart';
+import 'package:salesiq_mobilisten/siqtheme/siqconversationtheme.dart';
+import 'package:salesiq_mobilisten/siqtheme/siqfaqtheme.dart';
+import 'package:salesiq_mobilisten/siqtheme/siqchatwindowtheme.dart';
+import 'package:salesiq_mobilisten/siqtheme/siqchatformtheme.dart';
+import 'package:salesiq_mobilisten/siqtheme/siqfeedbacktheme.dart';
+import 'package:salesiq_mobilisten/siqtheme/siqinappnotificationtheme.dart';
+import 'package:salesiq_mobilisten/siqtheme/colorutils.dart';
 
 class SIQTheme {
   String? themeColor;

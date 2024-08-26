@@ -1,5 +1,5 @@
-import 'package:salesiq_mobilisten/SIQTheme/ColorUtils.dart';
-import 'package:salesiq_mobilisten/SIQTheme/SIQButtonTheme.dart';
+import 'package:salesiq_mobilisten/siqtheme/colorutils.dart';
+import 'package:salesiq_mobilisten/siqtheme/siqbuttontheme.dart';
 
 class SIQFAQBottomBarTheme {
   String? backgroundColor;

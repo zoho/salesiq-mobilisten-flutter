@@ -1,6 +1,6 @@
-import 'package:salesiq_mobilisten/SIQTheme/ColorUtils.dart';
-import 'package:salesiq_mobilisten/SIQTheme/SIQFAQListItemTheme.dart';
-import 'package:salesiq_mobilisten/SIQTheme/SIQArticleTheme.dart';
+import 'package:salesiq_mobilisten/siqtheme/colorutils.dart';
+import 'package:salesiq_mobilisten/siqtheme/siqfaqlistitemtheme.dart';
+import 'package:salesiq_mobilisten/siqtheme/siqarticletheme.dart';
 
 class SIQFAQTheme {
   SIQFAQListItemTheme listItem;

@@ -1,5 +1,8 @@
 ## Mobilisten Plugin Changelog
 
+### 6.2.1 - 26 Aug 2024
+- Updated Mobilisten SDK for Android to version [8.0.4](https://github.com/zoho/salesiq-mobilisten-android-sample/releases/tag/v8.0.4)
+
 ### 6.2.0 - 16 Aug 2024
 - Updated Mobilisten SDK for iOS to version [9.1.1](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/v9.1.1) Android to version [8.0.3](https://github.com/zoho/salesiq-mobilisten-android-sample/releases/tag/v8.0.3)
 
@@ -8,18 +11,16 @@
 - The [Chat.setWaitingTime()](https://www.zoho.com/salesiq/help/developer-guides/flutter-sdk-chat-wait-time.html) API allows customizing the chat's waiting time.
 - The [Chat.get()](https://www.zoho.com/salesiq/help/developer-guides/flutter-sdk-chat-get.html) API retrieves chat details for the specified chat ID.
 - The [present()](https://www.zoho.com/salesiq/help/developer-guides/flutter-sdk-present.html) API allows displaying the SDK (Conversation or Knowledge Base) as per your requirement.
+- The [setThemeForiOS()](https://www.zoho.com/salesiq/help/developer-guides/flutter-sdk-ui-customization.html) API enables customizing the SDK's appearance on iOS.
 
 ### 6.1.0 - 14 Jun 2024
-- Updated Mobilisten SDK for Android to
-  version [8.0.0](https://github.com/zoho/salesiq-mobilisten-android-sample/releases/tag/v8.0.0)
+- Updated Mobilisten SDK for Android to version [8.0.0](https://github.com/zoho/salesiq-mobilisten-android-sample/releases/tag/v8.0.0)
 
 ### 6.0.0 - 8 May 2024
-- Updated Mobilisten SDK for iOS to
-  version [9.0.1](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/v9.0.1) 
+- Updated Mobilisten SDK for iOS to version [9.0.1](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/v9.0.1) 
   
 ### 5.1.1 - 30 Apr 2024
-- Updated Mobilisten SDK for iOS to
-  version [8.1.3](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/v8.1.3)
+- Updated Mobilisten SDK for iOS to version [8.1.3](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/v8.1.3)
 
 ### 5.1.0 - 29 Apr 2024
 - Updated Mobilisten SDK for iOS to

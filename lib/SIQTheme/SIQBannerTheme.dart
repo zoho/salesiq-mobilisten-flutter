@@ -1,4 +1,4 @@
-import 'package:salesiq_mobilisten/SIQTheme/SIQBannerColorTheme.dart';
+import 'package:salesiq_mobilisten/siqtheme/siqbannercolortheme.dart';
 
 class SIQBannerTheme {
   SIQBannerColorTheme successTheme;

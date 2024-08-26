@@ -1,4 +1,4 @@
-import 'package:salesiq_mobilisten/SIQTheme/ColorUtils.dart';
+import 'package:salesiq_mobilisten/siqtheme/colorutils.dart';
 
 class SIQFAQListItemTheme {
   String? backgroundColor;
