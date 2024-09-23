@@ -1,6 +1,8 @@
 import 'package:salesiq_mobilisten/siqtheme/colorutils.dart';
 
 class SIQSliderCardTheme {
+  // ignore_for_file: public_member_api_docs
+
   String? thumbBorderColor;
   String? selectedTrackColor;
   String? selectedValueTextColor;

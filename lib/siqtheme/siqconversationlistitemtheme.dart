@@ -2,6 +2,8 @@ import 'package:salesiq_mobilisten/siqtheme/colorutils.dart';
 import 'package:salesiq_mobilisten/siqtheme/siqlauncherunreadbadgetheme.dart';
 
 class SIQConversationListItemTheme {
+  // ignore_for_file: public_member_api_docs
+
   String? backgroundColor;
   String? timerTextColor;
   String? timerIconColor;

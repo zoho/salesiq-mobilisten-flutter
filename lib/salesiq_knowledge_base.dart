@@ -3,13 +3,15 @@ import 'package:flutter/services.dart';
 import 'mobilisten_date_time.dart';
 
 class KnowledgeBase {
+  // ignore_for_file: public_member_api_docs
+
   final MethodChannel _channel = const MethodChannel("salesiq_knowledge_base");
 
   final eventChannel = EventChannel("mobilisten_knowledge_base_events")
       .receiveBroadcastStream()
       .map((event) => KnowledgeBaseEvent(
-          ResourceAction.from(event["eventName"]),
-          _getResourceType(event["type"]),
+          ResourceAction.from(event["eventName"] as String),
+          _getResourceType(event["type"] as int),
           _getResource(event["resource"] as Map?)));
 
   Future<Null> setVisibility(ResourceType type, bool shouldShow) async {
@@ -36,7 +38,9 @@ class KnowledgeBase {
   Future<bool> isEnabled(ResourceType type) async {
     Map<String, dynamic> arguments = <String, dynamic>{};
     arguments.putIfAbsent("type", () => type.index);
-    return await _channel.invokeMethod('isEnabled', arguments);
+    return await _channel
+        .invokeMethod<bool>('isEnabled', arguments)
+        .then((value) => value ?? false);
   }
 
   Future<Resource?> getSingleResource(ResourceType type, String id) async {
@@ -49,55 +53,64 @@ class KnowledgeBase {
     return _getResource(await _channel.invokeMethod('getSingleResource', args));
   }
 
-  Result _getResourceResult(Map map) {
+  Result _getResourceResult(Map? map) {
+    if (map == null) {
+      return Result([], false);
+    }
+
     List<Resource?> resources = [];
 
-    List<Object?> resourcesMapList = map["resources"] as List<Object?>;
-    bool moreDataAvailable = map["more_data_available"];
+    List<Object?>? resourcesMapList = map["resources"] as List<Object?>?;
+    bool moreDataAvailable = map["more_data_available"] as bool;
 
-    resourcesMapList.forEach((resource) {
-      resources.add(_getResource(resource as Map));
-    });
+    if (resourcesMapList != null) {
+      resourcesMapList.forEach((resource) {
+        resources.add(_getResource(resource as Map));
+      });
+    }
     return Result(resources, moreDataAvailable);
   }
 
   static Resource? _getResource(Map? map) {
     if (map != null) {
-      String? id = map["id"];
+      String? id = map["id"]?.toString();
 
       Map<String, dynamic> categoryMap =
-          Map<String, dynamic>.from(map["category"]);
-      SIQResourceCategory? category =
-          SIQResourceCategory(id: categoryMap["id"], name: categoryMap["name"]);
+          Map<String, dynamic>.from(map["category"] as Map);
+      SIQResourceCategory? category = SIQResourceCategory(
+          id: categoryMap["id"]?.toString(),
+          name: categoryMap["name"]?.toString());
 
-      String? title = map["title"];
-      String? departmentID = map["departmentId"];
+      String? title = map["title"]?.toString();
+      String? departmentID = map["departmentId"]?.toString();
 
       Map<String, dynamic> languageMap =
-          Map<String, dynamic>.from(map["language"]);
-      Language? language =
-          Language(id: languageMap["id"], code: languageMap["code"]);
+          Map<String, dynamic>.from(map["language"] as Map);
+      Language? language = Language(
+          id: languageMap["id"]?.toString(),
+          code: languageMap["code"]?.toString());
 
       User? creator = (map["creator"] as Map)._toUser();
       User? modifier = (map["modifier"] as Map)._toUser();
 
-      double? createdTimeMS = map["createdTime"];
-      double? modifiedTimeMS = map["modifiedTime"];
+      double? createdTimeMS = map["createdTime"] as double?;
+      double? modifiedTimeMS = map["modifiedTime"] as double?;
       DateTime? createdTime =
           DateTimeUtils.convertDoubleToDateTime(createdTimeMS);
       DateTime? modifiedTime =
           DateTimeUtils.convertDoubleToDateTime(modifiedTimeMS);
-      String? publicUrl = map["publicUrl"];
+      String? publicUrl = map["publicUrl"]?.toString();
 
-      Map<String, dynamic> statsMap = Map<String, dynamic>.from(map["stats"]);
+      Map<String, dynamic> statsMap =
+          Map<String, dynamic>.from(map["stats"] as Map);
       Stats? stats = Stats(
-          liked: statsMap["liked"],
-          disliked: statsMap["disliked"],
-          used: statsMap["used"],
-          viewed: statsMap["viewed"]);
+          liked: statsMap["liked"] as num?,
+          disliked: statsMap["disliked"] as num?,
+          used: statsMap["used"] as num?,
+          viewed: statsMap["viewed"] as num?);
 
-      String? content = map["content"];
-      String rateString = map["ratedType"] ?? "none";
+      String? content = map["content"]?.toString();
+      String rateString = map["ratedType"]?.toString() ?? "none";
       RatedType ratedTypes = RatedTypeString.toRateType(rateString);
 
       return Resource(
@@ -128,7 +141,9 @@ class KnowledgeBase {
     Map<String, dynamic> args = <String, dynamic>{};
     args.putIfAbsent("type", () => rawValue);
     args.putIfAbsent("id", () => id);
-    return await _channel.invokeMethod('openResource', args);
+    return await _channel
+        .invokeMethod<bool>('openResource', args)
+        .then((value) => value ?? false);
   }
 
   Future<Result> getResources(ResourceType type,
@@ -174,28 +189,32 @@ class KnowledgeBase {
       args.putIfAbsent("parentCategoryId", () => parentCategoryId);
     }
 
-    return _getCategoryList(await _channel.invokeMethod('getCategories', args));
+    return _getCategoryList(
+        await _channel.invokeMethod<List<dynamic>>('getCategories', args));
   }
 
   Future<List<ResourceDepartment>> getResourceDepartments() async {
-    final List departmentList =
-        await _channel.invokeMethod('getResourceDepartments');
+    final List<dynamic>? departmentList =
+        await _channel.invokeMethod<List<dynamic>>('getResourceDepartments');
     return _getResourceDepartmentList(departmentList);
   }
 
-  static List<ResourceCategory> _getCategoryList(List mapList) {
+  static List<ResourceCategory> _getCategoryList(List? mapList) {
+    if (mapList == null) {
+      return [];
+    }
     List<ResourceCategory> categoryList = [];
     for (int i = 0; i < mapList.length; i++) {
-      Map map = mapList[i];
-      String? id = map["id"];
-      String? name = map["name"];
-      String? departmentId = map["departmentId"];
-      num? count = map["count"];
-      num? childrenCount = map["childrenCount"];
-      num? order = map["order"];
-      String? parentCategoryId = map["parentCategoryId"];
+      Map? map = mapList[i] as Map?;
+      String? id = map?["id"]?.toString();
+      String? name = map?["name"]?.toString();
+      String? departmentId = map?["departmentId"]?.toString();
+      num? count = map?["count"] as num;
+      num? childrenCount = map?["childrenCount"] as num;
+      num? order = map?["order"] as num;
+      String? parentCategoryId = map?["parentCategoryId"]?.toString();
 
-      double? modifiedTimeMS = map["resourceModifiedTime"];
+      double? modifiedTimeMS = map?["resourceModifiedTime"] as double?;
       DateTime? modifiedTime =
           DateTimeUtils.convertDoubleToDateTime(modifiedTimeMS);
 
@@ -215,12 +234,15 @@ class KnowledgeBase {
     return categoryList;
   }
 
-  static List<ResourceDepartment> _getResourceDepartmentList(List mapList) {
+  static List<ResourceDepartment> _getResourceDepartmentList(List? mapList) {
+    if (mapList == null) {
+      return [];
+    }
     List<ResourceDepartment> departmentList = [];
     for (int i = 0; i < mapList.length; i++) {
-      Map map = mapList[i];
-      String? id = map["id"];
-      String? name = map["name"];
+      Map? map = mapList[i] as Map?;
+      String? id = map?["id"]?.toString();
+      String? name = map?["name"]?.toString();
       ResourceDepartment department = ResourceDepartment(id: id, name: name);
       departmentList.add(department);
     }
@@ -371,11 +393,11 @@ extension RatedTypeString on RatedType {
 extension UserParsing on Map {
   User _toUser() {
     return User(
-        id: this["id"],
-        name: this["name"],
-        email: this["email"],
-        displayName: this["displayName"],
-        imageUrl: this["imageUrl"]);
+        id: this["id"]?.toString(),
+        name: this["name"]?.toString(),
+        email: this["email"]?.toString(),
+        displayName: this["displayName"]?.toString(),
+        imageUrl: this["imageUrl"]?.toString());
   }
 }
 

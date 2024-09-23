@@ -1,7 +1,10 @@
 import 'package:flutter/services.dart';
 
 class Level {
+  // ignore_for_file: public_member_api_docs
+
   const Level._(this.index);
+
   final int index;
 
   static const Level info = Level._(0);
@@ -35,7 +38,9 @@ class ZohoSalesIQLogger {
 
   /// returns a boolean value that is used to determine whether the logger is enabled or not.
   static Future<bool> get isEnabled async {
-    return await methodChannel.invokeMethod('isLoggerEnabled');
+    return await methodChannel
+        .invokeMethod<bool>('isLoggerEnabled')
+        .then((value) => value ?? false);
   }
 
   /// Sets the logger to be enabled when true is set else it'll be disabled.

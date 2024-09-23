@@ -10,6 +10,8 @@ import 'package:salesiq_mobilisten/siqtheme/siqarticlemessagetheme.dart';
 import 'package:salesiq_mobilisten/siqtheme/siqfilemessagetheme.dart';
 
 class SIQMessageTheme {
+  // ignore_for_file: public_member_api_docs
+
   SIQMessageCommonTheme common;
   SIQSuggestionTheme suggestion;
   SIQSkipActionButtonTheme skipActionButton;

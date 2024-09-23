@@ -2,6 +2,8 @@ import 'package:salesiq_mobilisten/siqtheme/colorutils.dart';
 import 'package:salesiq_mobilisten/siqtheme/siqbuttontheme.dart';
 
 class SIQFAQBottomBarTheme {
+  // ignore_for_file: public_member_api_docs
+
   String? backgroundColor;
   SIQButtonTheme likeButton;
   SIQButtonTheme dislikeButton;

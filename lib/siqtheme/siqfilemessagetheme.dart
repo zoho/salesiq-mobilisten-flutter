@@ -1,6 +1,8 @@
 import 'package:salesiq_mobilisten/siqtheme/colorutils.dart';
 
 class SIQFileMessageTheme {
+  // ignore_for_file: public_member_api_docs
+
   String? incomingTitleColor;
   String? incomingSubTitleColor;
   String? outgoingTitleColor;

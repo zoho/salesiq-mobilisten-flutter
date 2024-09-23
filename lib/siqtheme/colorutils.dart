@@ -1,4 +1,6 @@
-String? colorToHex(dynamic color) {
+// ignore_for_file: public_member_api_docs
+
+String? colorToHex(String? color) {
   if (color == null) {
     return null;
   }

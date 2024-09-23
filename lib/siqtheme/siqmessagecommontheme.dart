@@ -4,6 +4,8 @@ import 'package:salesiq_mobilisten/siqtheme/siqreplyviewtheme.dart';
 import 'package:salesiq_mobilisten/siqtheme/siqloadmoreviewtheme.dart';
 
 class SIQMessageCommonTheme {
+  // ignore_for_file: public_member_api_docs
+
   int? botTypingIndicatorStyle;
   String? messageSenderNameColor;
 
@@ -87,7 +89,7 @@ class SIQMessageCommonTheme {
 
   Map<String, dynamic> toMap() {
     return {
-      'botTypingIndicatorStyle': colorToHex(botTypingIndicatorStyle),
+      'botTypingIndicatorStyle': botTypingIndicatorStyle,
       'messageSenderNameColor': colorToHex(messageSenderNameColor),
       'outgoingBackgroundColor': colorToHex(outgoingBackgroundColor),
       'outgoingTextColor': colorToHex(outgoingTextColor),

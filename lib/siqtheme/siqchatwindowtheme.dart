@@ -10,6 +10,8 @@ import 'package:salesiq_mobilisten/siqtheme/siqemailtranscripttheme.dart';
 import 'package:salesiq_mobilisten/siqtheme/siqlogviewtheme.dart';
 
 class SIQChatWindowTheme {
+  // ignore_for_file: public_member_api_docs
+
   String? backgroundColor;
   String? backgroundImage;
   SIQMessageTheme message;

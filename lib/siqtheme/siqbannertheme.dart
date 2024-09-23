@@ -1,6 +1,8 @@
 import 'package:salesiq_mobilisten/siqtheme/siqbannercolortheme.dart';
 
 class SIQBannerTheme {
+  // ignore_for_file: public_member_api_docs
+
   SIQBannerColorTheme successTheme;
   SIQBannerColorTheme infoTheme;
   SIQBannerColorTheme failureTheme;

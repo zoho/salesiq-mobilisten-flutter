@@ -1,4 +1,7 @@
 class SIQTab {
+  // ignore_for_file: public_member_api_docs
+  // ignore_for_file: deprecated_member_use_from_same_package
+
   const SIQTab._(this.index);
 
   final int index;

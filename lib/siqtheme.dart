@@ -13,6 +13,8 @@ import 'package:salesiq_mobilisten/siqtheme/siqinappnotificationtheme.dart';
 import 'package:salesiq_mobilisten/siqtheme/colorutils.dart';
 
 class SIQTheme {
+  // ignore_for_file: public_member_api_docs
+
   String? themeColor;
   SIQLauncherTheme launcher;
   SIQTabBarTheme tabBar;

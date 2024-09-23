@@ -1,5 +1,6 @@
 import 'package:flutter/services.dart';
 
+// ignore_for_file: public_member_api_docs
 class Launcher {
   final MethodChannel _channel = const MethodChannel("salesiq_launcher_module");
 

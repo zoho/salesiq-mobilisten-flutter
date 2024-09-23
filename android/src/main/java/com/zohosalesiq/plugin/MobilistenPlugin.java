@@ -12,17 +12,17 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Base64;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.google.gson.reflect.TypeToken;
 import com.zoho.commons.ChatComponent;
+import com.zoho.commons.Fonts;
+import com.zoho.commons.InitConfig;
 import com.zoho.commons.LauncherModes;
 import com.zoho.commons.LauncherProperties;
 import com.zoho.livechat.android.MobilistenActivityLifecycleCallbacks;
-import com.zoho.livechat.android.MobilistenApplication;
 import com.zoho.livechat.android.NotificationListener;
 import com.zoho.livechat.android.SIQDepartment;
 import com.zoho.livechat.android.SIQVisitor;
@@ -85,8 +85,6 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
-import kotlin.Unit;
-import kotlin.jvm.functions.Function1;
 
 
 public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, ActivityAware {
@@ -123,9 +121,16 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
     private static final String INVALID_FILTER_CODE = "604";         // No I18N
     private static final String INVALID_FILTER_TYPE = "invalid filter type";         // No I18N
 
+    private static Font customFont = null;
+
     private static Hashtable<String, SalesIQCustomActionListener> actionsList = new Hashtable<>();
 
     Handler handler;
+
+    private static class Font {
+        public String regular;
+        public String medium;
+    }
 
     private static class Tab {
         static String CONVERSATIONS = "TAB_CONVERSATIONS";  // No I18N
@@ -659,6 +664,19 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 ZohoSalesIQ.setPlatformName(SalesIQConstants.Platform.FLUTTER_ANDROID);
                 break;
 
+            case "setCustomFont":
+                Map<String, Object> regular = call.argument("regular"); // No I18N
+                Map<String, Object> medium = call.argument("medium");   // No I18N
+                String regularPath = regular != null ? LiveChatUtil.getString(regular.get("path")) : null;    // No I18N
+                String mediumPath = medium != null ? LiveChatUtil.getString(medium.get("path")) : null;   // No I18N
+                if (regularPath != null || mediumPath != null) {
+                    customFont = new Font();
+                    customFont.regular = regularPath;
+                    customFont.medium = mediumPath;
+                } else {
+                    customFont = null;
+                }
+                break;
             case "present": {
                 present(getStringOrNull(call.argument("tab")), getStringOrNull(call.argument("id")), finalResult);  // No I18N
                 break;
@@ -1203,7 +1221,13 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         final boolean[] isCallBackInvoked = {false};
         if (application != null) {
             try {
-                ZohoSalesIQ.init(application, appKey, accessKey, activity, null, new InitListener() {
+                InitConfig initConfig = null;
+                if (customFont != null) {
+                    initConfig = new InitConfig();
+                    initConfig.setFont(Fonts.REGULAR, customFont.regular);
+                    initConfig.setFont(Fonts.MEDIUM, customFont.medium);
+                }
+                ZohoSalesIQ.init(application, appKey, accessKey, activity, initConfig, new InitListener() {
                     @Override
                     public void onInitSuccess() {
                         if (activity != null && ZohoSalesIQ.getApplicationManager() != null) {
@@ -1263,7 +1287,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                     }
                 }
             }
-        });    
+        });
     }
 
     private static @Nullable ZohoSalesIQ.Tab getTab(@Nullable String tab) {

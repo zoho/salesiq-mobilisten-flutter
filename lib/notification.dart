@@ -2,14 +2,16 @@ import 'package:flutter/services.dart';
 import 'package:salesiq_mobilisten/salesiq_mobilisten.dart';
 
 class Notification {
+  // ignore_for_file: public_member_api_docs
+
   static MethodChannel methodChannel =
       const MethodChannel('salesiqNotificationModule');
 
   final eventChannel = EventChannel("mobilistenNotificationEvents")
       .receiveBroadcastStream()
       .map((event) => NotificationEvent(
-          NotificationAction.from(event["eventName"]),
-          _getNotificationPayload(event["payload"])));
+          NotificationAction.from(event["eventName"] as String),
+          _getNotificationPayload(event["payload"] as Map)));
 
   /// Use this API to enable push notifications for Android
   void registerPush(String token, bool isTestDevice) {
@@ -20,7 +22,9 @@ class Notification {
   }
 
   Future<bool> isSDKMessage(Map data) async {
-    return await methodChannel.invokeMethod('isSDKMessage', data);
+    return await methodChannel
+        .invokeMethod<bool>('isSDKMessage', data)
+        .then((value) => value ?? false);
   }
 
   void process(Map map) {
@@ -28,8 +32,8 @@ class Notification {
   }
 
   Future<SalesIQNotificationPayload?> getPayload(Map data) async {
-    return _getNotificationPayload(
-        await methodChannel.invokeMethod('getNotificationPayload', data));
+    return _getNotificationPayload(await methodChannel
+        .invokeMethod<Map<dynamic, dynamic>>('getNotificationPayload', data));
   }
 
   void setActionSource(ActionSource actionSource) {
@@ -61,33 +65,38 @@ class NotificationAction {
   }
 }
 
-SalesIQNotificationPayload? _getNotificationPayload(Map data) {
-  print("Push test data: ${data["type"]} ${data['payload']["department"]}");
-  Map payload = data['payload'];
+SalesIQNotificationPayload? _getNotificationPayload(Map? data) {
+  if (data == null) {
+    return null;
+  }
+  Map? payload = data['payload'] as Map?;
+  if (payload == null) {
+    return null;
+  }
+
   if (data['type'] == 'chat') {
     return SalesIQNotificationPayloadChat(
-        message: payload['message'],
-        userId: payload['userId'],
-        chatId: payload['chatId'],
-        senderName: payload['senderName'],
-        previousMessageUID: payload['previousMessageUID'],
-        messageUID: payload['messageUID'],
-        sender: payload['sender'],
-        title: payload['title'],
+        message: payload['message']?.toString(),
+        userId: payload['userId']?.toString(),
+        chatId: payload['chatId']?.toString(),
+        senderName: payload['senderName']?.toString(),
+        previousMessageUID: payload['previousMessageUID']?.toString(),
+        messageUID: payload['messageUID']?.toString(),
+        sender: payload['sender']?.toString(),
+        title: payload['title']?.toString(),
         department: getDepartment(payload));
   } else if (data['type'] == 'visitorHistory') {
     return SalesIQNotificationPayloadVisitorHistory(
-      imagePath: payload['imagePath'],
-      targetLink: payload['targetLink'],
-      title: payload['title'],
-      message: payload['message'],
-    );
+        imagePath: payload['imagePath']?.toString(),
+        targetLink: payload['targetLink']?.toString(),
+        title: payload['title']?.toString(),
+        message: payload['message']?.toString());
   } else if (data['type'] == 'endChatDetails') {
     return SalesIQNotificationPayloadEndChatDetails(
-      message: payload['message'],
-      userId: payload['userId'],
-      chatId: payload['chatId'],
-      title: payload['title'],
+      message: payload['message']?.toString(),
+      userId: payload['userId']?.toString(),
+      chatId: payload['chatId']?.toString(),
+      title: payload['title']?.toString(),
       department: getDepartment(payload),
     );
   } else {
@@ -97,10 +106,10 @@ SalesIQNotificationPayload? _getNotificationPayload(Map data) {
 
 Department? getDepartment(Map<dynamic, dynamic> payload) {
   Department? department;
-  if (payload['department'] != null && payload['department']['id'] != null) {
+  if (payload['department'] != null && payload['department']?['id'] != null) {
     department = Department(
-      id: payload['department']['id'],
-      name: payload['department']['name'],
+      id: payload['department']['id']?.toString(),
+      name: payload['department']['name']?.toString(),
     );
   }
   return department;

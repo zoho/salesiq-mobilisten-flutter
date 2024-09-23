@@ -3,6 +3,8 @@ import 'package:salesiq_mobilisten/notification.dart';
 import 'package:salesiq_mobilisten/salesiq_mobilisten.dart';
 
 class Chat {
+  // ignore_for_file: public_member_api_docs
+
   final MethodChannel _channel = const MethodChannel("salesiq_chat_module");
 
   void showFeedbackAfterSkip(bool enable) {
@@ -25,25 +27,28 @@ class Chat {
     _channel.invokeMethod('showPayloadChat', data.toMap());
   }
 
-  Future<SIQChat> start(String question,
+  Future<SIQChat?> start(String question,
       [String? customChatId = null, String? departmentName = null]) async {
-    return _channel.invokeMethod('startNewChat', <String, dynamic>{
+    return _channel
+        .invokeMethod<Map<dynamic, dynamic>>('startNewChat', <String, dynamic>{
       'question': question,
       'custom_chat_id': customChatId,
       'department_name': departmentName,
     }).then((value) => SIQChat.fromMap(value));
   }
 
-  Future<SIQChat> startWithTrigger(
+  Future<SIQChat?> startWithTrigger(
       [String? customChatId = null, String? departmentName = null]) async {
-    return _channel.invokeMethod('startNewChatWithTrigger', <String, dynamic>{
+    return _channel.invokeMethod<Map<dynamic, dynamic>>(
+        'startNewChatWithTrigger', <String, dynamic>{
       'custom_chat_id': customChatId,
       'department_name': departmentName,
     }).then((value) => SIQChat.fromMap(value));
   }
 
-  Future<SIQChat> get(String chatId) async {
-    return _channel.invokeMethod('getChat', <String, dynamic>{
+  Future<SIQChat?> get(String chatId) async {
+    return _channel
+        .invokeMethod<Map<dynamic, dynamic>>('getChat', <String, dynamic>{
       'chat_id': chatId,
     }).then((value) => SIQChat.fromMap(value));
   }

@@ -3,6 +3,8 @@ import 'package:salesiq_mobilisten/siqtheme/siqfaqlistitemtheme.dart';
 import 'package:salesiq_mobilisten/siqtheme/siqarticletheme.dart';
 
 class SIQFAQTheme {
+  // ignore_for_file: public_member_api_docs
+
   SIQFAQListItemTheme listItem;
   String? headerTextColor;
   SIQArticleTheme article;

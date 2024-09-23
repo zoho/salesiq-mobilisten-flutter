@@ -11,6 +11,8 @@ import 'tab.dart';
 import 'siqtheme.dart';
 
 class ZohoSalesIQ {
+  // ignore_for_file: public_member_api_docs
+
   static MethodChannel _channel = const MethodChannel('salesiq_mobilisten');
 
   static Launcher launcher = new Launcher();
@@ -46,11 +48,27 @@ class ZohoSalesIQ {
     await _channel.invokeMethod('init', args);
   }
 
+  /// sets the custom font to be used inside the Mobilisten UI.
+  static void setCustomFont(SalesIQFont font) async {
+    print("onMethodCall --> setCustomFont" + font.toString());
+    Map<String, dynamic> map = <String, dynamic>{};
+    Map<String, dynamic> regular = <String, dynamic>{};
+    regular.putIfAbsent("path", () => font.regular?.path);
+    Map<String, dynamic> medium = <String, dynamic>{};
+    medium.putIfAbsent("path", () => font.medium?.path);
+    map.putIfAbsent("regular", () => regular);
+    map.putIfAbsent("medium", () => medium);
+    print("onMethodCall --> setCustomFont-out" + map.toString());
+    await _channel.invokeMethod('setCustomFont', map);
+  }
+
   static Future<bool> present([SIQTab? tab = null, String? id = null]) async {
     Map<String, dynamic> args = <String, dynamic>{};
     args.putIfAbsent("tab", () => tab?.toString());
     args.putIfAbsent("id", () => id);
-    return await _channel.invokeMethod('present', args);
+    return await _channel
+        .invokeMethod<bool>('present', args)
+        .then((value) => value ?? false);
   }
 
   /// This API controls the behaviour of url opening behaviour
@@ -124,7 +142,7 @@ class ZohoSalesIQ {
   }
 
   /// Sets the current page title to be shown in the visitor footpath on the SalesIQ console.
-  static Future<Null> setPageTitle(String pageTitle) async {
+  static void setPageTitle(String pageTitle) async {
     await _channel.invokeMethod('setPageTitle', pageTitle);
   }
 
@@ -288,14 +306,14 @@ class ZohoSalesIQ {
 
   /// Returns a list of chats (Instances of [SIQChat]).
   static Future<List<SIQChat>> getChats() async {
-    final List mapList = await _channel.invokeMethod('getChats');
+    final List? mapList = await _channel.invokeMethod<List>('getChats');
     return _getChatObjectList(mapList);
   }
 
   /// Returns a list of chats (Instances of [SIQChat]) whose status matches [chatStatus].
   static Future<List<SIQChat>> getChatsWithFilter(
       SIQChatStatus chatStatus) async {
-    final List mapList = await _channel.invokeMethod(
+    final List? mapList = await _channel.invokeMethod(
         'getChatsWithFilter', chatStatus.toShortString());
     return _getChatObjectList(mapList);
   }
@@ -305,7 +323,7 @@ class ZohoSalesIQ {
   @Deprecated(
       'This method was deprecated after v3.1.2, Use knowledgeBase.getResources() method instead.')
   static Future<List<SIQArticle>> getArticles() async {
-    final List articleList = await _channel.invokeMethod('getArticles');
+    final List? articleList = await _channel.invokeMethod('getArticles');
     return _getArticleObjectList(articleList);
   }
 
@@ -315,7 +333,7 @@ class ZohoSalesIQ {
       'This method was deprecated after v3.1.2, Use knowledgeBase.getResources() method instead.')
   static Future<List<SIQArticle>> getArticlesWithCategoryID(
       String categoryID) async {
-    final List articleList =
+    final List? articleList =
         await _channel.invokeMethod('getArticlesWithCategoryID', categoryID);
     return _getArticleObjectList(articleList);
   }
@@ -325,14 +343,14 @@ class ZohoSalesIQ {
   @Deprecated(
       'This method was deprecated after v3.1.2, Use knowledgeBase.getCategories() method instead.')
   static Future<List<SIQArticleCategory>> getArticleCategories() async {
-    final List categoryList =
+    final List? categoryList =
         await _channel.invokeMethod('getArticleCategories');
     return _getArticleCategoryObjectList(categoryList);
   }
 
   /// Returns a list of departments (Instances of [SIQDepartment]).
   static Future<List<SIQDepartment>> getDepartments() async {
-    final List deptList = await _channel.invokeMethod('getDepartments');
+    final List? deptList = await _channel.invokeMethod('getDepartments');
     return _getDepartmentObjectList(deptList);
   }
 
@@ -342,8 +360,9 @@ class ZohoSalesIQ {
     Map<String, dynamic> details = <String, dynamic>{};
     details.putIfAbsent("attenderID", () => attenderID);
     details.putIfAbsent("fetchDefaultImage", () => fetchDefaultImage);
-    final String image =
-        await _channel.invokeMethod('fetchAttenderImage', details);
+    final String image = await _channel
+        .invokeMethod<String>('fetchAttenderImage', details)
+        .then((value) => value ?? "");
     return image;
   }
 
@@ -352,8 +371,9 @@ class ZohoSalesIQ {
   @Deprecated(
       'This method was deprecated after v3.1.2, Use knowledgeBase.openResource() method instead.')
   static Future<String> openArticle(String articleID) async {
-    final String articleList =
-        await _channel.invokeMethod('openArticle', articleID);
+    final String articleList = await _channel
+        .invokeMethod<String>('openArticle', articleID)
+        .then((value) => value ?? "");
     return articleList;
   }
 
@@ -422,40 +442,54 @@ class ZohoSalesIQ {
 
   /// A Boolean value used to determine whether a visitor can start multiple parallely open chats.
   static Future<bool> get isMultipleOpenChatRestricted async {
-    return await _channel.invokeMethod('isMultipleOpenChatRestricted');
+    return await _channel
+        .invokeMethod<bool>('isMultipleOpenChatRestricted')
+        .then((value) => value ?? false);
   }
 
   /// An integer value representing the number of unread messages.
   static Future<int> get chatUnreadCount async {
-    return await _channel.invokeMethod('getChatUnreadCount');
+    return await _channel
+        .invokeMethod<int>('getChatUnreadCount')
+        .then((value) => value ?? 0);
   }
 
   static void dismissUI() {
     _channel.invokeMethod('dismissUI');
   }
 
-  static List<SIQChat> _getChatObjectList(List mapList) {
+  static List<SIQChat> _getChatObjectList(List? mapList) {
+    if (mapList == null) {
+      return [];
+    }
     List<SIQChat> chatList = [];
     for (int i = 0; i < mapList.length; i++) {
-      chatList.add(SIQChat.fromMap(mapList[i]));
+      SIQChat? chat = SIQChat.fromMap(mapList[i] as Map?);
+      if (chat != null) {
+        chatList.add(chat);
+      }
     }
     return chatList;
   }
 
-  static List<SIQArticle> _getArticleObjectList(List mapList) {
+  @Deprecated('This method was deprecated after v3.1.2')
+  static List<SIQArticle> _getArticleObjectList(List? mapList) {
+    if (mapList == null) {
+      return [];
+    }
     List<SIQArticle> articleList = [];
     for (int i = 0; i < mapList.length; i++) {
-      Map map = mapList[i];
+      Map? map = mapList[i] as Map?;
 
-      String? id = map["id"];
-      String name = map["name"] ?? "-";
-      String? categoryId = map["categoryID"];
-      String categoryName = map["categoryName"] ?? "-";
-      int viewCount = map["viewCount"] ?? 0;
-      int likeCount = map["likeCount"] ?? 0;
-      int dislikeCount = map["dislikeCount"] ?? 0;
-      double? createdTimeMS = map["createdTime"];
-      double? modifiedTimeMS = map["modifiedTime"];
+      String? id = map?["id"]?.toString();
+      String name = map?["name"]?.toString() ?? "-";
+      String? categoryId = map?["categoryID"]?.toString();
+      String categoryName = map?["categoryName"]?.toString() ?? "-";
+      int viewCount = map?["viewCount"] as int? ?? 0;
+      int likeCount = map?["likeCount"] as int? ?? 0;
+      int dislikeCount = map?["dislikeCount"] as int? ?? 0;
+      double? createdTimeMS = map?["createdTime"] as double?;
+      double? modifiedTimeMS = map?["modifiedTime"] as double?;
 
       late DateTime? createdTime =
           DateTimeUtils.convertDoubleToDateTime(createdTimeMS);
@@ -471,13 +505,17 @@ class ZohoSalesIQ {
     return articleList;
   }
 
-  static List<SIQArticleCategory> _getArticleCategoryObjectList(List mapList) {
+  @Deprecated('This method was deprecated after v3.1.2')
+  static List<SIQArticleCategory> _getArticleCategoryObjectList(List? mapList) {
+    if (mapList == null) {
+      return [];
+    }
     List<SIQArticleCategory> categoryList = [];
     for (int i = 0; i < mapList.length; i++) {
-      Map map = mapList[i];
-      String? id = map["id"];
-      String? name = map["name"];
-      int articleCount = map["articleCount"] ?? 0;
+      Map? map = mapList[i] as Map?;
+      String? id = map?["id"]?.toString();
+      String? name = map?["name"]?.toString();
+      int articleCount = map?["articleCount"] as int? ?? 0;
       if (id != null && name != null) {
         SIQArticleCategory category =
             SIQArticleCategory(id, name, articleCount);
@@ -487,13 +525,16 @@ class ZohoSalesIQ {
     return categoryList;
   }
 
-  static List<SIQDepartment> _getDepartmentObjectList(List mapList) {
+  static List<SIQDepartment> _getDepartmentObjectList(List? mapList) {
+    if (mapList == null) {
+      return [];
+    }
     List<SIQDepartment> departmentList = [];
     for (int i = 0; i < mapList.length; i++) {
-      Map map = mapList[i];
-      String? id = map["id"];
-      String? name = map["name"];
-      bool available = map["available"] ?? false;
+      Map? map = mapList[i] as Map?;
+      String? id = map?["id"] as String?;
+      String? name = map?["name"] as String?;
+      bool available = map?["available"] as bool? ?? false;
       if ((id != null) && (name != null)) {
         SIQDepartment department = SIQDepartment(id, name, available);
         departmentList.add(department);
@@ -617,49 +658,54 @@ class SIQChat {
       this.feedback,
       this.rating);
 
-  static SIQChat fromMap(Map<dynamic, dynamic> map) {
-    String? id = map["id"];
-    String? question = map["question"];
-    bool isBotAttender = map["isBotAttender"] ?? false;
-    String? attenderEmail = map["attenderEmail"];
-    String? attenderID = map["attenderID"];
-    String? attenderName = map["attenderName"];
-    String? departmentName = map["departmentName"];
-    int unreadCount = map["unreadCount"] ?? 0;
-    String? lastMessage = map["lastMessage"];
-    String? lastMessageSender = map["lastMessageSender"];
-    DateTime? lastMessageTime;
-    double? lastMessageTimeMS = map["lastMessageTime"];
-    if (lastMessageTimeMS != null) {
-      lastMessageTime =
-          DateTimeUtils.convertDoubleToDateTime(lastMessageTimeMS);
+  static SIQChat? fromMap(Map<dynamic, dynamic>? map) {
+    if (map != null) {
+      String? id = map["id"]?.toString();
+      String? question = map["question"]?.toString();
+      bool isBotAttender = map["isBotAttender"] as bool? ?? false;
+      String? attenderEmail = map["attenderEmail"]?.toString();
+      String? attenderID = map["attenderID"]?.toString();
+      String? attenderName = map["attenderName"]?.toString();
+      String? departmentName = map["departmentName"]?.toString();
+      int unreadCount = map["unreadCount"] as int? ?? 0;
+      String? lastMessage = map["lastMessage"]?.toString();
+      String? lastMessageSender = map["lastMessageSender"]?.toString();
+      DateTime? lastMessageTime;
+      double? lastMessageTimeMS = map["lastMessageTime"] as double?;
+      if (lastMessageTimeMS != null) {
+        lastMessageTime =
+            DateTimeUtils.convertDoubleToDateTime(lastMessageTimeMS);
+      }
+      SIQMessage? recentMessage =
+          SIQMessage.getObject(map["recentMessage"] as Map<dynamic, dynamic>?);
+      int? queuePosition = map["queuePosition"] as int?;
+      String? rating = map["rating"]?.toString();
+      String? feedback = map["feedback"]?.toString();
+
+      String statusString = map["status"]?.toString() ?? "closed";
+      SIQChatStatus status = SIQChatStatusString.toChatType(statusString);
+
+      SIQChat chat = SIQChat(
+          id,
+          question,
+          queuePosition,
+          attenderName,
+          attenderEmail,
+          attenderID,
+          isBotAttender,
+          departmentName,
+          status,
+          unreadCount,
+          lastMessage,
+          lastMessageTime,
+          lastMessageSender,
+          recentMessage,
+          feedback,
+          rating);
+      return chat;
+    } else {
+      return null;
     }
-    SIQMessage recentMessage = SIQMessage.getObject(map["recentMessage"]);
-    int? queuePosition = map["queuePosition"];
-    String? rating = map["rating"];
-    String? feedback = map["feedback"];
-
-    String statusString = map["status"] ?? "closed";
-    SIQChatStatus status = SIQChatStatusString.toChatType(statusString);
-
-    SIQChat chat = SIQChat(
-        id,
-        question,
-        queuePosition,
-        attenderName,
-        attenderEmail,
-        attenderID,
-        isBotAttender,
-        departmentName,
-        status,
-        unreadCount,
-        lastMessage,
-        lastMessageTime,
-        lastMessageSender,
-        recentMessage,
-        feedback,
-        rating);
-    return chat;
   }
 }
 
@@ -672,28 +718,38 @@ class SIQDepartment {
 }
 
 /// See [Resource] class .
-// @Deprecated('This class was deprecated after v3.1.2, Use Resource class instead.')
+@Deprecated(
+    'This class was deprecated after v3.1.2, Use [Resource] class instead.')
 class SIQArticle {
-  @deprecated
+  @Deprecated(
+      'This reference was deprecated after v3.1.2, Use id from Resource class instead.')
   final String id;
-  @deprecated
+  @Deprecated(
+      'This reference was deprecated after v3.1.2, Use name from Resource class instead.')
   final String name;
 
-  @deprecated
+  @Deprecated(
+      'This reference was deprecated after v3.1.2, Use category from Resource class instead.')
   final String categoryId;
-  @deprecated
+  @Deprecated(
+      'This reference was deprecated after v3.1.2, Use category from Resource class instead.')
   final String categoryName;
 
-  @deprecated
+  @Deprecated(
+      'This reference was deprecated after v3.1.2, Use stats from Resource class instead.')
   final int viewCount;
-  @deprecated
+  @Deprecated(
+      'This reference was deprecated after v3.1.2, Use stats from Resource class instead.')
   final int likeCount;
-  @deprecated
+  @Deprecated(
+      'This reference was deprecated after v3.1.2, Use stats from Resource class instead.')
   final int dislikeCount;
 
-  @deprecated
+  @Deprecated(
+      'This reference was deprecated after v3.1.2, Use createdTime from Resource class instead.')
   final DateTime? createdTime;
-  @deprecated
+  @Deprecated(
+      'This reference was deprecated after v3.1.2, Use modifiedTime from Resource class instead.')
   final DateTime? modifiedTime;
 
   SIQArticle(
@@ -709,13 +765,17 @@ class SIQArticle {
 }
 
 /// See [ResourceCategory] class .
-// @Deprecated('This class was deprecated after v3.1.2, Use Resource class instead.')
+@Deprecated(
+    'This class was deprecated after v3.1.2, Use Resource class instead.')
 class SIQArticleCategory {
-  @deprecated
+  @Deprecated(
+      'This reference was deprecated after v3.1.2, Use id from ResourceCategory class instead.')
   final String id;
-  @deprecated
+  @Deprecated(
+      'This reference was deprecated after v3.1.2, Use name from ResourceCategory class instead.')
   final String name;
-  @deprecated
+  @Deprecated(
+      'This reference was deprecated after v3.1.2, Use count from ResourceCategory class instead.')
   final int articleCount;
 
   SIQArticleCategory(this.id, this.name, this.articleCount);
@@ -842,27 +902,12 @@ class SIQSendEvent {
   }
 }
 
-String? colorToHex(dynamic color) {
-  if (color == null) {
-    return null;
-  }
+class SalesIQFont {
+  SalesIQFontType? regular = null, medium = null;
+}
 
-  if (color.contains("0x")) {
-    final regex = RegExp(r'0x(\w{8})');
-    final match = regex.firstMatch(color);
-    if (match != null) {
-      final argb = match.group(1)!;
-      final alphaHex = argb.substring(0, 2);
-      final redHex = argb.substring(2, 4);
-      final greenHex = argb.substring(4, 6);
-      final blueHex = argb.substring(6, 8);
+class SalesIQFontType {
+  String? path = null; //,name = null, file = null;
 
-      final alpha = int.parse(alphaHex, radix: 16);
-      final red = int.parse(redHex, radix: 16);
-      final green = int.parse(greenHex, radix: 16);
-      final blue = int.parse(blueHex, radix: 16);
-      return 'rgba($red, $green, $blue, ${alpha / 255.0})';
-    }
-  }
-  return color;
+  SalesIQFontType(this.path); //, [this.name, this.file]);
 }
