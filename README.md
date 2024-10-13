@@ -11,7 +11,13 @@ Connect with customers at every step of their journey. Give them the best in-app
 Please follow the steps mentioned below to install the Mobilisten plugin in your Flutter mobile application.
 
 ### Requirements
-**Android**: `minSdkVersion` 21 or above is required.
+**Android**: 
+Ensure that your project meets the following requirements:
+
+   - Minimum Android Version: Android 5.0 (Lollipop) (API Level 21)
+   - Compile SDK Version: 34 (Android 14)
+   - Required Permissions:
+      - android.permission.INTERNET (Required for network operations)  
 
 **iOS**: iOS 12 or above is required. The minimum version of Xcode required is Xcode 13.
 
@@ -31,13 +37,33 @@ dependencies:
 4. Add the following permissions in the **Info.plist** file for the iOS Runner project.
 ![Mobilisten iOS Permissions Info.plist](https://www.zohowebstatic.com/sites/default/files/u71249/SDK2/cordova-installation-step2.png)
 
-5. Open the `android` directory in Android Studio or any IDE used for Android development.  Open the project **build.gradle** file and add the following maven repository.
-```groovy
+5. Open the `android` directory in Android Studio or any IDE used for Android development.  Open the project `build.gradle` or `settings.gradle` file and add the following maven repository.
+
+For Gradle version 6.7 and below
+```Gradle
+// Add the following to your project's root build.gradle file.
+
 allprojects {
+   repositories {
+      google()
+      mavenCentral()
+      // ...
+      maven { url 'https://maven.zohodl.com' }
+   }
+}
+```
+
+For Gradle version 6.8 and above
+```Gradle
+// Add the following to your settings.gradle file.
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
-        //...
+        google()
+        mavenCentral()
+        // Add the Zoho Maven URL here
         maven { url 'https://maven.zohodl.com' }
-        //...
     }
 }
 ```
