@@ -71,23 +71,29 @@ dependencyResolutionManagement {
 
 Now, click on **Sync Now** or use the **Sync Project with Gradle Files** option under the File menu.
 
-6.  Generate the App and Access keys for iOS to initialize Mobilisten. In the Zoho SalesIQ console, navigate to `Settings` → `Brands` → `Installation` → `iOS`. Enter the bundle ID for the application as shown in the below example and Click on **Generate**.
+6. #### Proguard rules:
+If you have enabled ProGuard(minifyEnabled) R8, then please add the following rules in your `proguard-rules.pro` file in your `android` folder.
+```
+-dontwarn kotlinx.parcelize.Parcelize
+```
+
+7.  Generate the App and Access keys for iOS to initialize Mobilisten. In the Zoho SalesIQ console, navigate to `Settings` → `Brands` → `Installation` → `iOS`. Enter the bundle ID for the application as shown in the below example and Click on **Generate**.
 ![iOS Mobilisten Generating App and Access Keys](https://www.zohowebstatic.com/sites/default/files/u71249/SDK2/ios-rc1.png)
 Note the App and Access keys generated for iOS to be used in further steps.
 ![iOS Mobilisten Copy App and Access Keys](https://www.zohowebstatic.com/sites/default/files/u71249/SDK2/ios-rc2.png)
 
-7.  Generate the App and Access keys for Android to initialize Mobilisten. In the Zoho SalesIQ console, navigate to `Settings` → `Brands` → `Installation` → `Android`. Enter the bundle ID for the application as shown in the below example and Click on **Generate**.
+8.  Generate the App and Access keys for Android to initialize Mobilisten. In the Zoho SalesIQ console, navigate to `Settings` → `Brands` → `Installation` → `Android`. Enter the bundle ID for the application as shown in the below example and Click on **Generate**.
 ![Android Mobilisten Generating App and Access Keys](https://www.zohowebstatic.com/sites/default/files/u71249/SDK2/android-rc1.png)
 Note the App and Access keys generated for Android to be used in further steps.
 ![Android Mobilisten Copy App and Access Keys](https://www.zohowebstatic.com/sites/default/files/u71249/SDK2/android-rc2.png)
 
-8. Open the **main.dart** file inside the `lib` directory and import Mobilisten as shown below. With this, additionally import `dart:io` to check the current platform which will be used at a later stage.
+9. Open the **main.dart** file inside the `lib` directory and import Mobilisten as shown below. With this, additionally import `dart:io` to check the current platform which will be used at a later stage.
 ```dart
 import 'dart:io' as io;
 import 'package:salesiq_mobilisten/salesiq_mobilisten.dart';
 ```
 
-9. Initialize Mobilisten using the [`init`](https://www.zoho.com/salesiq/help/developer-guides/flutter-sdk-init.html) API within the `initState()` method in the **main.dart** file.
+10. Initialize Mobilisten using the [`init`](https://www.zoho.com/salesiq/help/developer-guides/flutter-sdk-init.html) API within the `initState()` method in the **main.dart** file.
 ```dart
 if (io.Platform.isIOS || io.Platform.isAndroid) {
     String appKey;
@@ -108,7 +114,7 @@ if (io.Platform.isIOS || io.Platform.isAndroid) {
     });
 }
 ```
-10. Build and run the flutter application on Android and iOS.
+11. Build and run the flutter application on Android and iOS.
 
 ## API Documentation
 
