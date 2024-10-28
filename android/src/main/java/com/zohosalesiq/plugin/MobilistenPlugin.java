@@ -386,6 +386,56 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         return actionSource;
     }
 
+    private static @Nullable ChatComponent getChatComponent(final String componentName) {
+        ChatComponent chatComponent = null;
+        switch (componentName) {
+            case "operator_image":
+                chatComponent = ChatComponent.operatorImage;
+                break;
+            case "rating":
+                chatComponent = ChatComponent.rating;
+                break;
+            case "feedback":
+                chatComponent = ChatComponent.feedback;
+                break;
+            case "screenshot":
+                chatComponent = ChatComponent.screenshot;
+                break;
+            case "pre_chat_form":
+                chatComponent = ChatComponent.prechatForm;
+                break;
+            case "visitor_name":
+                chatComponent = ChatComponent.visitorName;
+                break;
+            case "email_transcript":
+                chatComponent = ChatComponent.emailTranscript;
+                break;
+            case "file_share":
+                chatComponent = ChatComponent.fileShare;
+                break;
+            case "media_capture":
+                chatComponent = ChatComponent.mediaCapture;
+                break;
+            case "end":
+                chatComponent = ChatComponent.end;
+                break;
+            case "end_when_in_queue":
+                chatComponent = ChatComponent.endWhenInQueue;
+                break;
+            case "end_when_bot_connected":
+                chatComponent = ChatComponent.endWhenBotConnected;
+                break;
+            case "end_when_operator_connected":
+                chatComponent = ChatComponent.endWhenOperatorConnected;
+                break;
+            case "reopen":
+                chatComponent = ChatComponent.reopen;
+                break;
+            default:
+        }
+        return chatComponent;
+    }
+
     static void handleChatMethodCalls(MethodCall call, Result result) {
         switch (call.method) {
             case "showFeedbackAfterSkip": {
@@ -439,6 +489,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 });
                 break;
             }
+
             case "startNewChatWithTrigger": {
                 final boolean[] canSubmitCallback = {true};
                 ZohoSalesIQ.Chat.startWithTrigger(getStringOrNull(call.argument("custom_chat_id")), getStringOrNull(call.argument("department_name")), chatResult -> {  // No I18N
@@ -473,6 +524,13 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                     }
                 });
                 break;
+            }
+
+            case "setChatComponentVisibility": {
+                ChatComponent chatComponent = getChatComponent(LiveChatUtil.getString(call.argument("component_name")));    // No I18N
+                if (chatComponent != null) {
+                    ZohoSalesIQ.Chat.setVisibility(chatComponent, LiveChatUtil.getBoolean(call.argument("visible")));   // No I18N
+                }
             }
         }
     }

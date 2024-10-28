@@ -1075,8 +1075,52 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
                 if let time = argument as? Int {
                     ZohoSalesIQ.Chat.setWaitingTime(upTo: time)
                 }
+            case "setChatComponentVisibility":
+                if let args = call.argumentDictionary, let component = args["component_name"] as? String, let visible = args["visible"] as? Bool {
+                    guard let chatComponent = getChatComponent(component) else {
+                        result(SwiftMobilistenPlugin().getErrorMessage("Failed to set chat component visibility"))
+                        return
+                    }
+                    ZohoSalesIQ.Chat.setVisibility(chatComponent, visible: visible)
+                }
+                break
             default:
                 result(FlutterMethodNotImplemented)
+            }
+        }
+        
+        func getChatComponent(_ componetRawValue: String) -> ChatComponent? {
+            switch componetRawValue {
+            case "operator_image":
+                return .attenderImageInChat
+            case "rating":
+                return .rating
+            case "feedback":
+                return .feedback
+            case "screenshot":
+                return .screenshotOption
+            case "pre_chat_form":
+                return .preChatForm
+            case "visitor_name":
+                return .visitorName
+            case "email_transcript":
+                return .emailTranscript
+            case "file_share":
+                return .fileSharing
+            case "media_capture":
+                return .mediaCapture
+            case "end":
+                return .end
+            case "end_when_in_queue":
+                return .endWhenInQueue
+            case "end_when_bot_connected":
+                return .endWhenBotConnected
+            case "end_when_operator_connected":
+                return .endWhenOperatorConnected
+            case "reopen":
+                return .reopen
+            default:
+                return nil
             }
         }
         

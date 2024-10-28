@@ -56,4 +56,73 @@ class Chat {
   void setWaitingTime(int seconds) {
     _channel.invokeMethod('setChatWaitingTime', seconds);
   }
+
+  void setVisibility(final ZSIQChatComponent chatComponent, final bool visible) {
+    String componentName;
+    switch(chatComponent) {
+      case ZSIQChatComponent.operatorImage:
+        componentName = "operator_image";
+        break;
+      case ZSIQChatComponent.rating:
+        componentName = "rating";
+        break;
+      case ZSIQChatComponent.feedback:
+        componentName = "feedback";
+        break;
+      case ZSIQChatComponent.screenshot:
+        componentName = "screenshot";
+        break;
+      case ZSIQChatComponent.preChatForm:
+        componentName = "pre_chat_form";
+        break;
+      case ZSIQChatComponent.visitorName:
+        componentName = "visitor_name";
+        break;
+      case ZSIQChatComponent.emailTranscript:
+        componentName = "email_transcript";
+        break;
+      case ZSIQChatComponent.fileShare:
+        componentName = "file_share";
+        break;
+      case ZSIQChatComponent.mediaCapture:
+        componentName = "media_capture";
+        break;
+      case ZSIQChatComponent.end:
+        componentName = "end";
+        break;
+      case ZSIQChatComponent.endWhenInQueue:
+        componentName = "end_when_in_queue";
+        break;
+      case ZSIQChatComponent.endWhenBotConnected:
+        componentName = "end_when_bot_connected";
+        break;
+      case ZSIQChatComponent.endWhenOperatorConnected:
+        componentName = "end_when_operator_connected";
+        break;
+      case ZSIQChatComponent.reopen:
+        componentName = "reopen";
+        break;
+    }
+    _channel.invokeMethod('setChatComponentVisibility', <String, dynamic>{
+      'component_name': componentName,
+      'visible': visible,
+    });
+  }
+}
+
+enum ZSIQChatComponent {
+  operatorImage,
+  rating,
+  feedback,
+  screenshot,
+  preChatForm,
+  visitorName,
+  emailTranscript,
+  fileShare,
+  mediaCapture,
+  end,
+  endWhenInQueue,
+  endWhenBotConnected,
+  endWhenOperatorConnected,
+  reopen
 }

@@ -261,21 +261,33 @@ class ZohoSalesIQ {
   }
 
   /// Enables or disables the display of sender images for incoming messages based on the value provided for [show].
+  /// See [chat.setVisibility(chatComponent, visible)] in [chat]
+  @Deprecated(
+      'This method was deprecated since v6.3.1, Use [chat.setVisibility] method instead.')
   static Future<Null> showOperatorImageInChat(bool show) async {
     await _channel.invokeMethod('showOperatorImageInChat', show);
   }
 
   /// Enables or disables showing the visitor name _if available_ as the sender name for outgoing messages within chat.
+  /// See [chat.setVisibility(chatComponent, visible)] in [chat]
+  @Deprecated(
+      'This method was deprecated since v6.3.1, Use [chat.setVisibility] method instead.')
   static Future<Null> setVisitorNameVisibility(bool visibility) async {
     await _channel.invokeMethod('setVisitorNameVisibility', visibility);
   }
 
   /// Enables or disables the option to provide feedback for a chat once ended.
+  /// See [chat.setVisibility(chatComponent, visible)] in [chat]
+  @Deprecated(
+      'This method was deprecated since v6.3.1, Use [chat.setVisibility] method instead.')
   static Future<Null> setFeedbackVisibility(bool visibility) async {
     await _channel.invokeMethod('setFeedbackVisibility', visibility);
   }
 
   /// Enables or disables the option to provide rating for a chat once ended.
+  /// See [chat.setVisibility(chatComponent, visible)] in [chat]
+  @Deprecated(
+      'This method was deprecated since v6.3.1, Use [chat.setVisibility] method instead.')
   static Future<Null> setRatingVisibility(bool visibility) async {
     await _channel.invokeMethod('setRatingVisibility', visibility);
   }
@@ -285,21 +297,33 @@ class ZohoSalesIQ {
   }
 
   /// Enables the option to capture screenshots from the attachments menu.
+  /// See [chat.setVisibility(chatComponent, visible)] in [chat]
+  @Deprecated(
+      'This method was deprecated since v6.3.1, Use [chat.setVisibility] method instead.')
   static Future<Null> enableScreenshotOption() async {
     await _channel.invokeMethod('enableScreenshotOption');
   }
 
   /// Disables the option to capture screenshots fromm the attachments menu.
+  /// See [chat.setVisibility(chatComponent, visible)] in [chat]
+  @Deprecated(
+      'This method was deprecated since v6.3.1, Use [chat.setVisibility] method instead.')
   static Future<Null> disableScreenshotOption() async {
     await _channel.invokeMethod('disableScreenshotOption');
   }
 
   /// Enables the pre-chat form if previously disables. Pre-chat forms are `enabled` by default.
+  /// See [chat.setVisibility(chatComponent, visible)] in [chat]
+  @Deprecated(
+      'This method was deprecated since v6.3.1, Use [chat.setVisibility] method instead.')
   static Future<Null> enablePreChatForms() async {
     await _channel.invokeMethod('enablePreChatForms');
   }
 
   /// Disables the pre-chat form.
+  /// See [chat.setVisibility(chatComponent, visible)] in [chat]
+  @Deprecated(
+      'This method was deprecated since v6.3.1, Use [chat.setVisibility] method instead.')
   static Future<Null> disablePreChatForms() async {
     await _channel.invokeMethod('disablePreChatForms');
   }

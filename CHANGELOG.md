@@ -1,5 +1,8 @@
 ## Mobilisten Plugin Changelog
 
+### 6.3.1 - 23 Sep 2024
+- Updated Mobilisten SDK for iOS to version [9.2.0](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/v9.2.0) and Android to version [8.0.6](https://github.com/zoho/salesiq-mobilisten-android-sample/releases/tag/v8.0.6)
+
 ### 6.3.0 - 23 Sep 2024
 - Updated Mobilisten SDK for Android to version [8.0.5](https://github.com/zoho/salesiq-mobilisten-android-sample/releases/tag/v8.0.5)
 

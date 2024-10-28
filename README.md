@@ -1,4 +1,4 @@
-[![SupportedLanguages](https://img.shields.io/badge/Platforms-iOS%20%7C%20%20Android-green.svg)](https://flutter.dev/) [![Version](https://img.shields.io/badge/version-6.3.0-blue.svg)](https://mobilisten.io/)
+[![SupportedLanguages](https://img.shields.io/badge/Platforms-iOS%20%7C%20%20Android-green.svg)](https://flutter.dev/) [![Version](https://img.shields.io/badge/version-6.3.1-blue.svg)](https://mobilisten.io/)
 
 # Zoho SalesIQ Mobilisten Flutter Plugin
 
@@ -11,13 +11,13 @@ Connect with customers at every step of their journey. Give them the best in-app
 Please follow the steps mentioned below to install the Mobilisten plugin in your Flutter mobile application.
 
 ### Requirements
-**Android**: 
+**Android**:
 Ensure that your project meets the following requirements:
 
-   - Minimum Android Version: Android 5.0 (Lollipop) (API Level 21)
-   - Compile SDK Version: 34 (Android 14)
-   - Required Permissions:
-      - android.permission.INTERNET (Required for network operations)  
+- Minimum Android Version: Android 5.0 (Lollipop) (API Level 21)
+- Compile SDK Version: 34 (Android 14)
+- Required Permissions:
+    - android.permission.INTERNET (Required for network operations)
 
 **iOS**: iOS 12 or above is required. The minimum version of Xcode required is Xcode 13.
 
@@ -27,7 +27,7 @@ Ensure that your project meets the following requirements:
 dependencies:
   flutter:
     sdk: flutter
-+ salesiq_mobilisten: ^6.3.0
++ salesiq_mobilisten: ^6.3.1
 ```
 
 2. Run `flutter pub get` to fetch dependencies for the project.
@@ -72,17 +72,17 @@ dependencyResolutionManagement {
 Now, click on **Sync Now** or use the **Sync Project with Gradle Files** option under the File menu.
 
 6. #### Proguard rules:
-If you have enabled ProGuard(minifyEnabled) R8, then please add the following rules in your `proguard-rules.pro` file in your `android` folder.
+If you have enabled ProGuard(minifyEnabled) R8, then please add the following rules in your `proguard-rules.pro` file in your `project/android` folder.
 ```
 -dontwarn kotlinx.parcelize.Parcelize
 ```
 
-7.  Generate the App and Access keys for iOS to initialize Mobilisten. In the Zoho SalesIQ console, navigate to `Settings` → `Brands` → `Installation` → `iOS`. Enter the bundle ID for the application as shown in the below example and Click on **Generate**.
+7. Generate the App and Access keys for iOS to initialize Mobilisten. In the Zoho SalesIQ console, navigate to `Settings` → `Brands` → `Installation` → `iOS`. Enter the bundle ID for the application as shown in the below example and Click on **Generate**.
 ![iOS Mobilisten Generating App and Access Keys](https://www.zohowebstatic.com/sites/default/files/u71249/SDK2/ios-rc1.png)
 Note the App and Access keys generated for iOS to be used in further steps.
 ![iOS Mobilisten Copy App and Access Keys](https://www.zohowebstatic.com/sites/default/files/u71249/SDK2/ios-rc2.png)
 
-8.  Generate the App and Access keys for Android to initialize Mobilisten. In the Zoho SalesIQ console, navigate to `Settings` → `Brands` → `Installation` → `Android`. Enter the bundle ID for the application as shown in the below example and Click on **Generate**.
+8. Generate the App and Access keys for Android to initialize Mobilisten. In the Zoho SalesIQ console, navigate to `Settings` → `Brands` → `Installation` → `Android`. Enter the bundle ID for the application as shown in the below example and Click on **Generate**.
 ![Android Mobilisten Generating App and Access Keys](https://www.zohowebstatic.com/sites/default/files/u71249/SDK2/android-rc1.png)
 Note the App and Access keys generated for Android to be used in further steps.
 ![Android Mobilisten Copy App and Access Keys](https://www.zohowebstatic.com/sites/default/files/u71249/SDK2/android-rc2.png)
