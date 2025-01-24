@@ -11,6 +11,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.TextUtils;
 import android.util.Base64;
 
 import androidx.annotation.NonNull;
@@ -30,6 +31,7 @@ import com.zoho.livechat.android.SIQVisitorLocation;
 import com.zoho.livechat.android.SalesIQCustomAction;
 import com.zoho.livechat.android.VisitorChat;
 import com.zoho.livechat.android.ZohoLiveChat;
+import com.zoho.livechat.android.config.DeviceConfig;
 import com.zoho.livechat.android.constants.ConversationType;
 import com.zoho.livechat.android.constants.SalesIQConstants;
 import com.zoho.livechat.android.exception.InvalidEmailException;
@@ -48,9 +50,17 @@ import com.zoho.livechat.android.listeners.UnRegisterListener;
 import com.zoho.livechat.android.models.SalesIQArticle;
 import com.zoho.livechat.android.models.SalesIQArticleCategory;
 import com.zoho.livechat.android.modules.common.DataModule;
+import com.zoho.livechat.android.modules.common.data.local.MobilistenEncryptedSharedPreferences;
+import com.zoho.livechat.android.modules.common.domain.repositories.entities.DebugInfoData;
 import com.zoho.livechat.android.modules.common.ui.LauncherUtil;
+import com.zoho.livechat.android.modules.common.ui.LoggerUtil;
 import com.zoho.livechat.android.modules.common.ui.lifecycle.SalesIQActivitiesManager;
+import com.zoho.livechat.android.modules.common.ui.models.SalesIQGuestUser;
+import com.zoho.livechat.android.modules.common.ui.models.SalesIQUser;
 import com.zoho.livechat.android.modules.common.ui.result.entities.SalesIQError;
+import com.zoho.livechat.android.modules.commonpreferences.data.local.entities.CommonPreferencesLocalDataSource;
+import com.zoho.livechat.android.modules.commonpreferences.domain.entities.PreferenceKey;
+import com.zoho.livechat.android.modules.jwt.domain.entities.SalesIQAuth;
 import com.zoho.livechat.android.modules.knowledgebase.ui.entities.Resource;
 import com.zoho.livechat.android.modules.knowledgebase.ui.entities.ResourceCategory;
 import com.zoho.livechat.android.modules.knowledgebase.ui.entities.ResourceDepartment;
@@ -65,6 +75,8 @@ import com.zoho.livechat.android.operation.SalesIQApplicationManager;
 import com.zoho.livechat.android.utils.LiveChatUtil;
 import com.zoho.salesiqembed.ZohoSalesIQ;
 import com.zoho.salesiqembed.ktx.GsonExtensionsKt;
+
+import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Type;
@@ -142,6 +154,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
     private static class ReturnEvent {
         static final String EVENT_OPEN_URL = "OPEN_URL";  // No I18N
         static final String EVENT_COMPLETE_CHAT_ACTION = "COMPLETE_CHAT_ACTION";// No I18N
+        static final String EVENT_VISITOR_REGISTRATION_FAILURE = "VISITOR_REGISTRATION_FAILURE";// No I18N
     }
 
     private static class Launcher {
@@ -1275,6 +1288,53 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         }
     }
 
+    private static void handleVisitorRegistrationFailure(HashMap<String, Object> map) {
+        if (map.containsKey("type")) {
+            String type = (String) map.get("type");
+            String userId = (String) map.get("user_id");
+            if ("registered_visitor".equals(type)) {
+                if (userId != null && !TextUtils.isEmpty(userId)) {
+                    LiveChatUtil.log("MobilistenEncryptedSharedPreferences- re-registering visitor");   // No I18N
+                    LiveChatUtil.registerVisitor(userId, new RegisterListener() {
+                        @Override
+                        public void onSuccess() {
+                            LoggerUtil.logDebugInfo(new DebugInfoData.VisitorFailureReRegistrationAcknowledged(userId));
+                            LiveChatUtil.log("MobilistenEncryptedSharedPreferences- re-registering visitor success");   // No I18N
+                            if (DataModule.getSharedPreferences().contains(MobilistenEncryptedSharedPreferences.ARE_NEW_ENCRYPTED_KEYS_PRESENT_IN_DEFAULT_PREFERENCES) && DataModule.getSharedPreferences().getBoolean(MobilistenEncryptedSharedPreferences.ARE_NEW_ENCRYPTED_KEYS_PRESENT_IN_DEFAULT_PREFERENCES, true)) {
+                                if (DeviceConfig.getPreferences() != null) {
+                                    DeviceConfig.getPreferences().edit().putBoolean(CommonPreferencesLocalDataSource.SharedPreferenceKeys.IsEncryptedSharedPreferenceFailureAcknowledged, true).commit();
+                                }
+                            } else {
+                                DataModule.getSharedPreferences().edit().remove(CommonPreferencesLocalDataSource.SharedPreferenceKeys.IsEncryptedSharedPreferenceFailureAcknowledged).commit();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(int code, String message) {
+
+                        }
+                    });
+                }
+            } else if ("guest".equals(type)) {
+                LiveChatUtil.log("MobilistenEncryptedSharedPreferences- Guest user acknowledged");
+                JSONObject jsonObject = new JSONObject();
+                try {
+                    jsonObject.put("avuid", LiveChatUtil.getAVUID());
+                } catch (Exception e) {
+                    LiveChatUtil.log(e);
+                }
+                LoggerUtil.logDebugInfo(new DebugInfoData.VisitorFailureGuestAcknowledged(jsonObject.toString()));
+                if (DataModule.getSharedPreferences().contains(MobilistenEncryptedSharedPreferences.ARE_NEW_ENCRYPTED_KEYS_PRESENT_IN_DEFAULT_PREFERENCES) && DataModule.getSharedPreferences().getBoolean(MobilistenEncryptedSharedPreferences.ARE_NEW_ENCRYPTED_KEYS_PRESENT_IN_DEFAULT_PREFERENCES, true)) {
+                    if (DeviceConfig.getPreferences() != null) {
+                        DeviceConfig.getPreferences().edit().putBoolean(CommonPreferencesLocalDataSource.SharedPreferenceKeys.IsEncryptedSharedPreferenceFailureAcknowledged, true).commit();
+                    }
+                } else {
+                    DataModule.getSharedPreferences().edit().remove(CommonPreferencesLocalDataSource.SharedPreferenceKeys.IsEncryptedSharedPreferenceFailureAcknowledged).commit();
+                }
+            }
+        }
+    }
+
     private static void initSalesIQ(final Application application, final Activity activity, final String appKey, final String accessKey, final Result result) {
         final boolean[] isCallBackInvoked = {false};
         if (application != null) {
@@ -1777,7 +1837,15 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                         }
                     }
                 }
-                break;
+            case ReturnEvent.EVENT_VISITOR_REGISTRATION_FAILURE: {
+                if (objects.size() > 0) {
+                    Object auth = objects.get(0);
+                    if (auth instanceof HashMap) {
+                        handleVisitorRegistrationFailure((HashMap<String, Object>) auth);
+                    }
+                }
+            }
+            break;
         }
     }
 
@@ -1857,6 +1925,19 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
             if (eventSink != null) {
                 eventSink.success(eventMap);
             }
+        }
+
+        @Nullable
+        @Override
+        public SalesIQAuth onVisitorRegistrationFailed(@NonNull SalesIQError salesIQError) {
+            Map<String, Object> eventMap = new HashMap<>(3);
+            eventMap.put("eventName", SIQEvent.visitorRegistrationFailure);
+            eventMap.put("code", salesIQError.getCode());
+            eventMap.put("message", salesIQError.getMessage());
+            if (eventSink != null) {
+                eventSink.success(eventMap);
+            }
+            return null;
         }
 
         @Override
@@ -2154,5 +2235,6 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         static String chatUnreadCountChanged = "chatUnreadCountChanged";    // No I18N
         static String handleURL = "handleURL";    // No I18N
         static String notificationClicked = "notificationClicked";    // No I18N
+        static String visitorRegistrationFailure = "visitorRegistrationFailure";    // No I18N
     }
 }

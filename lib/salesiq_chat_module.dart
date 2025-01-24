@@ -57,9 +57,10 @@ class Chat {
     _channel.invokeMethod('setChatWaitingTime', seconds);
   }
 
-  void setVisibility(final ZSIQChatComponent chatComponent, final bool visible) {
+  void setVisibility(
+      final ZSIQChatComponent chatComponent, final bool visible) {
     String componentName;
-    switch(chatComponent) {
+    switch (chatComponent) {
       case ZSIQChatComponent.operatorImage:
         componentName = "operator_image";
         break;

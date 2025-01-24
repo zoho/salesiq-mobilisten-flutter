@@ -7,6 +7,7 @@ import 'package:salesiq_mobilisten/notification.dart';
 import 'package:salesiq_mobilisten/salesiq_chat_module.dart';
 import 'package:salesiq_mobilisten/salesiq_knowledge_base.dart';
 import 'launcher.dart';
+import 'salesiq_auth.dart';
 import 'tab.dart';
 import 'siqtheme.dart';
 
@@ -576,10 +577,17 @@ class ZohoSalesIQ {
   /// Use this API to send events to the SDK with [SIQSendEvent] and it's values
   /// with respect to the event
   static Future<Null> sendEvent(
-      SIQSendEvent eventName, List<Object> values) async {
+      final SIQSendEvent eventName, final List<Object> values) async {
     Map<String, Object> map = <String, Object>{};
     map.putIfAbsent("eventName", () => eventName.toString());
-    map.putIfAbsent("values", () => values);
+    if (eventName == SIQSendEvent.visitorRegistrationFailure) {
+      if (values.length == 1) {
+        SalesIQAuth salesIQAuth = values[0] as SalesIQAuth;
+        map.putIfAbsent("values", () => [salesIQAuth.toMap()]);
+      }
+    } else {
+      map.putIfAbsent("values", () => values);
+    }
     await _channel.invokeMethod('sendEvent', map);
   }
 
@@ -857,6 +865,7 @@ class SIQEvent {
   static const String chatUnreadCountChanged = "chatUnreadCountChanged";
   static const String handleURL = "handleURL";
   static const String customLauncherVisibility = "customLauncherVisibility";
+  static const String visitorRegistrationFailure = "visitorRegistrationFailure";
 }
 
 enum SIQChatStatus {
@@ -911,19 +920,20 @@ class SIQSendEvent {
 
   static const SIQSendEvent openUrl = SIQSendEvent._(0);
   static const SIQSendEvent completeChatAction = SIQSendEvent._(1);
+  static const SIQSendEvent visitorRegistrationFailure = SIQSendEvent._(2);
 
   static const List<SIQSendEvent> values = <SIQSendEvent>[
     openUrl,
-    completeChatAction
+    completeChatAction,
+    visitorRegistrationFailure
   ];
 
   @override
-  String toString() {
-    return const <int, String>{
-      0: 'OPEN_URL',
-      1: 'COMPLETE_CHAT_ACTION'
-    }[index]!;
-  }
+  String toString() => const <int, String>{
+        0: 'OPEN_URL',
+        1: 'COMPLETE_CHAT_ACTION',
+        2: 'VISITOR_REGISTRATION_FAILURE'
+      }[index]!;
 }
 
 class SalesIQFont {

@@ -1,4 +1,4 @@
-[![SupportedLanguages](https://img.shields.io/badge/Platforms-iOS%20%7C%20%20Android-green.svg)](https://flutter.dev/) [![Version](https://img.shields.io/badge/version-6.3.1-blue.svg)](https://mobilisten.io/)
+[![SupportedLanguages](https://img.shields.io/badge/Platforms-iOS%20%7C%20%20Android-green.svg)](https://flutter.dev/) [![Version](https://img.shields.io/badge/version-6.3.2-blue.svg)](https://mobilisten.io/)
 
 # Zoho SalesIQ Mobilisten Flutter Plugin
 
@@ -27,7 +27,7 @@ Ensure that your project meets the following requirements:
 dependencies:
   flutter:
     sdk: flutter
-+ salesiq_mobilisten: ^6.3.1
++ salesiq_mobilisten: ^6.3.2
 ```
 
 2. Run `flutter pub get` to fetch dependencies for the project.
@@ -107,7 +107,7 @@ if (io.Platform.isIOS || io.Platform.isAndroid) {
     }
     ZohoSalesIQ.init(appKey, accessKey).then((_) {
         // initialization successful
-        ZohoSalesIQ.showLauncher(true); // Invoking showLauncher is optional.
+        ZohoSalesIQ.launcher.show(VisibilityMode.always); // Invoking Launcher.show() is optional.
     }).catchError((error) {
         // initialization failed
         print(error);
@@ -118,4 +118,4 @@ if (io.Platform.isIOS || io.Platform.isAndroid) {
 
 ## API Documentation
 
-You can find the list of all APIs and their documentation [here](https://www.zoho.com/salesiq/help/developer-guides/flutter-sdk-show-launcher.html) under the **API Reference** section.
+You can find the list of all APIs and their documentation [here](https://www.zoho.com/salesiq/help/developer-guides/flutter-sdk-installation.html) under the **API Reference** section.

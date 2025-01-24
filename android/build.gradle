@@ -32,6 +32,6 @@ android {
 }
 
 dependencies {
-    api 'com.zoho.salesiq:mobilisten:8.0.6'
+    api 'com.zoho.salesiq:mobilisten:8.0.8'
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
 }
