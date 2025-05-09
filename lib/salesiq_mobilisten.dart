@@ -1,15 +1,16 @@
 import 'dart:async';
 
 import 'package:flutter/services.dart';
-import 'package:salesiq_mobilisten/last_message.dart';
-import 'package:salesiq_mobilisten/mobilisten_date_time.dart';
 import 'package:salesiq_mobilisten/notification.dart';
-import 'package:salesiq_mobilisten/salesiq_chat_module.dart';
-import 'package:salesiq_mobilisten/salesiq_knowledge_base.dart';
+
+import 'last_message.dart';
 import 'launcher.dart';
+import 'mobilisten_date_time.dart';
 import 'salesiq_auth.dart';
-import 'tab.dart';
+import 'salesiq_chat_module.dart';
+import 'salesiq_knowledge_base.dart';
 import 'siqtheme.dart';
+import 'tab.dart';
 
 class ZohoSalesIQ {
   // ignore_for_file: public_member_api_docs
@@ -149,7 +150,7 @@ class ZohoSalesIQ {
 
   /// Performs a custom action using the action name provided in [actionName].
   static Future<Null> performCustomAction(String actionName,
-      [bool shouldOpenChatWindow = false]) async {
+      [@Deprecated("This param was deprecated after v6.4.0, Use ZohoSalesIQ.chat.initiateWithTrigger() method instead.") bool shouldOpenChatWindow = false]) async {
     Map<String, dynamic> arguments = <String, dynamic>{};
     arguments.putIfAbsent("action_name", () => actionName);
     arguments.putIfAbsent(

@@ -1,4 +1,5 @@
 import 'package:flutter/services.dart';
+
 import 'package:salesiq_mobilisten/notification.dart';
 import 'package:salesiq_mobilisten/salesiq_mobilisten.dart';
 
@@ -37,10 +38,22 @@ class Chat {
     }).then((value) => SIQChat.fromMap(value));
   }
 
+  @Deprecated(
+      "This method is deprecated since v6.3.4, use initiateWithTrigger instead")
   Future<SIQChat?> startWithTrigger(
       [String? customChatId = null, String? departmentName = null]) async {
     return _channel.invokeMethod<Map<dynamic, dynamic>>(
         'startNewChatWithTrigger', <String, dynamic>{
+      'custom_chat_id': customChatId,
+      'department_name': departmentName,
+    }).then((value) => SIQChat.fromMap(value));
+  }
+
+  Future<SIQChat?> initiateWithTrigger(String customActionName,
+      [String? customChatId, String? departmentName]) async {
+    return _channel.invokeMethod<Map<dynamic, dynamic>>(
+        'initiateNewChatWithTrigger', <String, dynamic>{
+      'custom_action_name': customActionName,
       'custom_chat_id': customChatId,
       'department_name': departmentName,
     }).then((value) => SIQChat.fromMap(value));

@@ -1060,6 +1060,23 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
                         }
                     }
                 }
+            case "initiateNewChatWithTrigger":
+                if let args = call.argumentDictionary {
+                    if let actionName = args["custom_action_name"] as? String, !actionName.isEmpty {
+                        let customChatId: String? = args["custom_chat_id"] as? String ?? nil
+                        let departmentName: String? = args["department_name"] as? String ?? nil
+                        ZohoSalesIQ.Chat.startWithTrigger(actionName: actionName, chatID: customChatId, department: departmentName) { error, success in
+                            if let object = success {
+                                let visitorObject = SwiftMobilistenPlugin().getChatObject(object)
+                                result(visitorObject)
+                            } else {
+                                result(SwiftMobilistenPlugin().getResourceError(error:error))
+                            }
+                        }
+                    } else {
+                        result(SwiftMobilistenPlugin().getErrorMessage("custom action name mandatory"))
+                    }
+                }
             case "getChat":
                 if let args = call.argumentDictionary, let chatId = args["chat_id"] as? String {
                     ZohoSalesIQ.Chat.get(chatID: chatId) { error, chat in

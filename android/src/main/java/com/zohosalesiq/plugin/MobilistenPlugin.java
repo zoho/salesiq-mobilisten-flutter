@@ -51,15 +51,12 @@ import com.zoho.livechat.android.models.SalesIQArticle;
 import com.zoho.livechat.android.models.SalesIQArticleCategory;
 import com.zoho.livechat.android.modules.common.DataModule;
 import com.zoho.livechat.android.modules.common.data.local.MobilistenEncryptedSharedPreferences;
-import com.zoho.livechat.android.modules.common.domain.repositories.entities.DebugInfoData;
+import com.zoho.livechat.android.modules.common.domain.entities.DebugInfoData;
 import com.zoho.livechat.android.modules.common.ui.LauncherUtil;
 import com.zoho.livechat.android.modules.common.ui.LoggerUtil;
 import com.zoho.livechat.android.modules.common.ui.lifecycle.SalesIQActivitiesManager;
-import com.zoho.livechat.android.modules.common.ui.models.SalesIQGuestUser;
-import com.zoho.livechat.android.modules.common.ui.models.SalesIQUser;
 import com.zoho.livechat.android.modules.common.ui.result.entities.SalesIQError;
-import com.zoho.livechat.android.modules.commonpreferences.data.local.entities.CommonPreferencesLocalDataSource;
-import com.zoho.livechat.android.modules.commonpreferences.domain.entities.PreferenceKey;
+import com.zoho.livechat.android.modules.commonpreferences.data.local.CommonPreferencesLocalDataSource;
 import com.zoho.livechat.android.modules.jwt.domain.entities.SalesIQAuth;
 import com.zoho.livechat.android.modules.knowledgebase.ui.entities.Resource;
 import com.zoho.livechat.android.modules.knowledgebase.ui.entities.ResourceCategory;
@@ -503,12 +500,32 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 break;
             }
 
+            case "initiateNewChatWithTrigger": {
+                final boolean[] canSubmitCallback = {true};
+                ZohoSalesIQ.Chat.startWithTrigger(getString(call.argument("custom_action_name")), getStringOrNull(call.argument("custom_chat_id")), getStringOrNull(call.argument("department_name")), chatResult -> {  // No I18N
+                    if (canSubmitCallback[0]) {
+                        canSubmitCallback[0] = false;
+                        if (chatResult.isSuccess() && chatResult.getData() != null) {
+                            result.success(getChatMapObject(chatResult.getData(), false));
+                        } else {
+                            SalesIQError salesIQError = chatResult.getError();
+                            if (salesIQError != null) {
+                                result.error(LiveChatUtil.getString(salesIQError.getCode()), salesIQError.getMessage(), null);
+                            } else {
+                                result.error("100", "Unknown error", null); // No I18N
+                            }
+                        }
+                    }
+                });
+                break;
+            }
+
             case "startNewChatWithTrigger": {
                 final boolean[] canSubmitCallback = {true};
                 ZohoSalesIQ.Chat.startWithTrigger(getStringOrNull(call.argument("custom_chat_id")), getStringOrNull(call.argument("department_name")), chatResult -> {  // No I18N
                     if (canSubmitCallback[0]) {
                         canSubmitCallback[0] = false;
-                        if (chatResult.isSuccess()) {
+                        if (chatResult.isSuccess() && chatResult.getData() != null) {
                             result.success(getChatMapObject(chatResult.getData(), false));
                         } else {
                             SalesIQError salesIQError = chatResult.getError();
@@ -525,7 +542,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
 
             case "getChat": {
                 ZohoSalesIQ.Chat.get(LiveChatUtil.getString(call.argument("chat_id")), chatResult -> {
-                    if (chatResult.isSuccess()) {
+                    if (chatResult.isSuccess() && chatResult.getData() != null) {
                         result.success(getChatMapObject(chatResult.getData(), false));
                     } else {
                         SalesIQError salesIQError = chatResult.getError();
@@ -674,6 +691,16 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         String value;
         if (object == null) {
             value = null;
+        } else {
+            value = (String) object;
+        }
+        return value;
+    }
+
+    private static @NonNull String getString(Object object) {
+        String value;
+        if (object == null) {
+            value = "";
         } else {
             value = (String) object;
         }
@@ -833,7 +860,13 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 break;
 
             case "performCustomAction":
-                ZohoSalesIQ.Tracking.setCustomAction(LiveChatUtil.getString(call.argument("action_name")), LiveChatUtil.getBoolean(call.argument("should_open_chat_window")));  // No I18N
+                boolean shouldOpenChatWindow = LiveChatUtil.getBoolean(call.argument("should_open_chat_window"));   // No I18N
+                String customActionName = LiveChatUtil.getString(call.argument("action_name")); // No I18N
+                if (shouldOpenChatWindow) {
+                    ZohoSalesIQ.Tracking.setCustomAction(customActionName, true);
+                } else {
+                    ZohoSalesIQ.Visitor.performCustomAction(customActionName);
+                }
                 break;
 
             case "enableInAppNotification":
