@@ -1,5 +1,5 @@
-import 'package:salesiq_mobilisten/siqtheme/siqlauncherunreadbadgetheme.dart';
 import 'package:salesiq_mobilisten/siqtheme/colorutils.dart';
+import 'package:salesiq_mobilisten/siqtheme/siqlauncherunreadbadgetheme.dart';
 
 class SIQLauncherTheme {
   // ignore_for_file: public_member_api_docs

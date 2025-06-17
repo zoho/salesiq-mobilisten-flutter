@@ -1,13 +1,13 @@
 import 'package:salesiq_mobilisten/siqtheme/colorutils.dart';
-import 'package:salesiq_mobilisten/siqtheme/siqmessagetheme.dart';
-import 'package:salesiq_mobilisten/siqtheme/siqhandoffbannertheme.dart';
-import 'package:salesiq_mobilisten/siqtheme/siqbannertheme.dart';
-import 'package:salesiq_mobilisten/siqtheme/siqqueuebannertheme.dart';
-import 'package:salesiq_mobilisten/siqtheme/siqchatinputtheme.dart';
 import 'package:salesiq_mobilisten/siqtheme/siqattachmentsheettheme.dart';
+import 'package:salesiq_mobilisten/siqtheme/siqbannertheme.dart';
+import 'package:salesiq_mobilisten/siqtheme/siqchatinputtheme.dart';
 import 'package:salesiq_mobilisten/siqtheme/siqchatscrollbuttontheme.dart';
 import 'package:salesiq_mobilisten/siqtheme/siqemailtranscripttheme.dart';
+import 'package:salesiq_mobilisten/siqtheme/siqhandoffbannertheme.dart';
 import 'package:salesiq_mobilisten/siqtheme/siqlogviewtheme.dart';
+import 'package:salesiq_mobilisten/siqtheme/siqmessagetheme.dart';
+import 'package:salesiq_mobilisten/siqtheme/siqqueuebannertheme.dart';
 
 class SIQChatWindowTheme {
   // ignore_for_file: public_member_api_docs

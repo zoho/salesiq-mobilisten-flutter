@@ -1,13 +1,13 @@
-import 'package:salesiq_mobilisten/siqtheme/siqmessagecommontheme.dart';
-import 'package:salesiq_mobilisten/siqtheme/siqsuggestiontheme.dart';
-import 'package:salesiq_mobilisten/siqtheme/siqskipactionbuttontheme.dart';
-import 'package:salesiq_mobilisten/siqtheme/siqaudioplayertheme.dart';
-import 'package:salesiq_mobilisten/siqtheme/siqselectioncomponenttheme.dart';
-import 'package:salesiq_mobilisten/siqtheme/siqinputcardtheme.dart';
-import 'package:salesiq_mobilisten/siqtheme/siqslidercardtheme.dart';
-import 'package:salesiq_mobilisten/siqtheme/siqinfomessagetheme.dart';
 import 'package:salesiq_mobilisten/siqtheme/siqarticlemessagetheme.dart';
+import 'package:salesiq_mobilisten/siqtheme/siqaudioplayertheme.dart';
 import 'package:salesiq_mobilisten/siqtheme/siqfilemessagetheme.dart';
+import 'package:salesiq_mobilisten/siqtheme/siqinfomessagetheme.dart';
+import 'package:salesiq_mobilisten/siqtheme/siqinputcardtheme.dart';
+import 'package:salesiq_mobilisten/siqtheme/siqmessagecommontheme.dart';
+import 'package:salesiq_mobilisten/siqtheme/siqselectioncomponenttheme.dart';
+import 'package:salesiq_mobilisten/siqtheme/siqskipactionbuttontheme.dart';
+import 'package:salesiq_mobilisten/siqtheme/siqslidercardtheme.dart';
+import 'package:salesiq_mobilisten/siqtheme/siqsuggestiontheme.dart';
 
 class SIQMessageTheme {
   // ignore_for_file: public_member_api_docs

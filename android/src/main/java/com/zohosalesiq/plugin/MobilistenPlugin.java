@@ -57,6 +57,8 @@ import com.zoho.livechat.android.modules.common.ui.LoggerUtil;
 import com.zoho.livechat.android.modules.common.ui.lifecycle.SalesIQActivitiesManager;
 import com.zoho.livechat.android.modules.common.ui.result.entities.SalesIQError;
 import com.zoho.livechat.android.modules.commonpreferences.data.local.CommonPreferencesLocalDataSource;
+import com.zoho.livechat.android.modules.conversations.models.CommunicationMode;
+import com.zoho.livechat.android.modules.conversations.models.SalesIQConversation;
 import com.zoho.livechat.android.modules.jwt.domain.entities.SalesIQAuth;
 import com.zoho.livechat.android.modules.knowledgebase.ui.entities.Resource;
 import com.zoho.livechat.android.modules.knowledgebase.ui.entities.ResourceCategory;
@@ -70,6 +72,7 @@ import com.zoho.livechat.android.modules.knowledgebase.ui.listeners.SalesIQKnowl
 import com.zoho.livechat.android.modules.notifications.sdk.entities.SalesIQNotificationPayload;
 import com.zoho.livechat.android.operation.SalesIQApplicationManager;
 import com.zoho.livechat.android.utils.LiveChatUtil;
+import com.zoho.salesiq.core.modules.conversations.models.SalesIQConversationAttributes;
 import com.zoho.salesiqembed.ZohoSalesIQ;
 import com.zoho.salesiqembed.ktx.GsonExtensionsKt;
 
@@ -78,6 +81,7 @@ import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -482,7 +486,9 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
             case "startNewChat": {
                 // TODO: Need to remove this fallback case if everything is fine from native end.
                 final boolean[] canSubmitCallback = {true};
-                ZohoSalesIQ.Chat.start(LiveChatUtil.getString(call.argument("question")), getStringOrNull(call.argument("custom_chat_id")), getStringOrNull(call.argument("department_name")), chatResult -> {  // No I18N
+                String departmentName = getStringOrNull(call.argument("department_name"));  //No I18N
+                SalesIQConversationAttributes attributes = getSalesIQConversationAttributes(call, departmentName);
+                ZohoSalesIQ.Chat.start(LiveChatUtil.getString(call.argument("question")), getStringOrNull(call.argument("custom_chat_id")), attributes, chatResult -> {  // No I18N
                     if (canSubmitCallback[0]) {
                         canSubmitCallback[0] = false;
                         if (chatResult.isSuccess()) {
@@ -502,7 +508,9 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
 
             case "initiateNewChatWithTrigger": {
                 final boolean[] canSubmitCallback = {true};
-                ZohoSalesIQ.Chat.startWithTrigger(getString(call.argument("custom_action_name")), getStringOrNull(call.argument("custom_chat_id")), getStringOrNull(call.argument("department_name")), chatResult -> {  // No I18N
+                String departmentName = getStringOrNull(call.argument("department_name"));  //No I18N
+                SalesIQConversationAttributes attributes = getSalesIQConversationAttributes(call, departmentName);
+                ZohoSalesIQ.Chat.startWithTrigger(getString(call.argument("custom_action_name")), getStringOrNull(call.argument("custom_chat_id")), attributes, chatResult -> {  // No I18N
                     if (canSubmitCallback[0]) {
                         canSubmitCallback[0] = false;
                         if (chatResult.isSuccess() && chatResult.getData() != null) {
@@ -563,6 +571,29 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 }
             }
         }
+    }
+
+    @Nullable
+    private static SalesIQConversationAttributes getSalesIQConversationAttributes(MethodCall call, String departmentName) {
+        SalesIQConversationAttributes.Builder builder;
+        SalesIQConversationAttributes attributes = null;
+        boolean hasDepartment = departmentName != null && !departmentName.isEmpty();
+        boolean hasCustomSecretFields = call.hasArgument("custom_secret_fields") && call.argument("custom_secret_fields") != null && call.argument("custom_secret_fields") instanceof Map;  //No I18N
+        if (departmentName != null && !departmentName.isEmpty() || hasCustomSecretFields) {
+            builder = new SalesIQConversationAttributes.Builder();
+
+            if (hasDepartment) {
+                builder.setDepartments(Collections.singletonList(new SIQDepartment(null, departmentName, CommunicationMode.CHAT)));
+            }
+            if (hasCustomSecretFields) {
+                Map<String, String> customFields = call.argument("custom_secret_fields");   //No I18N
+                if (customFields != null) {
+                    builder.setCustomSecretFields(customFields);
+                }
+            }
+            attributes = builder.build();
+        }
+        return attributes;
     }
 
     static void handleKnowledgeBaseMethodCalls(MethodCall call, Result result) {
@@ -1563,6 +1594,99 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         }
         if (chat.getQueuePosition() > 0) {
             visitorMap.put("queuePosition", chat.getQueuePosition());         // No I18N
+        }
+        return visitorMap;
+    }
+
+    public static Map<String, Object> getChatMapObject(SalesIQConversation conversation, boolean isEventStream) {
+        Map<String, Object> visitorMap = new HashMap<String, Object>();
+        visitorMap.put("id", conversation.getId());         // No I18N
+        if (conversation instanceof SalesIQConversation.Chat) {
+            visitorMap.put("unreadCount", ((SalesIQConversation.Chat) conversation).getUnreadCount());         // No I18N
+            visitorMap.put("isBotAttender", ((SalesIQConversation.Chat) conversation).isBotAttender());         // No I18N
+            if (((SalesIQConversation.Chat) conversation).getStatus() != null) {
+                visitorMap.put("status", ((SalesIQConversation.Chat) conversation).getStatus().name().toLowerCase());         // No I18N
+            }
+
+            Map<String, Object> lastMessageMap = new HashMap<String, Object>();
+            SalesIQConversation.Chat.SalesIQMessage lastMessage = ((SalesIQConversation.Chat) conversation).getLastSalesIQMessage();
+            if (lastMessage != null) {
+                if (lastMessage.getText() != null) {
+                    visitorMap.put("lastMessage", lastMessage.getText());         // No I18N
+                }
+                if (lastMessage.getSender() != null) {
+                    visitorMap.put("lastMessageSender", lastMessage.getSender());         // No I18N
+                }
+                if (lastMessage.getTime() != null && lastMessage.getTime() > 0) {
+                    if (isEventStream) {
+                        visitorMap.put("lastMessageTime", LiveChatUtil.getString(lastMessage.getTime()));         // No I18N
+                        lastMessageMap.put("time", LiveChatUtil.getString(lastMessage.getTime()));         // No I18N
+                    } else {
+                        visitorMap.put("lastMessageTime", LiveChatUtil.getDouble(lastMessage.getTime()));
+                        lastMessageMap.put("time", LiveChatUtil.getDouble(lastMessage.getTime()));
+                    }
+                }
+                lastMessageMap.put("sender", lastMessage.getSender());
+                lastMessageMap.put("sender_id", lastMessage.getSenderId());
+                lastMessageMap.put("text", lastMessage.getText());
+                lastMessageMap.put("type", lastMessage.getType());
+                lastMessageMap.put("is_read", lastMessage.isRead());
+                lastMessageMap.put("sent_by_visitor", lastMessage.getSentByVisitor());
+                if (lastMessage.getStatus() != null) {
+                    String status = null;
+                    switch (lastMessage.getStatus()) {
+                        case Sending:
+                            status = SENDING;
+                            break;
+                        case Uploading:
+                            status = UPLOADING;
+                            break;
+                        case Sent:
+                            status = SENT;
+                            break;
+                        case Failure:
+                            status = FAILURE;
+                            break;
+                    }
+                    lastMessageMap.put("status", status);
+                }
+                SalesIQConversation.Chat.SalesIQMessage.SalesIQFile salesIQFile = lastMessage.getFile();
+                Map<String, Object> fileMap = new HashMap<String, Object>();
+                if (salesIQFile != null) {
+                    fileMap.put("name", salesIQFile.getName());
+                    fileMap.put("content_type", salesIQFile.getContentType());
+                    fileMap.put("comment", salesIQFile.getComment());
+                    fileMap.put("size", salesIQFile.getSize());
+                    lastMessageMap.put("file", fileMap);
+                }
+                visitorMap.put("recentMessage", lastMessageMap);         // No I18N
+            }
+
+            if (conversation.getFeedback() != null) {
+                visitorMap.put("feedback", conversation.getFeedback());         // No I18N
+            }
+        }
+        if (conversation.getQuestion() != null) {
+            visitorMap.put("question", conversation.getQuestion());         // No I18N
+        }
+        if (conversation.getDepartmentName() != null) {
+            visitorMap.put("departmentName", conversation.getDepartmentName());         // No I18N
+        }
+
+        if (conversation.getAttenderName() != null) {
+            visitorMap.put("attenderName", conversation.getAttenderName());         // No I18N
+        }
+        if (conversation.getAttenderId() != null) {
+            visitorMap.put("attenderID", conversation.getAttenderId());         // No I18N
+        }
+        if (conversation.getAttenderEmail() != null) {
+            visitorMap.put("attenderEmail", conversation.getAttenderEmail());         // No I18N
+        }
+        if (conversation.getRating() != null) {
+            visitorMap.put("rating", conversation.getRating());         // No I18N
+        }
+        if (conversation.getQueuePosition() > 0) {
+            visitorMap.put("queuePosition", conversation.getQueuePosition());         // No I18N
         }
         return visitorMap;
     }

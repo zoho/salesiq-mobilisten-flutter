@@ -1,5 +1,6 @@
 import 'package:flutter/services.dart';
-import 'package:salesiq_mobilisten/salesiq_mobilisten.dart';
+
+import 'salesiq_mobilisten.dart';
 
 class Notification {
   // ignore_for_file: public_member_api_docs

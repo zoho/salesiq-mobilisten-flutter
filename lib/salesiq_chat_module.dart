@@ -1,7 +1,7 @@
 import 'package:flutter/services.dart';
 
-import 'package:salesiq_mobilisten/notification.dart';
-import 'package:salesiq_mobilisten/salesiq_mobilisten.dart';
+import 'notification.dart';
+import 'salesiq_mobilisten.dart';
 
 class Chat {
   // ignore_for_file: public_member_api_docs
@@ -29,17 +29,20 @@ class Chat {
   }
 
   Future<SIQChat?> start(String question,
-      [String? customChatId = null, String? departmentName = null]) async {
+      [String? customChatId = null,
+      String? departmentName = null,
+      Map<String, String>? customSecretFields]) async {
     return _channel
         .invokeMethod<Map<dynamic, dynamic>>('startNewChat', <String, dynamic>{
       'question': question,
       'custom_chat_id': customChatId,
       'department_name': departmentName,
+      'custom_secret_fields': customSecretFields,
     }).then((value) => SIQChat.fromMap(value));
   }
 
   @Deprecated(
-      "This method is deprecated since v6.4.0, use initiateWithTrigger instead")
+      "This method is deprecated since v6.3.4, use initiateWithTrigger instead")
   Future<SIQChat?> startWithTrigger(
       [String? customChatId = null, String? departmentName = null]) async {
     return _channel.invokeMethod<Map<dynamic, dynamic>>(
@@ -50,12 +53,15 @@ class Chat {
   }
 
   Future<SIQChat?> initiateWithTrigger(String customActionName,
-      [String? customChatId, String? departmentName]) async {
+      [String? customChatId,
+      String? departmentName,
+      Map<String, String>? customSecretFields]) async {
     return _channel.invokeMethod<Map<dynamic, dynamic>>(
         'initiateNewChatWithTrigger', <String, dynamic>{
       'custom_action_name': customActionName,
       'custom_chat_id': customChatId,
       'department_name': departmentName,
+      'custom_secret_fields': customSecretFields,
     }).then((value) => SIQChat.fromMap(value));
   }
 

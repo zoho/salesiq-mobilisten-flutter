@@ -1038,7 +1038,8 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
                 if let args = call.argumentDictionary, let question = args["question"] as? String {
                     let customChatId: String? = args["custom_chat_id"] as? String ?? nil
                     let departmentName: String? = args["department_name"] as? String ?? nil
-                    ZohoSalesIQ.Chat.start(question: question, chatID: customChatId, department: departmentName) { error, success in
+                    let secretField: [String: Any]? = args["custom_secret_fields"] as? [String: Any] ?? nil
+                    ZohoSalesIQ.Chat.start(question: question, chatID: customChatId, department: departmentName, secretFields: secretField) { error, success in
                         if let object = success {
                             let visitorObject = SwiftMobilistenPlugin().getChatObject(object)
                             result(visitorObject)
@@ -1065,7 +1066,8 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
                     if let actionName = args["custom_action_name"] as? String, !actionName.isEmpty {
                         let customChatId: String? = args["custom_chat_id"] as? String ?? nil
                         let departmentName: String? = args["department_name"] as? String ?? nil
-                        ZohoSalesIQ.Chat.startWithTrigger(actionName: actionName, chatID: customChatId, department: departmentName) { error, success in
+                        let secretField: [String: Any]? = args["custom_secret_fields"] as? [String: Any] ?? nil
+                        ZohoSalesIQ.Chat.startWithTrigger(actionName: actionName, chatID: customChatId, department: departmentName, secretFields: secretField) { error, success in
                             if let object = success {
                                 let visitorObject = SwiftMobilistenPlugin().getChatObject(object)
                                 result(visitorObject)

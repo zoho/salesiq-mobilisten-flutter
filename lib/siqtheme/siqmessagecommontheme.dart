@@ -1,7 +1,7 @@
 import 'package:salesiq_mobilisten/siqtheme/colorutils.dart';
+import 'package:salesiq_mobilisten/siqtheme/siqloadmoreviewtheme.dart';
 import 'package:salesiq_mobilisten/siqtheme/siqprogressbuttontheme.dart';
 import 'package:salesiq_mobilisten/siqtheme/siqreplyviewtheme.dart';
-import 'package:salesiq_mobilisten/siqtheme/siqloadmoreviewtheme.dart';
 
 class SIQMessageCommonTheme {
   // ignore_for_file: public_member_api_docs
