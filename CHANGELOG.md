@@ -1,5 +1,9 @@
 ## Mobilisten Plugin Changelog
 
+### 6.4.3 - 02 Jul 2025
+- Code formatting improvements for better readability and consistency.
+- No functional changes.
+
 ### 6.4.2 - 02 Jul 2025
 
 - Updated Mobilisten SDK for Android to
