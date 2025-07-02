@@ -33,5 +33,5 @@ jobs:
           AUTH_TOKEN: ${{ secrets.SD_PUB_DEV_PUBLISHING_AUTH_TOKEN }}
         run: |
           curl --location --request POST \
-            $WEBHOOK_URL \
+            "$WEBHOOK_URL" \
             --header 'Authorization: $AUTH_TOKEN'
