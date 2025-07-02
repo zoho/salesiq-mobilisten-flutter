@@ -32,7 +32,6 @@ jobs:
           WEBHOOK_URL: ${{ secrets.SD_PUB_DEV_PUBLISHING_URL }}
           AUTH_TOKEN: ${{ secrets.SD_PUB_DEV_PUBLISHING_AUTH_TOKEN }}
         run: |          
-          response=(curl --location --request POST \      
+          curl --location --request POST \      
             -H "Authorization: $AUTH_TOKEN" \
-            "$WEBHOOK_URL")
-          echo "Response: $response"
+            "$WEBHOOK_URL")          
