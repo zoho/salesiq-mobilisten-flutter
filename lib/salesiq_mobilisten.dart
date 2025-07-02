@@ -150,7 +150,9 @@ class ZohoSalesIQ {
 
   /// Performs a custom action using the action name provided in [actionName].
   static Future<Null> performCustomAction(String actionName,
-      [@Deprecated("This param was deprecated after v6.4.0, Use ZohoSalesIQ.chat.initiateWithTrigger() method instead.") bool shouldOpenChatWindow = false]) async {
+      [@Deprecated(
+          "This param was deprecated after v6.4.0, Use ZohoSalesIQ.chat.initiateWithTrigger() method instead.")
+      bool shouldOpenChatWindow = false]) async {
     Map<String, dynamic> arguments = <String, dynamic>{};
     arguments.putIfAbsent("action_name", () => actionName);
     arguments.putIfAbsent(

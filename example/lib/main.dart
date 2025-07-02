@@ -239,8 +239,8 @@ class MobilistenDemoScreen extends StatelessWidget {
                   "key2": "secret_value_2",
                   "key3": "secret_value_3",
                 };
-                ZohoSalesIQ.chat.start(
-                    "Trigger 1", "custom_chat_id", "department_name", secretFields);
+                ZohoSalesIQ.chat.start("Trigger 1", "custom_chat_id",
+                    "department_name", secretFields);
               },
               style: buttonStyle,
               child: Center(child: Text("Transactions")),
