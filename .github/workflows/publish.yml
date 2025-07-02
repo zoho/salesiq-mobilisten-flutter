@@ -13,13 +13,13 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Debug environment variables and context
-        shell: cmd
+        shell: bash
         env:
           WEBHOOK_URL: ${{ secrets.SD_PUB_DEV_PUBLISHING_URL }}
           AUTH_TOKEN: ${{ secrets.SD_PUB_DEV_PUBLISHING_AUTH_TOKEN }}
         run: |
-          example-command "%SD_PUB_DEV_PUBLISHING_URL%"      
-          example-command "URL_Test: %secrets.SD_PUB_DEV_PUBLISHING_URL != ''%"
+          echo "WEBHOOK_URL: $WEBHOOK_URL"
+          if [ -n "$WEBHOOK_URL" ]; then echo "URL_Test: WEBHOOK_URL is set"; else echo "URL_Test: WEBHOOK_URL is not set"; fi
 
       - name: Send cURL request
         env:
