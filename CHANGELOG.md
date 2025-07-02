@@ -1,6 +1,12 @@
 ## Mobilisten Plugin Changelog
 
-### 6.4.1 - 17 Jun 2025
+### 6.4.2 - 02 Jul 2025
+
+- Updated Mobilisten SDK for Android to
+  version [8.2.1](https://github.com/zoho/salesiq-mobilisten-android-sample/releases/tag/v8.2.1)
+- Miscellaneous bug fixes and performance improvements.
+
+### 6.4.1 - 16 Jun 2025
 
 - Updated Mobilisten SDK for iOS to version [9.3.1](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/v9.3.1) and Android to version [8.2.1-beta01](https://github.com/zoho/salesiq-mobilisten-android-sample/releases/tag/v8.2.1-beta01)
 - The ZohoSalesIQ.chat.initiateWithTrigger() and ZohoSalesIQ.chat.start() APIs supports secret fields that can be used with plugs.
