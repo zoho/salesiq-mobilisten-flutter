@@ -32,6 +32,15 @@ jobs:
           WEBHOOK_URL: ${{ secrets.SD_PUB_DEV_PUBLISHING_URL }}
           AUTH_TOKEN: ${{ secrets.SD_PUB_DEV_PUBLISHING_AUTH_TOKEN }}
         run: |
-          curl --location --request POST \
-            "$WEBHOOK_URL" \
-            --header 'Authorization: $AUTH_TOKEN'
+          python -c "
+          import requests
+          response = requests.post(
+            $WEBHOOK_URL,
+            headers={'Authorization': '$AUTH_TOKEN'},
+            json={'key': 'value'}
+          )
+          print(response.text)
+          "
+          # curl --location --request POST \
+          #   "$WEBHOOK_URL" \
+          #   --header 'Authorization: $AUTH_TOKEN'
