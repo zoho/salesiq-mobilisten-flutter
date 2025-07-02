@@ -36,7 +36,7 @@ jobs:
           import requests
           response = requests.post(
             $WEBHOOK_URL,
-            headers={'Authorization': '$AUTH_TOKEN'},
+            headers={'Authorization': $AUTH_TOKEN},
             json={'key': 'value'}
           )
           print(response.text)
