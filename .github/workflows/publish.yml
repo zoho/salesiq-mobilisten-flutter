@@ -18,8 +18,8 @@ jobs:
           WEBHOOK_URL: ${{ secrets.SD_PUB_DEV_PUBLISHING_URL }}
           AUTH_TOKEN: ${{ secrets.SD_PUB_DEV_PUBLISHING_AUTH_TOKEN }}
         run: |
-            example-command "%SD_PUB_DEV_PUBLISHING_URL%"      
-            example-command "URL_Test: %secrets.SD_PUB_DEV_PUBLISHING_URL != ''%"
+          example-command "%SD_PUB_DEV_PUBLISHING_URL%"      
+          example-command "URL_Test: %secrets.SD_PUB_DEV_PUBLISHING_URL != ''%"
 
       - name: Send cURL request
         env:
