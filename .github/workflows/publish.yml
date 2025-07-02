@@ -22,7 +22,9 @@ jobs:
           echo "WEBHOOK_URL: $WEBHOOK_URL"
           echo "WEBHOOK_URL_TEST: $WEBHOOK_URL"
           echo "URL length: ${#WEBHOOK_URL}"
-          echo "URL starts with: ${WEBHOOK_URL:0:8}..."
+          echo "URL length: ${#WEBHOOK_URL_TEST}"
+          echo "URL starts with: ${WEBHOOK_URL:0:166}..."
+          # echo "URL starts with: ${WEBHOOK_URL_TEST:0:166}..."
           if [ -n "$WEBHOOK_URL" ]; then echo "URL_Test: WEBHOOK_URL is set"; else echo "URL_Test: WEBHOOK_URL is not set"; fi
 
       - name: Send cURL request
