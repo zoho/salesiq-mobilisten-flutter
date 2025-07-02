@@ -12,12 +12,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Send cURL request
+      - name: Debug environment variables and context
         env:
           WEBHOOK_URL: ${{ secrets.SD_PUB_DEV_PUBLISHING_URL }}
           AUTH_TOKEN: ${{ secrets.SD_PUB_DEV_PUBLISHING_AUTH_TOKEN }}
         run: |
-          echo "::debug::Sending cURL request to $WEBHOOK_URL"
+          echo "Test-GitHub Ref Name (Tag): ${{ github.ref_name }}"
+          echo "Test-Repository: ${{ github.repository }}"
+          echo "Test-Event Name: ${{ github.event_name }}"
+          echo "Test-WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}" # Masked in logs        
+
+      - name: Send cURL request
+        env:
+          WEBHOOK_URL: ${{ secrets.SD_PUB_DEV_PUBLISHING_URL }}
+          AUTH_TOKEN: ${{ secrets.SD_PUB_DEV_PUBLISHING_AUTH_TOKEN }}
+        run: |          
           curl --manual--location --request POST 
           curl -X POST "$WEBHOOK_URL" \      
           -H "Authorization: $AUTH_TOKEN"
