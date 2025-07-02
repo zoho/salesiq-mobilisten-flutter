@@ -23,10 +23,11 @@ jobs:
           echo "WEBHOOK_URL_TEST: $WEBHOOK_URL"
           echo "URL length: ${#WEBHOOK_URL}"
           echo "URL length: ${#WEBHOOK_URL_TEST}"
-          echo "URL starts with: ${WEBHOOK_URL:0:166}..."
+          echo "URL starts with: ${WEBHOOK_URL:0:16}..."
           # echo "URL starts with: ${WEBHOOK_URL_TEST:0:166}..."
           if [ -n "$WEBHOOK_URL" ]; then echo "URL_Test: WEBHOOK_URL is set"; else echo "URL_Test: WEBHOOK_URL is not set"; fi
 
+      - uses: sozo-design/curl@v1.0.2
       - name: Send cURL request
         env:
           WEBHOOK_URL: ${{ secrets.SD_PUB_DEV_PUBLISHING_URL }}
