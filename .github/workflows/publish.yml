@@ -31,7 +31,7 @@ jobs:
         env:
           WEBHOOK_URL: ${{ secrets.SD_PUB_DEV_PUBLISHING_URL }}
           AUTH_TOKEN: ${{ secrets.SD_PUB_DEV_PUBLISHING_AUTH_TOKEN }}
-        run: |          
-          curl --location --request POST \      
-            # -H "Authorization: $AUTH_TOKEN" \
-            'www.zoho.com'
+        run: |
+          curl --location --request POST \
+            '$WEBHOOK_URL' \
+            --header 'Authorization: $AUTH_TOKEN'
