@@ -34,4 +34,4 @@ jobs:
         run: |          
           curl --location --request POST \      
             -H "Authorization: $AUTH_TOKEN" \
-            "$WEBHOOK_URL")          
+            "$WEBHOOK_URL"
