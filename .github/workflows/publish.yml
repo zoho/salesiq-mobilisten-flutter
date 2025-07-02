@@ -15,8 +15,8 @@ jobs:
       - name: Debug environment variables and context
         shell: bash
         env:
-          WEBHOOK_URL: ${{ secrets.SD_PUB_DEV_PUBLISHING_URL }}
-          AUTH_TOKEN: ${{ secrets.SD_PUB_DEV_PUBLISHING_AUTH_TOKEN }}
+          WEBHOOK_URL: "${{ secrets.SD_PUB_DEV_PUBLISHING_URL }}"
+          AUTH_TOKEN: "${{ secrets.SD_PUB_DEV_PUBLISHING_AUTH_TOKEN }}"
         run: |
           echo "WEBHOOK_URL: $WEBHOOK_URL"
           if [ -n "$WEBHOOK_URL" ]; then echo "URL_Test: WEBHOOK_URL is set"; else echo "URL_Test: WEBHOOK_URL is not set"; fi
