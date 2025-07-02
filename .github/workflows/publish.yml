@@ -33,5 +33,5 @@ jobs:
           AUTH_TOKEN: ${{ secrets.SD_PUB_DEV_PUBLISHING_AUTH_TOKEN }}
         run: |          
           curl --location --request POST \      
-            -H "Authorization: $AUTH_TOKEN" \
-            "$WEBHOOK_URL"
+            # -H "Authorization: $AUTH_TOKEN" \
+            www.zoho.com
