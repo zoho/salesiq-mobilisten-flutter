@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <bool name="zsiq_internal_api_for_testing_print_debug_logs">true</bool>
+</resources>

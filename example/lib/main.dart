@@ -2,9 +2,7 @@ import 'dart:async';
 import 'dart:io' as io;
 
 import 'package:flutter/material.dart';
-import 'package:salesiq_mobilisten/launcher.dart';
 import 'package:salesiq_mobilisten/salesiq_mobilisten.dart';
-import 'package:salesiq_mobilisten_calls/salesiq_mobilisten_calls.dart';
 
 void main() {
   runApp(MyApp());
@@ -34,7 +32,13 @@ class _MyAppState extends State<MyApp> {
         appKey = "INSERT_ANDROID_APP_KEY";
         accessKey = "INSERT_ANDROID_ACCESS_KEY";
       }
-      ZohoSalesIQ.init(appKey, accessKey).then((_) {
+
+      SalesIQConfiguration configuration =
+          SalesIQConfiguration(appKey: appKey, accessKey: accessKey)
+              // .copyWith(callViewMode: SalesIQCallViewMode.floating);
+              .copyWith(callViewMode: SalesIQCallViewMode.banner);
+
+      ZohoSalesIQ.initialize(configuration).then((_) {
         // initialization successful
         ZohoSalesIQ.launcher.show(VisibilityMode.always);
       }).catchError((error) {
@@ -62,7 +66,7 @@ class _MyAppState extends State<MyApp> {
 }
 
 class MobilistenDemoScreen extends StatelessWidget {
-  TextEditingController _visitorIdController = TextEditingController();
+  final TextEditingController _visitorIdController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -115,18 +119,6 @@ class MobilistenDemoScreen extends StatelessWidget {
                       label: Icon(Icons.message_rounded),
                     ),
                     SizedBox(width: 12),
-                    // FloatingActionButton.extended(
-                    //     heroTag: "call",
-                    //     backgroundColor: Colors.blue,
-                    //     // child: Icon(Icons.add_ic_call_rounded),
-                    //     shape: RoundedRectangleBorder(
-                    //       borderRadius: BorderRadius.circular(50),
-                    //     ),
-                    //     onPressed: () {
-                    //
-                    //     },
-                    //     label: Icon(Icons.add_ic_call_rounded) //Text("Call")
-                    //     ),
                   ],
                 )
               ],
@@ -230,21 +222,6 @@ class MobilistenDemoScreen extends StatelessWidget {
                 _langButton("ar"),
               ],
             ),
-
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                Map<String, String> secretFields = {
-                  "key1": "secret_value_1",
-                  "key2": "secret_value_2",
-                  "key3": "secret_value_3",
-                };
-                ZohoSalesIQ.chat.start("Trigger 1", "custom_chat_id",
-                    "department_name", secretFields);
-              },
-              style: buttonStyle,
-              child: Center(child: Text("Transactions")),
-            ), // Space for floating button
           ],
         ),
       ),

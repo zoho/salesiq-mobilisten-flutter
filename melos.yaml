@@ -1,0 +1,31 @@
+name: mobilisten_workspace
+repository: https://github.com/zoho/salesiq-mobilisten-flutter
+
+packages:
+  - packages/*
+
+commands:
+  bootstrap:
+    runPubGet: true # Runs `dart pub get` for all packages
+  test:
+    run: flutter test # Runs tests for all packages
+  analyze:
+    run: dart analyze
+  format:
+    run: dart format .
+  publish:
+    run: dart format . && dart pub publish
+
+# Optional: Custom scripts
+scripts:
+  clean:
+    run: melos run clean:flutter && melos run clean:packages
+    description: Clean all packages and the Flutter app
+  clean:flutter:
+    run: flutter clean
+    packageFilters:
+      dirExists: flutter
+  clean:packages:
+    run: dart pub cache clean
+    packageFilters:
+      dirExists: lib

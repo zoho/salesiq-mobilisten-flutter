@@ -1,4 +1,4 @@
-[![SupportedLanguages](https://img.shields.io/badge/Platforms-iOS%20%7C%20%20Android-green.svg)](https://flutter.dev/) [![Version](https://img.shields.io/badge/version-6.4.3-blue.svg)](https://mobilisten.io/)
+[![SupportedLanguages](https://img.shields.io/badge/Platforms-iOS%20%7C%20%20Android-green.svg)](https://flutter.dev/) [![Version](https://img.shields.io/badge/version-6.5.0-blue.svg)](https://mobilisten.io/)
 
 # Zoho SalesIQ Mobilisten Flutter Plugin
 
@@ -14,12 +14,12 @@ Please follow the steps mentioned below to install the Mobilisten plugin in your
 **Android**:
 Ensure that your project meets the following requirements:
 
-- Minimum Android Version: Android 5.0 (Lollipop) (API Level 21)
-- Compile SDK Version: 35 (Android 14)
+- Minimum Android Version: Android 6.0 (Marshmallow) (API Level 23)
+- Compile SDK Version: 35 (Android 15)
 - Required Permissions:
     - android.permission.INTERNET (Required for network operations)
 
-**iOS**: iOS 13 or above is required. The minimum version of Xcode required is Xcode 13.
+**iOS**: iOS 13 or above is required.
 
 ### Installation steps:
 1. Add Mobilisten as a dependency within the `pubspec.yaml` file as shown below.
@@ -27,15 +27,22 @@ Ensure that your project meets the following requirements:
 dependencies:
   flutter:
     sdk: flutter
-+ salesiq_mobilisten: ^6.4.3
++ salesiq_mobilisten: ^6.5.0
+
+// Add this only if you want to integrate Mobilisten Calls along with Mobilisten
++ salesiq_mobilisten_calls: ^0.0.1
 ```
+
+Refer to
+this [README](https://github.com/zoho/salesiq-mobilisten-flutter/tree/main/packages/calls/README.md)
+for more details with calls integration
 
 2. Run `flutter pub get` to fetch dependencies for the project.
 
 3. Navigate to the `ios` directory and run the `pod install` command.
 
 4. Add the following permissions in the **Info.plist** file for the iOS Runner project.
-![Mobilisten iOS Permissions Info.plist](https://www.zohowebstatic.com/sites/default/files/u71249/SDK2/cordova-installation-step2.png)
+   ![Mobilisten iOS Permissions Info.plist](https://www.zohowebstatic.com/sites/default/files/u71249/SDK2/cordova-installation-step2.png)
 
 5. Open the `android` directory in Android Studio or any IDE used for Android development.  Open the project `build.gradle` or `settings.gradle` file and add the following maven repository.
 
@@ -93,7 +100,9 @@ import 'dart:io' as io;
 import 'package:salesiq_mobilisten/salesiq_mobilisten.dart';
 ```
 
-10. Initialize Mobilisten using the [`init`](https://www.zoho.com/salesiq/help/developer-guides/flutter-sdk-init.html) API within the `initState()` method in the **main.dart** file.
+10. Initialize Mobilisten using the [
+    `initialize`](https://www.zoho.com/salesiq/help/developer-guides/flutter-sdk-initialize.html)
+    API within the `initState()` method in the **main.dart** file.
 ```dart
 if (io.Platform.isIOS || io.Platform.isAndroid) {
     String appKey;
@@ -105,7 +114,9 @@ if (io.Platform.isIOS || io.Platform.isAndroid) {
         appKey = "INSERT_ANDROID_APP_KEY";
         accessKey = "INSERT_ANDROID_ACCESS_KEY";
     }
-    ZohoSalesIQ.init(appKey, accessKey).then((_) {
+SalesIQConfiguration configuration =
+SalesIQConfiguration(appKey: appKey, accessKey: accessKey)
+ZohoSalesIQ.initialize(configuration).then((_) {
         // initialization successful
         ZohoSalesIQ.launcher.show(VisibilityMode.always); // Invoking Launcher.show() is optional.
     }).catchError((error) {

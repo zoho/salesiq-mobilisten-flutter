@@ -1,0 +1,48 @@
+group 'com.zoho.salesiq.mobilisten.core.plugin'
+version '1.0'
+
+buildscript {
+    repositories {
+        google()
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:4.1.0'
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.10'
+    }
+}
+
+rootProject.allprojects {
+    repositories {
+        google()
+        jcenter()
+    }
+}
+
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+android {
+
+    namespace "com.zoho.salesiq.mobilisten.core.plugin"
+    compileSdk 34
+
+    defaultConfig {
+        minSdkVersion 21
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation 'com.zoho.salesiq:mobilisten-core:0.0.2'
+//    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+}
