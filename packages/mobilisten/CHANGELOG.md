@@ -1,5 +1,9 @@
 ## Mobilisten Plugin Changelog
 
+### 6.5.1 - 28 Aug 2025
+
+- Update pubspec.yaml and README.md files
+
 ### 6.5.0 - 28 Aug 2025
 
 - Updated Mobilisten SDK for Android to
