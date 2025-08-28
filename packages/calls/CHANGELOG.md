@@ -1,5 +1,9 @@
 ## Mobilisten Calls Plugin Changelog
 
+### 0.0.2 - 28 Aug 2025
+
+- Fixed the build error with MobilistenCallsPlugin
+
 ### 0.0.1 - 28 Aug 2025
 
 - Updated Mobilisten Calls SDK for Android to version 0.0.2 and iOS to

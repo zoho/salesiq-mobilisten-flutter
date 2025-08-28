@@ -31,7 +31,7 @@ import io.flutter.plugin.platform.PlatformView
 import io.flutter.plugin.platform.PlatformViewFactory
 import java.util.HashMap
 
-open class MobilistenCallsPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
+class MobilistenCallsPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
     private lateinit var flutterPluginBinding: FlutterPlugin.FlutterPluginBinding
     private lateinit var callChannel: MethodChannel

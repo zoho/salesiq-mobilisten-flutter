@@ -20,6 +20,7 @@ Ensure that your project meets the following requirements:
    - android.permission.INTERNET (Required for network operations)
 
 **iOS**: iOS 13 or above is required.
+
 ### Installation steps:
 1. Add Mobilisten as a dependency within the `pubspec.yaml` file as shown below.
 ```diff
@@ -29,7 +30,7 @@ dependencies:
 + salesiq_mobilisten: ^6.5.0
 
 // Add this only if you want to integrate Mobilisten Calls along with Mobilisten
-+ salesiq_mobilisten_calls: ^0.0.1
++ salesiq_mobilisten_calls: ^0.0.2
 ```
 
 Refer to
