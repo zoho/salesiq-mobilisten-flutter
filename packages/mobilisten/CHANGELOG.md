@@ -1,6 +1,6 @@
 ## Mobilisten Plugin Changelog
 
-### 6.5.0 - 27 Aug 2025
+### 6.5.0 - 28 Aug 2025
 
 - Updated Mobilisten SDK for Android to
   version [8.2.3](https://github.com/zoho/salesiq-mobilisten-android-sample/releases/tag/v8.2.3) and
