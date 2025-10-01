@@ -1,5 +1,9 @@
 ## Mobilisten Plugin Changelog
 
+### 6.5.3 - 02 Oct 2025
+
+- Miscellaneous bug fixes and performance improvements.
+
 ### 6.5.2 - 01 Oct 2025
 
 - Added new setAndroidUriScheme() API to set the custom URI scheme for Android.
