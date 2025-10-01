@@ -92,7 +92,6 @@ class MobilistenDemoScreen extends StatelessWidget {
                   height: 120), // Replace with your image
             ),
             SizedBox(height: 16),
-
             ElevatedButton(
               onPressed: () {
                 ZohoSalesIQ.present();
@@ -100,9 +99,7 @@ class MobilistenDemoScreen extends StatelessWidget {
               style: buttonStyle,
               child: Center(child: Text("Open SalesIQ support")),
             ),
-
             SizedBox(height: 24),
-
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -123,7 +120,6 @@ class MobilistenDemoScreen extends StatelessWidget {
                 )
               ],
             ),
-
             SizedBox(height: 16),
             ToggleRow(
                 label: "Launcher visibility :",
@@ -154,7 +150,6 @@ class MobilistenDemoScreen extends StatelessWidget {
                       launcherProperties);
                 }),
             Divider(height: 32),
-
             TextField(
               maxLength: 100,
               decoration: InputDecoration(
@@ -163,7 +158,6 @@ class MobilistenDemoScreen extends StatelessWidget {
               ),
               controller: _visitorIdController,
             ),
-
             Row(
               children: [
                 Expanded(
@@ -201,15 +195,12 @@ class MobilistenDemoScreen extends StatelessWidget {
                 ),
               ],
             ),
-
             SizedBox(height: 16),
-
             ElevatedButton(
               onPressed: () {},
               style: buttonStyle,
               child: Center(child: Text("Set visitor details")),
             ),
-
             SizedBox(height: 24),
             Text("Support language :", style: TextStyle(fontSize: 16)),
             SizedBox(height: 8),
