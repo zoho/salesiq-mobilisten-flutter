@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:salesiq_mobilisten/conversations/salesiq_conversations.dart';
 import 'package:salesiq_mobilisten/notification.dart';
+import 'package:salesiq_mobilisten/uri/salesiq_uri_scheme.dart';
 import 'package:salesiq_mobilisten_core/salesiq_configuration.dart';
 import 'package:salesiq_mobilisten_core/salesiq_core_enums.dart';
 import 'package:salesiq_mobilisten_core/utils/salesiq_calls_helper.dart';
@@ -28,6 +29,7 @@ export 'package:salesiq_mobilisten/tab.dart';
 export 'package:salesiq_mobilisten_core/salesiq_configuration.dart';
 export 'package:salesiq_mobilisten_core/salesiq_core_enums.dart';
 export 'package:salesiq_mobilisten_core/salesiq_department.dart';
+export 'package:salesiq_mobilisten/uri/salesiq_uri_scheme.dart';
 
 /// The main class for integrating Zoho SalesIQ Mobilisten SDK in Flutter application.
 class ZohoSalesIQ {
@@ -706,6 +708,12 @@ class ZohoSalesIQ {
     args.putIfAbsent("userInfo", () => userInfo);
     args.putIfAbsent("responseText", () => responseText);
     await _channel.invokeMethod('handlePushNotificationAction', args);
+  }
+
+  /// Sets the URI scheme for Android.
+  /// This is required to be set if you are using custom URI scheme for your application.
+  static void setAndroidUriScheme(SalesIQUriScheme uriScheme) {
+    _channel.invokeMethod('setAndroidUriScheme', uriScheme.toMap());
   }
 }
 

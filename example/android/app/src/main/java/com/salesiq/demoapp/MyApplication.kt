@@ -1,8 +1,8 @@
 package com.salesiq.demoapp
 
+import io.flutter.app.FlutterApplication
 import com.zoho.salesiq.mobilisten.calls.plugin.MobilistenCallsPlugin
 import com.zohosalesiq.plugin.MobilistenPlugin
-import io.flutter.app.FlutterApplication
 
 class MyApplication : FlutterApplication() {
 

@@ -20,6 +20,6 @@ SalesIQ Mobilisten Calls Flutter Plugin
   # Flutter.framework does not contain a i386 slice.
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386' }
   s.dependency "MobilistenCalls", "#{s.version}"
-  s.dependency "Mobilisten", "10.1.0"
+  s.dependency "Mobilisten", "10.1.4"
   s.swift_version = '5.0'
 end

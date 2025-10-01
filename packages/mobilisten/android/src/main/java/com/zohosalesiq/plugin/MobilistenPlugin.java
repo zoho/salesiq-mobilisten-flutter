@@ -65,6 +65,7 @@ import com.zoho.livechat.android.modules.common.ui.result.entities.SalesIQResult
 import com.zoho.livechat.android.modules.commonpreferences.data.local.CommonPreferencesLocalDataSource;
 import com.zoho.livechat.android.modules.conversations.models.CommunicationMode;
 import com.zoho.livechat.android.modules.conversations.models.SalesIQConversation;
+import com.zoho.livechat.android.modules.deeplinking.models.SalesIQUriScheme;
 import com.zoho.livechat.android.modules.jwt.domain.entities.SalesIQAuth;
 import com.zoho.livechat.android.modules.knowledgebase.ui.entities.Resource;
 import com.zoho.livechat.android.modules.knowledgebase.ui.entities.ResourceCategory;
@@ -1331,6 +1332,9 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
             case "dismissUI":
                 ZohoSalesIQ.dismissUI();
                 break;
+            case "setAndroidUriScheme":
+                setUriScheme((Map<String, Object>) call.arguments);
+                break;
             case "setThemeColorForiOS":
             case "writeLogForiOS":
             case "clearLogForiOS":
@@ -1340,6 +1344,56 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
             default:
                 finalResult.notImplemented();
                 break;
+        }
+    }
+
+    private static void setUriScheme(@NonNull Map<String, Object> uriSchemeMap) {
+        Object schemeObject = uriSchemeMap.get("scheme");
+        Object hostsObject = uriSchemeMap.get("hosts");
+        Object pathsObject = uriSchemeMap.get("paths");
+
+        String scheme = schemeObject != null ? LiveChatUtil.getString(schemeObject) : null;
+        List<String> hosts = hostsObject instanceof List ? (List<String>) hostsObject : null;
+        List<Map<String, Object>> paths = pathsObject instanceof List ? (List<Map<String, Object>>) pathsObject : null;
+        if (scheme != null && !scheme.isEmpty()) {
+            SalesIQUriScheme uriScheme = new SalesIQUriScheme(scheme);
+            if (hosts != null && !hosts.isEmpty()) {
+                uriScheme.addHosts(hosts.toArray(new String[0]));
+            }
+            if (paths != null && !paths.isEmpty()) {
+                for (Map<String, Object> pathMap : paths) {
+                    String type = pathMap.get("type") != null ? LiveChatUtil.getString(pathMap.get("type")) : null; // No I18N
+                    String value = pathMap.get("value") != null ? LiveChatUtil.getString(pathMap.get("value")) : null; // No I18N
+                    if (type != null && !type.isEmpty() && value != null && !value.isEmpty()) {
+                        SalesIQUriScheme.PathMatcher pathMatcher = null;
+                        switch (type) {
+                            case "exact": {
+                                pathMatcher = new SalesIQUriScheme.PathMatcher.Exact(value);
+                                break;
+                            }
+
+                            case "prefix": {
+                                pathMatcher = new SalesIQUriScheme.PathMatcher.Prefix(value);
+                                break;
+                            }
+
+                            case "suffix": {
+                                pathMatcher = new SalesIQUriScheme.PathMatcher.Suffix(value);
+                                break;
+                            }
+
+                            case "pattern": {
+                                pathMatcher = new SalesIQUriScheme.PathMatcher.Pattern(value);
+                                break;
+                            }
+                        }
+                        if (pathMatcher != null) {
+                            uriScheme.addPaths(pathMatcher);
+                        }
+                    }
+                }
+            }
+            ZohoSalesIQ.setUriScheme(uriScheme);
         }
     }
 

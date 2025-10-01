@@ -39,7 +39,7 @@ Ensure that your project meets the following requirements:
 dependencies:
   flutter:
     sdk: flutter
-+ salesiq_mobilisten: ^6.5.1
++ salesiq_mobilisten: ^6.5.2
 + salesiq_mobilisten_calls: ^0.0.2
 ```
 

@@ -1,5 +1,13 @@
 ## Mobilisten Plugin Changelog
 
+### 6.5.2 - 01 Oct 2025
+
+- Added new setAndroidUriScheme() API to set the custom URI scheme for Android.
+- Updated Mobilisten SDK for Android to
+  version [8.2.5](https://github.com/zoho/salesiq-mobilisten-android-sample/releases/tag/v8.2.5) and
+  iOS to version [10.1.4](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/v10.1.4)
+- Miscellaneous bug fixes and performance improvements.
+
 ### 6.5.1 - 28 Aug 2025
 
 - Update pubspec.yaml and README.md files
