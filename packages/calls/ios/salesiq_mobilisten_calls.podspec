@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'salesiq_mobilisten_calls'
-  s.version          = '1.0.1'
+  s.version          = '1.1.0'
   s.summary          = 'A new Flutter plugin for SalesIQ Mobilisten Calls'
   s.description      = <<-DESC
 SalesIQ Mobilisten Calls Flutter Plugin
@@ -20,6 +20,6 @@ SalesIQ Mobilisten Calls Flutter Plugin
   # Flutter.framework does not contain a i386 slice.
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386' }
   s.dependency "MobilistenCalls", "#{s.version}"
-  s.dependency "Mobilisten", "10.1.4"
+  s.dependency "Mobilisten", "10.1.6"
   s.swift_version = '5.0'
 end

@@ -1809,10 +1809,10 @@ fileprivate class MobilistenNotificationEventStreamHandler: MobilistenEventStrea
 }
 
 extension SwiftMobilistenPlugin: ZohoSalesIQDelegate {
-
-        public func shouldReRegisterPushNotification() {
-
-        }
+    
+    public func shouldReRegisterPushNotification() {
+            
+    }
     
     public func agentsOnline() {
         sendEvent(name:.operatorsOnline)
