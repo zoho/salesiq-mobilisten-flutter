@@ -30,7 +30,7 @@ dependencies:
 + salesiq_mobilisten: ^6.5.4
 
 // Add this only if you want to integrate Mobilisten Calls along with Mobilisten
-+ salesiq_mobilisten_calls: ^0.0.2
++ salesiq_mobilisten_calls: ^0.0.4
 ```
 
 Refer to
