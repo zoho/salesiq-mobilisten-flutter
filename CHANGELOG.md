@@ -1,5 +1,34 @@
 ## Mobilisten Plugin Changelog
 
+### 6.5.4 - 17 Oct 2025
+
+- Updated Mobilisten SDK for iOS to version [10.1.6](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/v10.1.6)
+- Miscellaneous bug fixes and performance improvements.
+
+### 6.5.3 - 02 Oct 2025
+
+- Miscellaneous bug fixes and performance improvements.
+
+### 6.5.2 - 01 Oct 2025
+
+- Added new setAndroidUriScheme() API to set the custom URI scheme for Android.
+- Updated Mobilisten SDK for Android to
+  version [8.2.5](https://github.com/zoho/salesiq-mobilisten-android-sample/releases/tag/v8.2.5) and
+  iOS to version [10.1.4](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/v10.1.4)
+- Miscellaneous bug fixes and performance improvements.
+
+### 6.5.1 - 28 Aug 2025
+
+- Update pubspec.yaml and README.md files
+
+### 6.5.0 - 28 Aug 2025
+
+- Updated Mobilisten SDK for Android to
+  version [8.2.3](https://github.com/zoho/salesiq-mobilisten-android-sample/releases/tag/v8.2.3) and
+  iOS to version [10.1.0](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/10.1.0).
+- Supported the new calls feature in the Mobilisten SDK for iOS and Android.
+- Miscellaneous bug fixes and performance improvements.
+
 ### 6.4.3 - 02 Jul 2025
 - Code formatting improvements for better readability and consistency.
 - No functional changes.
