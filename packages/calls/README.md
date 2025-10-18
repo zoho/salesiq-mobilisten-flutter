@@ -1,4 +1,4 @@
-[![SupportedLanguages](https://img.shields.io/badge/Platforms-iOS%20%7C%20%20Android-green.svg)](https://flutter.dev/) [![Version](https://img.shields.io/badge/version-0.0.2-blue.svg)](https://mobilisten.io/)
+[![SupportedLanguages](https://img.shields.io/badge/Platforms-iOS%20%7C%20%20Android-green.svg)](https://flutter.dev/) [![Version](https://img.shields.io/badge/version-0.0.4-blue.svg)](https://mobilisten.io/)
 
 # Zoho SalesIQ Mobilisten Calls Flutter Plugin
 
@@ -40,7 +40,7 @@ dependencies:
   flutter:
     sdk: flutter
 + salesiq_mobilisten: ^6.5.4
-+ salesiq_mobilisten_calls: ^0.0.2
++ salesiq_mobilisten_calls: ^0.0.4
 ```
 
 2. Run `flutter pub get` to fetch dependencies for the project.
