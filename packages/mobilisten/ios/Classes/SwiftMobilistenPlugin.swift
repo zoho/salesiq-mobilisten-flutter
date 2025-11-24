@@ -699,10 +699,37 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
                     }
                 }
             }
+        case "updateConfiguration":
+            if let args = call.argumentDictionary, let key = args["key"] as? String, let value = args["value"] {
+                guard let flag = getFlag(key) else { return }
+                ZohoSalesIQ.updateConfigurationFlag(flag, value: value)
+            }
         default:
             result(FlutterMethodNotImplemented)
         }
         
+    }
+    
+    private func getFlag(_ key: String) -> MobilistenFlag? {
+        switch key {
+        case "NeutralRatingDisabled":
+            return .neutralRatingDisabled
+        case "TrackStorageSpace":
+            return .trackStorageSpace
+        case "TrackAppInstalledTime":
+            return .trackAppInstalledTime
+        case "TrackAppUpdatedTime":
+            return .trackAppUpdatedTime
+        case "ShowEndSessionInInAppNotification":
+            return .showEndSessionInAppNotification
+        case "ChatBotCarousalCardPropertiesOrientation":
+            return .inputCarouselCardOrientation
+        case "ChatBotCarousalCardImageVisibility":
+            return .showInputCarouselCardImage
+        default:
+            print("Unsupported flag: \(key)")
+        }
+        return nil
     }
     
     private func createEvent(name: MobilistenEvent, dataLabel: String = "data", data: Any? = nil) -> [String: Any]? {
@@ -1257,6 +1284,10 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
                 return .reopen
             case "call":
                 return .callIcon
+            case "fileSharingWhenBotConnected":
+                return .attachmentIconWhenBotConnected
+            case "voiceNoteWhenBotConnected":
+                return .voiceNoteIconWhenBotConnected
             default:
                 return nil
             }

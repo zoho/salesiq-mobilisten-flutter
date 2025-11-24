@@ -53,6 +53,7 @@ import com.zoho.livechat.android.listeners.SalesIQListener;
 import com.zoho.livechat.android.listeners.UnRegisterListener;
 import com.zoho.livechat.android.models.SalesIQArticle;
 import com.zoho.livechat.android.models.SalesIQArticleCategory;
+import com.zoho.livechat.android.modules.authentication.domain.entities.SalesIQAuth;
 import com.zoho.livechat.android.modules.common.DataModule;
 import com.zoho.livechat.android.modules.common.data.local.MobilistenEncryptedSharedPreferences;
 import com.zoho.livechat.android.modules.common.domain.entities.DebugInfoData;
@@ -66,7 +67,6 @@ import com.zoho.livechat.android.modules.commonpreferences.data.local.CommonPref
 import com.zoho.livechat.android.modules.conversations.models.CommunicationMode;
 import com.zoho.livechat.android.modules.conversations.models.SalesIQConversation;
 import com.zoho.livechat.android.modules.deeplinking.models.SalesIQUriScheme;
-import com.zoho.livechat.android.modules.jwt.domain.entities.SalesIQAuth;
 import com.zoho.livechat.android.modules.knowledgebase.ui.entities.Resource;
 import com.zoho.livechat.android.modules.knowledgebase.ui.entities.ResourceCategory;
 import com.zoho.livechat.android.modules.knowledgebase.ui.entities.ResourceDepartment;
@@ -106,11 +106,9 @@ import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
 
-
 public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, ActivityAware {
 
     private MethodChannel channel, conversationsChannel, chatChannel, knowledgeBaseChannel, launcherChannel, notificationChannel;
-    private EventChannel eventChannel, chatEventChannel, faqEventChannel, notificationEventChannel;
     static Application application;
     private Activity activity;
 
@@ -141,9 +139,12 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
     private static final String INVALID_FILTER_CODE = "604";         // No I18N
     private static final String INVALID_FILTER_TYPE = "invalid filter type";         // No I18N
 
+    private static final String INVALID_PARAM_TYPE_CODE = "-100";         // No I18N
+    private static final String INVALID_PARAM_TYPE = "Invalid param type";         // No I18N
+
     private static Font customFont = null;
 
-    private static Hashtable<String, SalesIQCustomActionListener> actionsList = new Hashtable<>();
+    static final Hashtable<String, SalesIQCustomActionListener> ACTIONS_LIST = new Hashtable<>();
 
     Handler handler = MobilistenCorePlugin.getHandler();
 
@@ -154,6 +155,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
 
     private static class Tab {
         static String CONVERSATIONS = "TAB_CONVERSATIONS";  // No I18N
+        @SuppressWarnings("DeprecatedIsStillUsed")  // No I18N
         @Deprecated
         static String FAQ = "TAB_FAQ";  // No I18N
         static String KNOWLEDGE_BASE = "TAB_KNOWLEDGE_BASE";  // No I18N
@@ -236,10 +238,10 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         notificationChannel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "salesiqNotificationModule");  // No I18N
         notificationChannel.setMethodCallHandler(notificationMethodCallHandler);
 
-        eventChannel = new EventChannel(flutterPluginBinding.getBinaryMessenger(), MOBILISTEN_EVENT_CHANNEL);
-        chatEventChannel = new EventChannel(flutterPluginBinding.getBinaryMessenger(), MOBILISTEN_CHAT_EVENT_CHANNEL);
-        faqEventChannel = new EventChannel(flutterPluginBinding.getBinaryMessenger(), MOBILISTEN_FAQ_EVENT_CHANNEL);
-        notificationEventChannel = new EventChannel(flutterPluginBinding.getBinaryMessenger(), MOBILISTEN_NOTIFICATION_EVENT_CHANNEL);
+        EventChannel eventChannel = new EventChannel(flutterPluginBinding.getBinaryMessenger(), MOBILISTEN_EVENT_CHANNEL);
+        EventChannel chatEventChannel = new EventChannel(flutterPluginBinding.getBinaryMessenger(), MOBILISTEN_CHAT_EVENT_CHANNEL);
+        EventChannel faqEventChannel = new EventChannel(flutterPluginBinding.getBinaryMessenger(), MOBILISTEN_FAQ_EVENT_CHANNEL);
+        EventChannel notificationEventChannel = new EventChannel(flutterPluginBinding.getBinaryMessenger(), MOBILISTEN_NOTIFICATION_EVENT_CHANNEL);
         new EventChannel(flutterPluginBinding.getBinaryMessenger(), MOBILISTEN_KNOWLEDGE_BASE_EVENTS).setStreamHandler(new EventChannel.StreamHandler() {
             @Override
             public void onListen(Object arguments, EventChannel.EventSink events) {
@@ -345,7 +347,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
 
         @Nullable
         static Map getPayloadMap(SalesIQNotificationPayload payload) {
-            Map resultMap = new HashMap();
+            Map<String, Object> resultMap = new HashMap<>();
             resultMap.put("payload", getMap(payload));   // No I18N
             if (payload instanceof SalesIQNotificationPayload.Chat) {
                 resultMap.put("type", "chat");    // No I18N
@@ -384,9 +386,14 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                     break;
 
                 case "getNotificationPayload":
-                    ZohoSalesIQ.Notification.getPayload((Map) call.arguments, salesIQResult -> {
+                    Map<String, String> map = MobilistenCorePlugin.getMapOrNull(call.arguments);
+                    if (map == null) {
+                        result.error(INVALID_PARAM_TYPE_CODE, INVALID_PARAM_TYPE, null);
+                        return;
+                    }
+                    ZohoSalesIQ.Notification.getPayload(map, salesIQResult -> {
                         if (salesIQResult.isSuccess()) {
-                            result.success(getPayloadMap((SalesIQNotificationPayload) salesIQResult.getData()));
+                            result.success(getPayloadMap(salesIQResult.getData()));
                         } else {
                             SalesIQError salesIQError = salesIQResult.getError();
                             if (salesIQError != null) {
@@ -457,6 +464,12 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
             case "call":
                 chatComponent = ChatComponent.call;
                 break;
+            case "fileSharingWhenBotConnected":
+                chatComponent = ChatComponent.fileSharingWhenBotConnected;
+                break;
+            case "voiceNoteWhenBotConnected":
+                chatComponent = ChatComponent.voiceNoteWhenBotConnected;
+                break;
             default:
         }
         return chatComponent;
@@ -508,9 +521,13 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
             }
 
             case "showPayloadChat": {
-                Map<String, Object> data = (Map<String, Object>) call.arguments;
+                Map<String, Object> data = MobilistenCorePlugin.getMapOrNull(call.arguments);
+                if (data == null) {
+                    result.error(INVALID_PARAM_TYPE_CODE, INVALID_PARAM_TYPE, null);
+                    return;
+                }
                 if ("endChatDetails".equals(data.get("type")) || "chat".equals(data.get("type"))) { // No I18N
-                    Map<String, Object> payload = (Map<String, Object>) data.get("payload");
+                    Map<String, Object> payload = MobilistenCorePlugin.getMapOrNull(data.get("payload"));   // No I18N
                     if (payload != null && payload.containsKey("chatId")) {
                         ZohoSalesIQ.Chat.open((String) payload.get("chatId"));    // No I18N
                     }
@@ -580,6 +597,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
 
             case "startNewChatWithTrigger": {
                 final boolean[] canSubmitCallback = {true};
+                //noinspection deprecation
                 ZohoSalesIQ.Chat.startWithTrigger(getStringOrNull(call.argument("custom_chat_id")), getStringOrNull(call.argument("department_name")), chatResult -> {  // No I18N
                     if (canSubmitCallback[0]) {
                         canSubmitCallback[0] = false;
@@ -804,6 +822,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
             }
 
             case "showLauncher":
+                //noinspection deprecation
                 ZohoSalesIQ.showLauncher(LiveChatUtil.getBoolean(call.arguments));
                 handler.post(new Runnable() {
                     public void run() {
@@ -824,8 +843,11 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 break;
 
             case "setDepartments":
-                ArrayList deptList = (ArrayList) call.arguments;
-                ZohoSalesIQ.Chat.setDepartments(deptList);
+                ArrayList<String> list = MobilistenCorePlugin.getArrayListOrNull(call.arguments);
+                if (list == null) {
+                    return;
+                }
+                ZohoSalesIQ.Chat.setDepartments(list);
                 break;
 
             case "getCommunicationMode":
@@ -837,6 +859,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 break;
 
             case "startChat":
+                //noinspection deprecation
                 ZohoSalesIQ.Visitor.startChat(LiveChatUtil.getString(call.arguments));
                 break;
 
@@ -889,6 +912,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 boolean shouldOpenChatWindow = LiveChatUtil.getBoolean(call.argument("should_open_chat_window"));   // No I18N
                 String customActionName = LiveChatUtil.getString(call.argument("action_name")); // No I18N
                 if (shouldOpenChatWindow) {
+                    //noinspection deprecation
                     ZohoSalesIQ.Tracking.setCustomAction(customActionName, true);
                 } else {
                     ZohoSalesIQ.Visitor.performCustomAction(customActionName);
@@ -912,6 +936,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 break;
 
             case "show":
+                //noinspection deprecation
                 ZohoSalesIQ.Chat.show();
                 break;
 
@@ -951,35 +976,38 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
 
             case "setVisitorLocation":
                 if (call.arguments instanceof Map) {
-                    Map<String, Object> visitorLocation = (Map<String, Object>) call.arguments;
-                    SIQVisitorLocation siqVisitorLocation = new SIQVisitorLocation();
-
-                    if (visitorLocation.containsKey("latitude")) {
-                        siqVisitorLocation.setLatitude(LiveChatUtil.getDouble(visitorLocation.get("latitude")));         // No I18N
-                    }
-                    if (visitorLocation.containsKey("longitude")) {
-                        siqVisitorLocation.setLongitude(LiveChatUtil.getDouble(visitorLocation.get("longitude")));         // No I18N
-                    }
-                    if (visitorLocation.containsKey("country")) {
-                        siqVisitorLocation.setCountry(LiveChatUtil.getString(visitorLocation.get("country")));         // No I18N
-                    }
-                    if (visitorLocation.containsKey("city")) {
-                        siqVisitorLocation.setCity(LiveChatUtil.getString(visitorLocation.get("city")));         // No I18N
-                    }
-                    if (visitorLocation.containsKey("state")) {
-                        siqVisitorLocation.setState(LiveChatUtil.getString(visitorLocation.get("state")));         // No I18N
-                    }
-                    if (visitorLocation.containsKey("countryCode")) {
-                        siqVisitorLocation.setCountryCode(LiveChatUtil.getString(visitorLocation.get("countryCode")));         // No I18N
-                    }
-                    if (visitorLocation.containsKey("zipCode")) {
-                        siqVisitorLocation.setZipCode(LiveChatUtil.getString(visitorLocation.get("zipCode")));         // No I18N
+                    SIQVisitorLocation siqVisitorLocation = null;
+                    Map<String, Object> visitorLocation = MobilistenCorePlugin.getMapOrNull(call.arguments);
+                    if (visitorLocation != null) {
+                        siqVisitorLocation = new SIQVisitorLocation();
+                        if (visitorLocation.containsKey("latitude")) {
+                            siqVisitorLocation.setLatitude(LiveChatUtil.getDouble(visitorLocation.get("latitude")));         // No I18N
+                        }
+                        if (visitorLocation.containsKey("longitude")) {
+                            siqVisitorLocation.setLongitude(LiveChatUtil.getDouble(visitorLocation.get("longitude")));         // No I18N
+                        }
+                        if (visitorLocation.containsKey("country")) {
+                            siqVisitorLocation.setCountry(LiveChatUtil.getString(visitorLocation.get("country")));         // No I18N
+                        }
+                        if (visitorLocation.containsKey("city")) {
+                            siqVisitorLocation.setCity(LiveChatUtil.getString(visitorLocation.get("city")));         // No I18N
+                        }
+                        if (visitorLocation.containsKey("state")) {
+                            siqVisitorLocation.setState(LiveChatUtil.getString(visitorLocation.get("state")));         // No I18N
+                        }
+                        if (visitorLocation.containsKey("countryCode")) {
+                            siqVisitorLocation.setCountryCode(LiveChatUtil.getString(visitorLocation.get("countryCode")));         // No I18N
+                        }
+                        if (visitorLocation.containsKey("zipCode")) {
+                            siqVisitorLocation.setZipCode(LiveChatUtil.getString(visitorLocation.get("zipCode")));         // No I18N
+                        }
                     }
                     ZohoSalesIQ.Visitor.setLocation(siqVisitorLocation);
                 }
                 break;
 
             case "setChatTitle":
+                //noinspection deprecation
                 ZohoSalesIQ.Chat.setTitle(LiveChatUtil.getString(call.arguments));
                 break;
 
@@ -1093,6 +1121,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
             case "getArticles":
                 handler.post(new Runnable() {
                     public void run() {
+                        //noinspection deprecation
                         ZohoSalesIQ.FAQ.getArticles(new FAQListener() {
                             @Override
                             public void onSuccess(ArrayList<SalesIQArticle> arrayList) {
@@ -1146,7 +1175,9 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 break;
 
             case "getArticleCategories":
+                //noinspection deprecation
                 ZohoSalesIQ.FAQ.getCategories(new FAQCategoryListener() {
+                    @SuppressWarnings("deprecation")    // No I18N
                     @Override
                     public void onSuccess(ArrayList<SalesIQArticleCategory> arrayList) {
                         final List<Map<String, Object>> categoryList = new ArrayList<>();
@@ -1247,12 +1278,12 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 handler.post(new Runnable() {
                     public void run() {
                         SalesIQCustomActionListener listener;
-                        listener = actionsList.get(actionID);
+                        listener = ACTIONS_LIST.get(actionID);
                         if (listener != null) {
                             listener.onSuccess();
                         }
-                        if (actionsList != null) {
-                            actionsList.remove(actionID);
+                        if (ACTIONS_LIST != null) {
+                            ACTIONS_LIST.remove(actionID);
                         }
                     }
                 });
@@ -1265,7 +1296,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 Handler handler1 = new Handler(Looper.getMainLooper());
                 handler1.post(new Runnable() {
                     public void run() {
-                        SalesIQCustomActionListener listener = actionsList.get(actionId);
+                        SalesIQCustomActionListener listener = ACTIONS_LIST.get(actionId);
                         if (listener != null) {
                             if (state) {
                                 if (message != null && message.length() > 0) {
@@ -1281,8 +1312,8 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                                 }
                             }
                         }
-                        if (actionsList != null) {
-                            actionsList.remove(actionId);
+                        if (ACTIONS_LIST != null) {
+                            ACTIONS_LIST.remove(actionId);
                         }
                     }
                 });
@@ -1293,9 +1324,11 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 break;
 
             case "getChatUnreadCount":
+                //noinspection deprecation
                 finalResult.success(ZohoLiveChat.Notification.getBadgeCount());
                 break;
             case "setNotificationIconForAndroid":
+                //noinspection deprecation
                 ZohoSalesIQ.Notification.setIcon(getDrawableResourceId(LiveChatUtil.getString(call.arguments)));
                 break;
             case "setThemeForAndroid": {
@@ -1309,10 +1342,18 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 ZohoSalesIQ.printDebugLogs(LiveChatUtil.getBoolean(call.arguments));
                 break;
             case "setTabOrder":
-                setTabOrder((ArrayList) call.arguments);
+                ArrayList<String> tabs = MobilistenCorePlugin.getArrayListOrNull(call.arguments);
+                if (tabs == null) {
+                    return;
+                }
+                setTabOrder(tabs);
                 break;
             case "shouldOpenUrl":
-                shouldOpenUrl((Boolean) call.arguments);
+                Boolean boolValue = MobilistenCorePlugin.getBooleanOrNull(call.arguments);
+                if (boolValue == null) {
+                    return;
+                }
+                shouldOpenUrl(boolValue);
                 break;
             case "sendEvent":
                 sendEvent((String) call.argument("eventName"), (ArrayList) call.argument("values"));    // No I18N
@@ -1324,16 +1365,33 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 setLoggerEnabled((Boolean) call.arguments);
                 break;
             case "setLauncherPropertiesForAndroid":
-                setLauncherPropertiesForAndroid((Map<String, Object>) call.arguments);
+                Map<String, Object> map = MobilistenCorePlugin.getMapOrNull(call.arguments);
+                if (map == null) {
+                    rawResult.error(INVALID_PARAM_TYPE_CODE, INVALID_PARAM_TYPE, null);
+                    return;
+                }
+                setLauncherPropertiesForAndroid(map);
                 break;
             case "syncThemeWithOSForAndroid":
-                ZohoSalesIQ.syncThemeWithOS((Boolean) call.arguments);
+                boolValue = MobilistenCorePlugin.getBooleanOrNull(call.arguments);
+                if (boolValue == null) {
+                    return;
+                }
+                ZohoSalesIQ.syncThemeWithOS(boolValue);
                 break;
             case "dismissUI":
                 ZohoSalesIQ.dismissUI();
                 break;
             case "setAndroidUriScheme":
-                setUriScheme((Map<String, Object>) call.arguments);
+                Map<String, Object> uriSchemeMap = MobilistenCorePlugin.getMapOrNull(call.arguments);
+                if (uriSchemeMap == null) {
+                    rawResult.error(INVALID_PARAM_TYPE_CODE, INVALID_PARAM_TYPE, null);
+                    return;
+                }
+                setUriScheme(uriSchemeMap);
+                break;
+            case "updateConfiguration":
+                updateConfiguration(call.argument("key"), call.argument("value"));  // No I18N
                 break;
             case "setThemeColorForiOS":
             case "writeLogForiOS":
@@ -1353,8 +1411,8 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         Object pathsObject = uriSchemeMap.get("paths");
 
         String scheme = schemeObject != null ? LiveChatUtil.getString(schemeObject) : null;
-        List<String> hosts = hostsObject instanceof List ? (List<String>) hostsObject : null;
-        List<Map<String, Object>> paths = pathsObject instanceof List ? (List<Map<String, Object>>) pathsObject : null;
+        List<String> hosts = MobilistenCorePlugin.getListOrNull(hostsObject);
+        List<Map<String, Object>> paths = MobilistenCorePlugin.getListOrNull(pathsObject);
         if (scheme != null && !scheme.isEmpty()) {
             SalesIQUriScheme uriScheme = new SalesIQUriScheme(scheme);
             if (hosts != null && !hosts.isEmpty()) {
@@ -1394,6 +1452,22 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 }
             }
             ZohoSalesIQ.setUriScheme(uriScheme);
+        }
+    }
+
+    private static void updateConfiguration(String key, Object value) {
+        String configurationKey = null;
+        if ("NeutralRatingDisabled".equals(key)) {
+            configurationKey = "binaryRating";  // No I18N
+        } else if ("ChatBotCarousalCardPropertiesOrientation".equals(key)) {
+            configurationKey = "chat_bot_carousal_card_properties_orientation"; // No I18N
+        } else if ("ChatBotCarousalCardImageVisibility".equals(key)) {
+            configurationKey = "chat_bot_carousal_card_image_visibility";   // No I18N
+        }
+        if (configurationKey != null) {
+            System.setProperty(configurationKey, value.toString());
+        } else {
+            LiveChatUtil.log("MobilistenPlugin - Invalid configuration key: " + key);   // No I18N
         }
     }
 
@@ -1603,7 +1677,8 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         ZohoSalesIQ.Tab tabType = null;
         if (Tab.CONVERSATIONS.equals(tab)) {
             tabType = ZohoSalesIQ.Tab.Conversations;
-        } else if (Tab.KNOWLEDGE_BASE.equals(tab) || Tab.FAQ.equals(tab)) {
+        } else //noinspection deprecation
+            if (Tab.KNOWLEDGE_BASE.equals(tab) || Tab.FAQ.equals(tab)) {
             tabType = ZohoSalesIQ.Tab.KnowledgeBase;
         }
         return tabType;
@@ -1846,6 +1921,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         return articleMap;
     }
 
+    @SuppressWarnings("deprecation")    // No I18N
     public Map<String, Object> getArticleMapObject(SalesIQArticle article) {
         Map<String, Object> articleMap = new HashMap<String, Object>();
         articleMap.put("id", article.getId());         // No I18N
@@ -1943,8 +2019,6 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 return ConversationType.CONNECTED;
             case TYPE_WAITING:
                 return ConversationType.WAITING;
-            case TYPE_OPEN:
-                return ConversationType.OPEN;
             case TYPE_CLOSED:
                 return ConversationType.CLOSED;
             case TYPE_ENDED:
@@ -1982,6 +2056,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
             Object objectY = launcherPropertiesMap.get("y");
             int y = (int) (objectY != null ? objectY : -1);
             if (y > -1) {
+                //noinspection deprecation
                 launcherProperties.setY(y);
             }
 
@@ -2022,6 +2097,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 int resourceId = getDrawableResourceId((String) launcherPropertiesMap.get("icon"));
                 Drawable drawable = ZohoSalesIQ.getApplicationManager().getApplication().getDrawable(resourceId);
                 if (resourceId > 0 && drawable != null) {
+                    //noinspection deprecation
                     launcherProperties.setIcon(drawable);
                 }
             }
@@ -2029,7 +2105,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         }
     }
 
-    private static boolean shouldOpenUrl = true;
+    static boolean shouldOpenUrl = true;
 
     private void shouldOpenUrl(final boolean value) {
         shouldOpenUrl = value;
@@ -2043,7 +2119,8 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
             String tabName = tabNames.get(index);
             if (Tab.CONVERSATIONS.equals(tabName)) {
                 tabOrder[insertIndex++] = ZohoSalesIQ.Tab.Conversations;
-            } else if (Tab.FAQ.equals(tabName) || Tab.KNOWLEDGE_BASE.equals(tabName)) {
+            } else //noinspection deprecation
+                if (Tab.FAQ.equals(tabName) || Tab.KNOWLEDGE_BASE.equals(tabName)) {
                 tabOrder[insertIndex++] = ZohoSalesIQ.Tab.KnowledgeBase;
             }
         }
@@ -2103,7 +2180,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                     boolean success = objects.size() <= 1 || objects.get(1) instanceof Boolean && (boolean) objects.get(1);
                     String message = objects.size() == 3 ? (String) objects.get(2) : null;
                     if (uuid != null && !uuid.isEmpty()) {
-                        SalesIQCustomActionListener listener = actionsList.get(uuid);
+                        SalesIQCustomActionListener listener = ACTIONS_LIST.get(uuid);
                         if (listener != null) {
                             if (message != null && !message.isEmpty()) {
                                 if (success) {
@@ -2119,8 +2196,8 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                                 }
                             }
                         }
-                        if (actionsList != null) {
-                            actionsList.remove(uuid);
+                        if (ACTIONS_LIST != null) {
+                            ACTIONS_LIST.remove(uuid);
                         }
                     }
                 }
@@ -2128,7 +2205,11 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 if (objects.size() > 0) {
                     Object auth = objects.get(0);
                     if (auth instanceof HashMap) {
-                        handleVisitorRegistrationFailure((HashMap<String, Object>) auth);
+                        HashMap<String, Object> authMap = MobilistenCorePlugin.getHashmapOrNull(auth);
+                        if (authMap == null) {
+                            return;
+                        }
+                        handleVisitorRegistrationFailure(authMap);
                     }
                 }
             }
@@ -2196,7 +2277,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
 
         @Override
         public void handleBotTrigger() {
-            Map<String, Object> eventMap = new HashMap<String, Object>();
+            Map<String, Object> eventMap = new HashMap<>();
             eventMap.put("eventName", SIQEvent.botTrigger);
             if (eventSink != null) {
                 eventSink.success(eventMap);
@@ -2229,7 +2310,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
 
         @Override
         public void handleChatViewOpen(String chatID) {
-            Map<String, Object> eventMap = new HashMap<String, Object>();
+            Map<String, Object> eventMap = new HashMap<>();
             eventMap.put("eventName", SIQEvent.chatViewOpened);
             eventMap.put("chatID", chatID);
             if (eventSink != null) {
@@ -2239,7 +2320,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
 
         @Override
         public void handleChatViewClose(String chatID) {
-            Map<String, Object> eventMap = new HashMap<String, Object>();
+            Map<String, Object> eventMap = new HashMap<>();
             eventMap.put("eventName", SIQEvent.chatViewClosed);
             eventMap.put("chatID", chatID);
             if (eventSink != null) {
@@ -2249,7 +2330,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
 
         @Override
         public void handleChatOpened(VisitorChat visitorChat) {
-            Map<String, Object> eventMap = new HashMap<String, Object>();
+            Map<String, Object> eventMap = new HashMap<>();
             Map<String, Object> chatMapObject = getChatMapObject(visitorChat, true);
             eventMap.put("eventName", SIQEvent.chatOpened);
             eventMap.put("chat", chatMapObject);
@@ -2260,7 +2341,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
 
         @Override
         public void handleChatClosed(VisitorChat visitorChat) {
-            Map<String, Object> eventMap = new HashMap<String, Object>();
+            Map<String, Object> eventMap = new HashMap<>();
             Map<String, Object> chatMapObject = getChatMapObject(visitorChat, true);
             eventMap.put("eventName", SIQEvent.chatClosed);
             eventMap.put("chat", chatMapObject);
@@ -2271,7 +2352,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
 
         @Override
         public void handleChatAttended(VisitorChat visitorChat) {
-            Map<String, Object> eventMap = new HashMap<String, Object>();
+            Map<String, Object> eventMap = new HashMap<>();
             Map<String, Object> chatMapObject = getChatMapObject(visitorChat, true);
             eventMap.put("eventName", SIQEvent.chatAttended);
             eventMap.put("chat", chatMapObject);
@@ -2282,7 +2363,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
 
         @Override
         public void handleChatMissed(VisitorChat visitorChat) {
-            Map<String, Object> eventMap = new HashMap<String, Object>();
+            Map<String, Object> eventMap = new HashMap<>();
             Map<String, Object> chatMapObject = getChatMapObject(visitorChat, true);
             eventMap.put("eventName", SIQEvent.chatMissed);
             eventMap.put("chat", chatMapObject);
@@ -2293,7 +2374,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
 
         @Override
         public void handleChatReOpened(VisitorChat visitorChat) {
-            Map<String, Object> eventMap = new HashMap<String, Object>();
+            Map<String, Object> eventMap = new HashMap<>();
             Map<String, Object> chatMapObject = getChatMapObject(visitorChat, true);
             eventMap.put("eventName", SIQEvent.chatReopened);
             eventMap.put("chat", chatMapObject);
@@ -2304,7 +2385,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
 
         @Override
         public void handleRating(VisitorChat visitorChat) {
-            Map<String, Object> eventMap = new HashMap<String, Object>();
+            Map<String, Object> eventMap = new HashMap<>();
             Map<String, Object> chatMapObject = getChatMapObject(visitorChat, true);
             eventMap.put("eventName", SIQEvent.ratingReceived);
             eventMap.put("chat", chatMapObject);
@@ -2315,7 +2396,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
 
         @Override
         public void handleFeedback(VisitorChat visitorChat) {
-            Map<String, Object> eventMap = new HashMap<String, Object>();
+            Map<String, Object> eventMap = new HashMap<>();
             Map<String, Object> chatMapObject = getChatMapObject(visitorChat, true);
             eventMap.put("eventName", SIQEvent.feedbackReceived);
             eventMap.put("chat", chatMapObject);
@@ -2326,7 +2407,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
 
         @Override
         public void handleQueuePositionChange(VisitorChat visitorChat) {
-            Map<String, Object> eventMap = new HashMap<String, Object>();
+            Map<String, Object> eventMap = new HashMap<>();
             Map<String, Object> chatMapObject = getChatMapObject(visitorChat, true);
             eventMap.put("eventName", SIQEvent.chatQueuePositionChange);
             eventMap.put("chat", chatMapObject);
@@ -2337,7 +2418,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
 
         @Override
         public boolean handleUri(Uri uri, VisitorChat visitorChat) {
-            Map<String, Object> eventMap = new HashMap<String, Object>();
+            Map<String, Object> eventMap = new HashMap<>();
             Map<String, Object> chatMapObject = getChatMapObject(visitorChat, true);
             eventMap.put("eventName", SIQEvent.handleURL);
             eventMap.put("chat", chatMapObject);
@@ -2352,16 +2433,16 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         public void handleCustomAction(SalesIQCustomAction salesIQCustomAction, SalesIQCustomActionListener salesIQCustomActionListener) {
             UUID uuid = UUID.randomUUID();
 
-            final Map<String, Object> actionDetailsMap = new HashMap<String, Object>();
+            final Map<String, Object> actionDetailsMap = new HashMap<>();
             actionDetailsMap.put("actionUUID", uuid.toString());         // No I18N
             actionDetailsMap.put("elementID", salesIQCustomAction.elementID);         // No I18N
             actionDetailsMap.put("label", salesIQCustomAction.label);         // No I18N
             actionDetailsMap.put("name", salesIQCustomAction.name);         // No I18N
             actionDetailsMap.put("clientActionName", salesIQCustomAction.clientActionName);         // No I18N
 
-            actionsList.put(uuid.toString(), salesIQCustomActionListener);
+            ACTIONS_LIST.put(uuid.toString(), salesIQCustomActionListener);
 
-            Map<String, Object> eventMap = new HashMap<String, Object>();
+            Map<String, Object> eventMap = new HashMap<>();
             eventMap.put("eventName", SIQEvent.performChatAction);
             eventMap.put("chatAction", actionDetailsMap);
             if (chatEventSink != null) {
@@ -2412,7 +2493,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 if (knowledgeBaseEventSink != null) {
                     knowledgeBaseEventSink.success(eventMap);
                 }
-                eventMap = new HashMap<String, Object>();
+                eventMap = new HashMap<>();
                 eventMap.put("eventName", SIQEvent.articleOpened);
                 eventMap.put("articleID", resource.getId());
                 if (faqEventSink != null) {
@@ -2431,7 +2512,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 if (knowledgeBaseEventSink != null) {
                     knowledgeBaseEventSink.success(eventMap);
                 }
-                eventMap = new HashMap<String, Object>();
+                eventMap = new HashMap<>();
                 eventMap.put("eventName", SIQEvent.articleClosed);
                 eventMap.put("articleID", resource.getId());
                 if (faqEventSink != null) {
@@ -2450,7 +2531,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 if (knowledgeBaseEventSink != null) {
                     knowledgeBaseEventSink.success(eventMap);
                 }
-                eventMap = new HashMap<String, Object>();
+                eventMap = new HashMap<>();
                 eventMap.put("eventName", SIQEvent.articleLiked);
                 eventMap.put("articleID", resource.getId());
                 if (faqEventSink != null) {
@@ -2469,7 +2550,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 if (knowledgeBaseEventSink != null) {
                     knowledgeBaseEventSink.success(eventMap);
                 }
-                eventMap = new HashMap<String, Object>();
+                eventMap = new HashMap<>();
                 eventMap.put("eventName", SIQEvent.articleDisliked);
                 eventMap.put("articleID", resource.getId());
                 if (faqEventSink != null) {
@@ -2478,7 +2559,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
             }
         }
 
-        Map<String, Object> addResourceType(Map<String, Object> map, ZohoSalesIQ.ResourceType resourceType) {
+        static Map<String, Object> addResourceType(Map<String, Object> map, ZohoSalesIQ.ResourceType resourceType) {
             switch (resourceType) {
                 case Articles:
                     map.put("type", 0);        // No I18N

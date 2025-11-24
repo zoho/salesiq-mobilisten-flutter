@@ -181,5 +181,45 @@ class MobilistenCorePlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Act
             }
             return builder.build()
         }
+
+        @JvmStatic
+        fun <K, V> getHashmapOrNull(any: Any?): HashMap<K, V>? {
+            return runCatching {
+                @Suppress("UNCHECKED_CAST")
+                any as? HashMap<K, V>
+            }.getOrNull()
+        }
+
+        @JvmStatic
+        fun <K, V> getMapOrNull(any: Any?): Map<K, V>? {
+            return runCatching {
+                @Suppress("UNCHECKED_CAST")
+                any as? Map<K, V>
+            }.getOrNull()
+        }
+
+        @JvmStatic
+        fun <T> getArrayListOrNull(any: Any?): ArrayList<T>? {
+            return runCatching {
+                @Suppress("UNCHECKED_CAST")
+                any as? ArrayList<T>
+            }.getOrNull()
+        }
+
+        @JvmStatic
+        fun getBooleanOrNull(any: Any?): Boolean? {
+            return runCatching {
+                @Suppress("UNCHECKED_CAST")
+                any as? Boolean
+            }.getOrNull()
+        }
+
+        @JvmStatic
+        fun <T> getListOrNull(any: Any?): List<T>? {
+            return runCatching {
+                @Suppress("UNCHECKED_CAST")
+                any as? List<T>
+            }.getOrNull()
+        }
     }
 }

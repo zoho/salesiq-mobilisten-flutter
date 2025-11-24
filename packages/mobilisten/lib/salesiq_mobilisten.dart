@@ -26,10 +26,10 @@ export 'package:salesiq_mobilisten/salesiq_chat_module.dart';
 export 'package:salesiq_mobilisten/salesiq_knowledge_base.dart';
 export 'package:salesiq_mobilisten/siqtheme.dart';
 export 'package:salesiq_mobilisten/tab.dart';
+export 'package:salesiq_mobilisten/uri/salesiq_uri_scheme.dart';
 export 'package:salesiq_mobilisten_core/salesiq_configuration.dart';
 export 'package:salesiq_mobilisten_core/salesiq_core_enums.dart';
 export 'package:salesiq_mobilisten_core/salesiq_department.dart';
-export 'package:salesiq_mobilisten/uri/salesiq_uri_scheme.dart';
 
 /// The main class for integrating Zoho SalesIQ Mobilisten SDK in Flutter application.
 class ZohoSalesIQ {
@@ -701,6 +701,7 @@ class ZohoSalesIQ {
         .then((onValue) => CommunicationMode.fromString(onValue));
   }
 
+  /// Handles push notification action for iOS.
   static Future<Null> handlePushNotificationAction(
       String actionIdentifier, Map userInfo, String responseText) async {
     Map<String, dynamic> args = <String, dynamic>{};
@@ -715,6 +716,44 @@ class ZohoSalesIQ {
   static void setAndroidUriScheme(SalesIQUriScheme uriScheme) {
     _channel.invokeMethod('setAndroidUriScheme', uriScheme.toMap());
   }
+
+  /// Updates the configuration for SalesIQ SDK using the provided [key] and [value].
+  /// See [SIQConfiguration] enum for available configuration keys.
+  /// Applies for both iOS and Android
+  /// Note: Some configurations may be platform specific.
+  static void updateConfiguration(SIQConfiguration key, Object value) {
+    Map<String, Object> args = <String, Object>{};
+    args.putIfAbsent("key", () => key.name);
+    args.putIfAbsent("value", () => value);
+    _channel.invokeMethod('updateConfiguration', args);
+  }
+}
+
+/// Configuration keys for SalesIQ SDK
+/// See [updateConfiguration(key, value)] method.
+/// Applies for both iOS and Android
+/// Note: Some configurations may be platform specific.
+enum SIQConfiguration {
+  /// Disables neutral ratings in chat feedback.
+  NeutralRatingDisabled,
+
+  /// Enables tracking of storage space used by the SDK.[iOS]
+  TrackStorageSpace,
+
+  /// Enables tracking of app installation time.[iOS]
+  TrackAppInstalledTime,
+
+  /// Enables tracking of app update time.[iOS]
+  TrackAppUpdatedTime,
+
+  /// Shows 'End Session' option in in-app notifications.[iOS]
+  ShowEndSessionInInAppNotification,
+
+  /// Sets the orientation of carousel card properties in chatbot.
+  ChatBotCarousalCardPropertiesOrientation,
+
+  /// Sets the visibility of images in carousel cards in chatbot.
+  ChatBotCarousalCardImageVisibility
 }
 
 class SIQChat {

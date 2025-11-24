@@ -1,6 +1,10 @@
 ## Mobilisten Core Plugin Changelog
 
-### 0.0.2 - 28 Aug 2025
+### 0.0.3 - 24 Nov 2025
+
+- Update functions and pubspec.yaml.
+
+- ### 0.0.2 - 28 Aug 2025
 
 - Update pubspec.yaml and README.md files.
 

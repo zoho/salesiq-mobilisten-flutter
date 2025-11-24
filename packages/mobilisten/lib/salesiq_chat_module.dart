@@ -131,6 +131,12 @@ class Chat {
       case ZSIQChatComponent.call:
         componentName = "call";
         break;
+      case ZSIQChatComponent.fileSharingWhenBotConnected:
+        componentName = "fileSharingWhenBotConnected";
+        break;
+      case ZSIQChatComponent.voiceNoteWhenBotConnected:
+        componentName = "voiceNoteWhenBotConnected";
+        break;
     }
     _channel.invokeMethod('setChatComponentVisibility', <String, dynamic>{
       'component_name': componentName,
@@ -154,5 +160,7 @@ enum ZSIQChatComponent {
   endWhenBotConnected,
   endWhenOperatorConnected,
   reopen,
-  call
+  call,
+  fileSharingWhenBotConnected,
+  voiceNoteWhenBotConnected
 }
