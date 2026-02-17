@@ -64,6 +64,7 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
     enum MobilistenEvent: String {
         
         static var nameKey: String = "eventName"
+        static var errorKey: String = "error"
         
         case supportOpened = "supportOpened";
         case supportClosed = "supportClosed"
@@ -97,6 +98,8 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
         case resourceLiked = "resourceLiked"
         case resourceDisliked = "resourceDisliked"
         case notificationClicked = "notificationClicked"
+        case chatError = "chatError"
+        case resourceError = "resourceError"
         
         
         var enabled: Bool {
@@ -732,11 +735,14 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
         return nil
     }
     
-    private func createEvent(name: MobilistenEvent, dataLabel: String = "data", data: Any? = nil) -> [String: Any]? {
+    private func createEvent(name: MobilistenEvent, dataLabel: String = "data", data: Any? = nil, error: Any? = nil) -> [String: Any]? {
         guard name.enabled else { return nil }
         var event: [String: Any] = [:]
         event[MobilistenEvent.nameKey] = name.rawValue
         event[dataLabel] = data
+        if let error {
+            event[MobilistenEvent.errorKey] = error
+        }
         return formEventData(name: name, dataLabel: dataLabel, event: event)
     }
 
@@ -777,8 +783,8 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
         eventSink?(event)
     }
     
-    private func sendChatEvent(name: MobilistenEvent, dataLabel: String = "chat", data: Any? = nil) {
-        guard let event = createEvent(name: name, dataLabel: dataLabel, data: data) else { return }
+    private func sendChatEvent(name: MobilistenEvent, dataLabel: String = "chat", data: Any? = nil, error: Any? = nil) {
+        guard let event = createEvent(name: name, dataLabel: dataLabel, data: data, error: error) else { return }
         chatEventSink?(event)
     }
     
@@ -787,13 +793,16 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
         faqEventSink?(event)
     }
     
-    private func sendResourceEvent(name: MobilistenEvent, dataLabel: String = "resource", data: Any? = nil) {
+    private func sendResourceEvent(name: MobilistenEvent, dataLabel: String = "resource", data: Any? = nil, error: Any? = nil) {
         if name.enabled {
             var event: [String: Any] = [:]
             event[MobilistenEvent.nameKey] = name.rawValue
             if let data = data as? [String: Any] {
                 event["type"] = data["type"] as? Int
                 event["resource"] = data["resource"]
+            }
+            if let error {
+                event[MobilistenEvent.errorKey] = error
             }
             resorceEventSink?(event)
         } else {
@@ -1607,6 +1616,60 @@ extension SwiftMobilistenPlugin {
         return chatDictionary
     }
     
+    func getChatErrorMap(chat: SIQVisitorChat?, error: ChatError) -> ([String: Any]?, [String: Any]?) {
+        var errorMap: [String: Any] = [:]
+        
+        errorMap["code"] = error.code
+        errorMap["message"] = error.message
+        
+        var type: String?
+        switch error.code {
+        case 5000:
+            type = "creationFailed"
+        case 5001:
+            type = "formSyncFailed"
+        case 5003:
+            type = "messagesSyncFailed"
+        case 5002:
+            type = "triggerTimedOut"
+        case 5005:
+            type = "socketConnectionFailedOnCreatingNewConversation"
+        case 5004:
+            type = "triggerFailed"
+        default:
+            break
+        }
+
+        if let type = type {
+            errorMap["type"] = type
+        }
+        
+        var chatMap: [String: Any] = [:]
+        if let chat = chat {
+            chatMap = getChatObject(chat)
+        }
+        
+        return (chatMap, errorMap)
+    }
+    
+    func getKnowledgeBaseErrorObject(error: ResourceError) -> [String: Any] {
+        var errorMap: [String: Any] = [:]
+        errorMap["code"] = error.code
+        errorMap["message"] = error.message
+        
+        switch error.code {
+        case 5201:
+            errorMap["type"] = "articleCategoriesSyncFailure"
+        case 5202:
+            errorMap["type"] = "articlesSyncFailure"
+        case 5203:
+            errorMap["type"] = "articlesSearchFailure"
+        default:
+            break
+        }
+        return errorMap
+    }
+        
     private func getDepartmentObject(_ department: SIQDepartment) -> [String: Any] {
         var deptDictionary: [String: Any] = [:]
         deptDictionary["id"] = department.id
@@ -1943,6 +2006,15 @@ extension SwiftMobilistenPlugin: ZohoSalesIQKnowledgeBaseDelegate {
         let resourceDict: [String: Any] = ["type": resourceType, "resource": getResourceObject(resource)]
         sendResourceEvent(name: .resourceDisliked, data: resourceDict)
     }
+    
+    public func didFailWithError(_ type: SIQResourceType, resource: SIQKnowledgeBaseResource?, error: ResourceError) {
+        let errorObject = getKnowledgeBaseErrorObject(error: error)
+        var knowledgeBaseMap: [String: Any] = ["type": type.rawValue]
+        if let resource {
+            knowledgeBaseMap = ["resource": getResourceObject(resource)]
+        }
+        sendResourceEvent(name: .resourceError, data: knowledgeBaseMap, error: errorObject)
+    }
 }
 
 extension SwiftMobilistenPlugin: ZohoSalesIQChatDelegate {
@@ -2004,6 +2076,11 @@ extension SwiftMobilistenPlugin: ZohoSalesIQChatDelegate {
         let notificationPayload = NotificationPlugin().getPayloadObjectEventDictionary(payload)
         let event: [String: Any] = [MobilistenEvent.nameKey: MobilistenEvent.notificationClicked.rawValue,"payload": notificationPayload]
         self.notificationEventSint?(event)
+    }
+    
+    public func didFailWithError(chat: SIQVisitorChat?, error: ChatError) {
+        let (chatObj, errorObj) = getChatErrorMap(chat: chat, error: error)
+        sendChatEvent(name: .chatError, dataLabel: "chat", data: chatObj, error: errorObj)
     }
 }
  

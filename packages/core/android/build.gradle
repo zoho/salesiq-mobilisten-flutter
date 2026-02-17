@@ -43,6 +43,6 @@ android {
 }
 
 dependencies {
-    implementation 'com.zoho.salesiq:mobilisten-core:0.0.2'
+    implementation 'com.zoho.salesiq:mobilisten-core:0.0.3'
 //    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
 }

@@ -10,6 +10,8 @@ import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.zoho.livechat.android.SIQDepartment
+import com.zoho.livechat.android.modules.calls.ui.result.enums.SalesIQCallAction
+import com.zoho.livechat.android.modules.common.ui.result.entities.CallError
 import com.zoho.livechat.android.modules.conversations.models.CommunicationMode
 import com.zoho.livechat.android.modules.conversations.models.SalesIQConversation
 import com.zoho.salesiq.core.modules.conversations.models.SalesIQConversationAttributes
@@ -122,6 +124,31 @@ class MobilistenCallsPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             )
             eventSink?.success(map)
         }
+
+        override fun onError(error: CallError) {
+            super.onError(error)
+            val map = hashMapOf<String, Any>(
+                "eventName" to "callErrorOccurred",
+            )
+            val data = hashMapOf<String, Any>("code" to error.code)
+            error.message?.let { data["message"] = it }
+
+            when (error) {
+                is CallError.CreationFailed -> {
+                    data["type"] = "creationFailure"
+                }
+
+                is CallError.ActionFailed -> {
+                    data["type"] = "actionFailure"
+                    data["action"] = error.salesIQCallAction.value
+                }
+            }
+
+            map["data"] = data
+            MobilistenCorePlugin.handler.post {
+                eventSink?.success(map)
+            }
+        }
     }
 
     companion object {
@@ -230,6 +257,9 @@ class MobilistenCallsPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     status
                 }).name.lowercase()
             )
+
+        internal val SalesIQCallAction.value: String
+            get() = name.lowercase()
 
         private fun isEnabled(result: MethodChannel.Result) {
             result.success(ZohoSalesIQCalls.isEnabled)

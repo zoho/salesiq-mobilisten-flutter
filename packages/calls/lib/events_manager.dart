@@ -152,6 +152,16 @@ class CallEventManager {
           );
         }
         break;
+
+      case "callErrorOccurred":
+        if (data == null) {
+          break;
+        }
+
+        String message = data['message'] as String;
+        int code = data['code'] as int;
+        CallErrorInfo? info = CallErrorInfo.fromMap(data);
+        return CallErrorOccurred(message, code, info);
     }
 
     return UnknownCallState();

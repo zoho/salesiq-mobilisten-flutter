@@ -25,6 +25,10 @@ class MobilistenCallsListeners: NSObject, ZohoSalesIQCallDelegate {
         SwiftMobilistenCallsPlugin.sharedInstance?.callScreenDidEnterFullScreenMode()
     }
     
+    func didFailWithError(call: SIQVisitorChat?, error: CallError) {
+        SwiftMobilistenCallsPlugin.sharedInstance?.didFailWithError(call: call, error: error)
+    }
+    
     override init() {
         super.init()
     }

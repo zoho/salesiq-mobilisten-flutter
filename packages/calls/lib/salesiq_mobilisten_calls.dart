@@ -788,6 +788,66 @@ enum SalesIQCallStatus {
   }
 }
 
+/// Enum representing the possible actions that can be performed on a SalesIQ call.
+///
+/// This enum defines all supported call actions, such as ending, missing, cancelling,
+/// inviting, accepting, or rejecting a call. It is used throughout the SalesIQ call
+/// system to specify and handle user or system-initiated call actions.
+///
+/// Each value corresponds to a specific action that can be triggered by the user
+/// or by the system during the call lifecycle.
+enum SalesIQCallAction {
+  /// End the call.
+  end,
+
+  /// Mark the call as missed.
+  miss,
+
+  /// Cancel the call before it is answered.
+  cancel,
+
+  /// Invite another participant to the call.
+  invite,
+
+  /// Accept an incoming call.
+  accept,
+
+  /// Reject an incoming call.
+  reject,
+
+  /// Invalid or unknown call action.
+  /// Used as a fallback for unrecognized action values.
+  invalid;
+
+  /// Creates a [SalesIQCallAction] from a string value.
+  ///
+  /// Converts a string representation of a call action (typically received from
+  /// native platforms or APIs) into the corresponding enum value. Returns [invalid]
+  /// if the value is null or does not match any known action.
+  ///
+  /// Parameters:
+  /// - [value]: The string representation of the call action. Can be null.
+  ///
+  /// Returns the corresponding [SalesIQCallAction] enum value, or [invalid]
+  /// if the value is null or doesn't match any known action.
+  ///
+  /// Example:
+  /// ```dart
+  /// final action = SalesIQCallAction.fromString('end');
+  /// // Returns SalesIQCallAction.end
+  /// ```
+  static SalesIQCallAction fromString(String? value) {
+    if (value == null) {
+      return SalesIQCallAction.invalid;
+    }
+
+    return SalesIQCallAction.values.firstWhere(
+      (e) => e.toString().split('.').last == value,
+      orElse: () => SalesIQCallAction.invalid,
+    );
+  }
+}
+
 /// Represents the current state of a SalesIQ call.
 ///
 /// This class encapsulates comprehensive information about a call's current status

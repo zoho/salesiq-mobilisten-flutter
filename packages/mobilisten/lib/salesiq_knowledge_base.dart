@@ -12,7 +12,9 @@ class KnowledgeBase {
       .map((event) => KnowledgeBaseEvent(
           ResourceAction.from(event["eventName"] as String),
           _getResourceType(event["type"] as int),
-          _getResource(event["resource"] as Map?)));
+          _getResource(event["resource"] as Map?),
+          KnowledgeBaseErrorInfo.fromMap(
+              event["error"] as Map<dynamic, dynamic>)));
 
   Future<Null> setVisibility(ResourceType type, bool shouldShow) async {
     Map<String, dynamic> args = <String, dynamic>{};
@@ -72,64 +74,64 @@ class KnowledgeBase {
   }
 
   static Resource? _getResource(Map? map) {
-    if (map != null) {
-      String? id = map["id"]?.toString();
-
-      Map<String, dynamic> categoryMap =
-          Map<String, dynamic>.from(map["category"] as Map);
-      SIQResourceCategory? category = SIQResourceCategory(
-          id: categoryMap["id"]?.toString(),
-          name: categoryMap["name"]?.toString());
-
-      String? title = map["title"]?.toString();
-      String? departmentID = map["departmentId"]?.toString();
-
-      Map<String, dynamic> languageMap =
-          Map<String, dynamic>.from(map["language"] as Map);
-      Language? language = Language(
-          id: languageMap["id"]?.toString(),
-          code: languageMap["code"]?.toString());
-
-      User? creator = (map["creator"] as Map)._toUser();
-      User? modifier = (map["modifier"] as Map)._toUser();
-
-      double? createdTimeMS = map["createdTime"] as double?;
-      double? modifiedTimeMS = map["modifiedTime"] as double?;
-      DateTime? createdTime =
-          DateTimeUtils.convertDoubleToDateTime(createdTimeMS);
-      DateTime? modifiedTime =
-          DateTimeUtils.convertDoubleToDateTime(modifiedTimeMS);
-      String? publicUrl = map["publicUrl"]?.toString();
-
-      Map<String, dynamic> statsMap =
-          Map<String, dynamic>.from(map["stats"] as Map);
-      Stats? stats = Stats(
-          liked: statsMap["liked"] as num?,
-          disliked: statsMap["disliked"] as num?,
-          used: statsMap["used"] as num?,
-          viewed: statsMap["viewed"] as num?);
-
-      String? content = map["content"]?.toString();
-      String rateString = map["ratedType"]?.toString() ?? "none";
-      RatedType ratedTypes = RatedTypeString.toRateType(rateString);
-
-      return Resource(
-          id: id,
-          category: category,
-          title: title,
-          departmentId: departmentID,
-          language: language,
-          creator: creator,
-          modifier: modifier,
-          createdTime: createdTime,
-          modifiedTime: modifiedTime,
-          publicUrl: publicUrl,
-          stats: stats,
-          content: content,
-          ratedType: ratedTypes);
-    } else {
+    if (map == null || map.isEmpty) {
       return null;
     }
+
+    String? id = map["id"]?.toString();
+
+    Map<String, dynamic> categoryMap =
+        Map<String, dynamic>.from(map["category"] as Map);
+    SIQResourceCategory? category = SIQResourceCategory(
+        id: categoryMap["id"]?.toString(),
+        name: categoryMap["name"]?.toString());
+
+    String? title = map["title"]?.toString();
+    String? departmentID = map["departmentId"]?.toString();
+
+    Map<String, dynamic> languageMap =
+        Map<String, dynamic>.from(map["language"] as Map);
+    Language? language = Language(
+        id: languageMap["id"]?.toString(),
+        code: languageMap["code"]?.toString());
+
+    User? creator = (map["creator"] as Map)._toUser();
+    User? modifier = (map["modifier"] as Map)._toUser();
+
+    double? createdTimeMS = map["createdTime"] as double?;
+    double? modifiedTimeMS = map["modifiedTime"] as double?;
+    DateTime? createdTime =
+        DateTimeUtils.convertDoubleToDateTime(createdTimeMS);
+    DateTime? modifiedTime =
+        DateTimeUtils.convertDoubleToDateTime(modifiedTimeMS);
+    String? publicUrl = map["publicUrl"]?.toString();
+
+    Map<String, dynamic> statsMap =
+        Map<String, dynamic>.from(map["stats"] as Map);
+    Stats? stats = Stats(
+        liked: statsMap["liked"] as num?,
+        disliked: statsMap["disliked"] as num?,
+        used: statsMap["used"] as num?,
+        viewed: statsMap["viewed"] as num?);
+
+    String? content = map["content"]?.toString();
+    String rateString = map["ratedType"]?.toString() ?? "none";
+    RatedType ratedTypes = RatedTypeString.toRateType(rateString);
+
+    return Resource(
+        id: id,
+        category: category,
+        title: title,
+        departmentId: departmentID,
+        language: language,
+        creator: creator,
+        modifier: modifier,
+        createdTime: createdTime,
+        modifiedTime: modifiedTime,
+        publicUrl: publicUrl,
+        stats: stats,
+        content: content,
+        ratedType: ratedTypes);
   }
 
   void setRecentlyViewedCount(int limit) {
@@ -405,8 +407,25 @@ class KnowledgeBaseEvent {
   ResourceAction? action;
   ResourceType? type;
   Resource? resource;
+  KnowledgeBaseErrorInfo? errorInfo;
 
-  KnowledgeBaseEvent(this.action, this.type, this.resource);
+  KnowledgeBaseEvent(this.action, this.type, this.resource, this.errorInfo);
+}
+
+class KnowledgeBaseErrorInfo {
+  final String message;
+  final int code;
+  final String type;
+
+  KnowledgeBaseErrorInfo(this.message, this.code, this.type);
+
+  static KnowledgeBaseErrorInfo fromMap(Map<dynamic, dynamic> data) {
+    String type = data["type"];
+    int code = data["code"] ?? -1;
+    String message = data["message"] ?? "";
+
+    return KnowledgeBaseErrorInfo(message, code, type);
+  }
 }
 
 class ResourceAction {
@@ -418,6 +437,7 @@ class ResourceAction {
   static const ResourceAction closed = ResourceAction._("resourceClosed");
   static const ResourceAction liked = ResourceAction._("resourceLiked");
   static const ResourceAction disliked = ResourceAction._("resourceDisliked");
+  static const ResourceAction error = ResourceAction._("resourceError");
 
   static ResourceAction? from(String value) {
     if (value == opened.value) {
@@ -428,6 +448,8 @@ class ResourceAction {
       return liked;
     } else if (value == disliked.value) {
       return disliked;
+    } else if (value == error.value) {
+      return error;
     } else {
       return null;
     }

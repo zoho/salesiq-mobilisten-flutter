@@ -96,6 +96,98 @@ class CallStateChanged extends CallEvent {
   CallStateChanged(this.state);
 }
 
+/// Event fired when an error occurs with the SalesIQ calls.
+///
+/// This event is triggered when there is an error in the call process, such as
+/// connection failures, media issues, or any other problems that prevent the call from functioning properly. It provides an error message that can be used for
+/// debugging or displaying user-friendly error information.
+
+/// Event fired when an error occurs during a SalesIQ call.
+///
+/// This event is triggered when there is an error in the call process, such as
+/// connection failures, media issues, or any other problems that prevent the call from functioning properly.
+/// It provides an error message, error code, and additional error info that can be used for
+/// debugging or displaying user-friendly error information.
+class CallErrorOccurred extends CallEvent {
+  /// The error message describing what went wrong.
+  final String errorMessage;
+
+  /// The error code associated with the error.
+  final int errorCode;
+
+  /// Additional error information, if available.
+  final CallErrorInfo? info;
+
+  /// Creates a new [CallErrorOccurred] event.
+  ///
+  /// Parameters:
+  /// - [errorMessage]: The error message describing the failure.
+  /// - [errorCode]: The error code associated with the error.
+  /// - [info]: Additional error information, if available.
+  CallErrorOccurred(this.errorMessage, this.errorCode, this.info);
+}
+
+/// Base class for additional error information related to call errors.
+///
+/// This abstract class represents detailed error information that can be attached
+/// to a [CallErrorOccurred] event. Subclasses provide specific error context for
+/// different error scenarios, such as creation failures or action failures.
+abstract class CallErrorInfo {
+  /// The type of error info (e.g., "creationFailure", "actionFailure").
+  final String type;
+
+  /// Creates a new [CallErrorInfo] with the given [type].
+  CallErrorInfo(this.type);
+
+  /// Factory method to create a [CallErrorInfo] from a map.
+  ///
+  /// Returns a [CreationFailure] or [ActionFailure] depending on the "type" field in [data].
+  static CallErrorInfo? fromMap(Map<dynamic, dynamic> data) {
+    String type = data["type"];
+    switch (type) {
+      case "creationFailure":
+        return CreationFailure();
+      case "actionFailure":
+        return ActionFailure.fromMap(data);
+    }
+    return null;
+  }
+}
+
+/// Error info for failures related to specific call actions.
+///
+/// This class provides context about which call action failed, such as answering,
+/// holding, or ending a call. It is used as additional info in [CallErrorOccurred].
+class ActionFailure extends CallErrorInfo {
+  /// The call action that failed.
+  final SalesIQCallAction action;
+
+  /// Creates a new [ActionFailure] for the given [action].
+  ActionFailure(this.action) : super("actionFailure");
+
+  /// Creates an [ActionFailure] from a map.
+  ///
+  /// The [data] map must contain an "action" field.
+  static ActionFailure fromMap(Map<dynamic, dynamic> data) {
+    SalesIQCallAction action = SalesIQCallAction.fromString(data["action"]);
+    return ActionFailure(action);
+  }
+}
+
+/// Error info for failures that occur during call creation.
+///
+/// This class represents errors that happen when a call cannot be created or initialized.
+/// It is used as additional info in [CallErrorOccurred].
+class CreationFailure extends CallErrorInfo {
+  /// Creates a new [CreationFailure] instance.
+  CreationFailure() : super("creationFailure");
+
+  /// Creates a [CreationFailure] from a map.
+  static CreationFailure fromMap(Map<dynamic, dynamic> data) {
+    return CreationFailure();
+  }
+}
+
 /// Event fired when an unknown or unrecognized call state is encountered.
 ///
 /// This event serves as a fallback for situations where the call system

@@ -61,6 +61,8 @@ import com.zoho.livechat.android.modules.common.ui.LauncherUtil;
 import com.zoho.livechat.android.modules.common.ui.LoggerUtil;
 import com.zoho.livechat.android.modules.common.ui.lifecycle.SalesIQActivitiesManager;
 import com.zoho.livechat.android.modules.common.ui.result.callbacks.ZohoSalesIQResultCallback;
+import com.zoho.livechat.android.modules.common.ui.result.entities.ChatError;
+import com.zoho.livechat.android.modules.common.ui.result.entities.KnowledgeBaseError;
 import com.zoho.livechat.android.modules.common.ui.result.entities.SalesIQError;
 import com.zoho.livechat.android.modules.common.ui.result.entities.SalesIQResult;
 import com.zoho.livechat.android.modules.commonpreferences.data.local.CommonPreferencesLocalDataSource;
@@ -1679,8 +1681,8 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
             tabType = ZohoSalesIQ.Tab.Conversations;
         } else //noinspection deprecation
             if (Tab.KNOWLEDGE_BASE.equals(tab) || Tab.FAQ.equals(tab)) {
-            tabType = ZohoSalesIQ.Tab.KnowledgeBase;
-        }
+                tabType = ZohoSalesIQ.Tab.KnowledgeBase;
+            }
         return tabType;
     }
 
@@ -2121,8 +2123,8 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 tabOrder[insertIndex++] = ZohoSalesIQ.Tab.Conversations;
             } else //noinspection deprecation
                 if (Tab.FAQ.equals(tabName) || Tab.KNOWLEDGE_BASE.equals(tabName)) {
-                tabOrder[insertIndex++] = ZohoSalesIQ.Tab.KnowledgeBase;
-            }
+                    tabOrder[insertIndex++] = ZohoSalesIQ.Tab.KnowledgeBase;
+                }
         }
         ZohoSalesIQ.setTabOrder(tabOrder);
     }
@@ -2430,6 +2432,45 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         }
 
         @Override
+        public void onError(@Nullable VisitorChat chat, @Nullable ChatError error) {
+            Map<String, Object> eventMap = new HashMap<>();
+            Map<String, Object> chatMapObject = getChatMapObject(chat, true);
+            eventMap.put("eventName", SIQEvent.chatError);
+            eventMap.put("chat", chatMapObject);
+            eventMap.put("error", getChatErrorObject(error));
+            if (chatEventSink != null) {
+                chatEventSink.success(eventMap);
+            }
+        }
+
+        private Map<String, Object> getChatErrorObject(@Nullable ChatError error) {
+            Map<String, Object> errorMap = new HashMap<>();
+            if (error != null) {
+                errorMap.put("code", error.getCode());
+                errorMap.put("message", error.getMessage());
+            }
+
+            String type = null;
+            if (error instanceof ChatError.CreationFailed) {
+                type = "creationFailed";    //No I18N
+            } else if (error instanceof ChatError.MessagesSyncFailed) {
+                type = "messagesSyncFailed";    //No I18N
+            } else if (error instanceof ChatError.FormSyncFailed) {
+                type = "formSyncFailed";    //No I18N
+            } else if (error instanceof ChatError.TriggerTimedOut) {
+                type = "triggerTimedOut";    //No I18N
+            } else if (error instanceof ChatError.SocketConnectionFailedOnCreatingNewConversation) {
+                type = "socketConnectionFailedOnCreatingNewConversation";    //No I18N
+            } else if (error instanceof ChatError.TriggerFailed) {
+                type = "triggerFailed";    //No I18N
+            }
+            if (type != null) {
+                errorMap.put("type", type); // No I18N
+            }
+            return errorMap;
+        }
+
+        @Override
         public void handleCustomAction(SalesIQCustomAction salesIQCustomAction, SalesIQCustomActionListener salesIQCustomActionListener) {
             UUID uuid = UUID.randomUUID();
 
@@ -2559,6 +2600,38 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
             }
         }
 
+        @Override
+        public void onError(@NonNull ZohoSalesIQ.ResourceType type, @Nullable Resource resource, @NonNull KnowledgeBaseError error) {
+            Map<String, Object> eventMap = new HashMap<>();
+            eventMap = addResourceType(eventMap, type);
+            eventMap.put("eventName", KnowledgeBaseEvent.resourceError);     // No I18N
+            eventMap.put("resource", getMap(resource));       // No I18N
+            eventMap.put("error", getKnowledgeBaseErrorObject(error));
+            if (knowledgeBaseEventSink != null) {
+                knowledgeBaseEventSink.success(eventMap);
+            }
+        }
+
+        private Map<String, Object> getKnowledgeBaseErrorObject(@Nullable KnowledgeBaseError error) {
+            Map<String, Object> errorMap = new HashMap<>();
+            if (error != null) {
+                errorMap.put("code", error.getCode());
+                errorMap.put("message", error.getMessage());
+            }
+            String type = null;
+            if (error instanceof KnowledgeBaseError.ArticleCategoriesSyncFailed) {
+                type = "articleCategoriesSyncFailure";        // No I18N
+            } else if (error instanceof KnowledgeBaseError.ArticlesSyncFailed) {
+                type = "articlesSyncFailure";        // No I18N
+            } else if (error instanceof KnowledgeBaseError.ArticlesSearchFailed) {
+                type = "articlesSearchFailure";        // No I18N
+            }
+            if (type != null) {
+                errorMap.put("type", type);        // No I18N
+            }
+            return errorMap;
+        }
+
         static Map<String, Object> addResourceType(Map<String, Object> map, ZohoSalesIQ.ResourceType resourceType) {
             switch (resourceType) {
                 case Articles:
@@ -2574,6 +2647,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         static String resourceClosed = "resourceClosed";          // No I18N
         static String resourceLiked = "resourceLiked";        // No I18N
         static String resourceDisliked = "resourceDisliked";          // No I18N
+        static String resourceError = "resourceError";          // No I18N
     }
 
     static class SIQEvent {
@@ -2602,6 +2676,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         static String articleClosed = "articleClosed";                                   // No I18N
         static String chatUnreadCountChanged = "chatUnreadCountChanged";    // No I18N
         static String handleURL = "handleURL";    // No I18N
+        static String chatError = "chatError";    // No I18N
         static String notificationClicked = "notificationClicked";    // No I18N
         static String visitorRegistrationFailure = "visitorRegistrationFailure";    // No I18N
     }

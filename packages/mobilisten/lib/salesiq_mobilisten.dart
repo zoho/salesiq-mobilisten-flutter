@@ -951,6 +951,7 @@ class SIQEvent {
   static const String chatMissed = "chatMissed";
   static const String chatFeedbackReceived = "chatFeedbackReceived";
   static const String chatRatingReceived = "chatRatingReceived";
+  static const String chatError = "chatError";
   static const String performChatAction = "performChatAction";
   static const String chatQueuePositionChange = "chatQueuePositionChange";
   static const String chatReopened = "chatReopened";

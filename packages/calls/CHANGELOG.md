@@ -1,5 +1,9 @@
 ## Mobilisten Calls Plugin Changelog
 
+### 0.0.5 - 17 Feb 2026
+
+- Updated Mobilisten Calls SDK in Android to version 0.0.4.
+
 ### 0.0.5 - 24 Nov 2025
 
 - Updated Mobilisten Calls SDK for Android to version 0.0.3 and iOS to 1.1.1.

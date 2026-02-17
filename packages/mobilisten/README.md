@@ -27,10 +27,10 @@ Ensure that your project meets the following requirements:
 dependencies:
   flutter:
     sdk: flutter
-+ salesiq_mobilisten: ^6.6.0
++ salesiq_mobilisten: ^6.6.1
 
 // Add this only if you want to integrate Mobilisten Calls along with Mobilisten
-+ salesiq_mobilisten_calls: ^0.0.5
++ salesiq_mobilisten_calls: ^0.0.6
 ```
 
 Refer to

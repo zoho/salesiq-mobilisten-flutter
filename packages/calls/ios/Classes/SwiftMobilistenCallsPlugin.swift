@@ -321,4 +321,18 @@ extension SwiftMobilistenCallsPlugin {
     func callScreenDidEnterFullScreenMode() {
         
     }
+
+    func didFailWithError(call: SIQVisitorChat?, error: CallError) {
+        Task { @MainActor in
+            var data: [String: Any] = ["code": error.code, "message": error.message]
+            
+            if error.action == .none {
+                data["type"] = "creationFailure"
+            } else {
+                data["type"] = "actionFailure"
+                data["action"] = error.action
+            }
+            sendEvent("callErrorOccurred", data: data)
+        }
+    }
 }
