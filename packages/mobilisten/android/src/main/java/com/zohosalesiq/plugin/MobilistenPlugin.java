@@ -446,7 +446,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 chatComponent = ChatComponent.fileShare;
                 break;
             case "media_capture":
-                chatComponent = ChatComponent.mediaCapture;
+                chatComponent = ChatComponent.takePhoto;
                 break;
             case "end":
                 chatComponent = ChatComponent.end;
@@ -897,11 +897,13 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                     @Override
                     public void onSuccess() {
                         ZohoSalesIQ.Chat.setVisibility(ChatComponent.screenshot, false);
+                        finalResult.success("Success");    //No I18N
                     }
 
                     @Override
                     public void onFailure(int code, String message) {
                         ZohoSalesIQ.Chat.setVisibility(ChatComponent.screenshot, false);
+                        finalResult.error(LiveChatUtil.getString(code), message, null);
                     }
                 });
                 break;
