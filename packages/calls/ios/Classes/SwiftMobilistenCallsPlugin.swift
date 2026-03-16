@@ -330,9 +330,24 @@ extension SwiftMobilistenCallsPlugin {
                 data["type"] = "creationFailure"
             } else {
                 data["type"] = "actionFailure"
-                data["action"] = error.action
+                data["action"] = actionToString(error.action)
             }
             sendEvent("callErrorOccurred", data: data)
+        }
+    }
+    
+    private func actionToString(_ action: CallErrorAction) -> String {
+        switch action {
+        case .end:
+            return "end"
+        case .accept:
+            return "accept"
+        case .reject:
+            return "reject"
+        case .none:
+            return "none"
+        @unknown default:
+            return "invalid"
         }
     }
 }

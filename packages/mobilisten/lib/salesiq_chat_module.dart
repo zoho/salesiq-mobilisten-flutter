@@ -113,8 +113,17 @@ class Chat {
       case ZSIQChatComponent.mediaCapture:
         componentName = "media_capture";
         break;
+      case ZSIQChatComponent.takePhoto:
+        componentName = "take_photo";
+        break;
+      case ZSIQChatComponent.recordVideo:
+        componentName = "record_video";
+        break;
       case ZSIQChatComponent.end:
         componentName = "end";
+        break;
+      case ZSIQChatComponent.mediaLibrary:
+        componentName = "media_library";
         break;
       case ZSIQChatComponent.endWhenInQueue:
         componentName = "end_when_in_queue";
@@ -154,8 +163,12 @@ enum ZSIQChatComponent {
   visitorName,
   emailTranscript,
   fileShare,
+  @Deprecated('mediaCapture is deprecated, use takePhoto or recordVideo instead')
   mediaCapture,
   end,
+  takePhoto,
+  recordVideo,
+  mediaLibrary,
   endWhenInQueue,
   endWhenBotConnected,
   endWhenOperatorConnected,

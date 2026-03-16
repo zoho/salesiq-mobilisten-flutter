@@ -1281,6 +1281,12 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
                 return .fileSharing
             case "media_capture":
                 return .mediaCapture
+            case "take_photo":
+                return .takePhoto
+            case "record_video":
+                return .recordVideo
+            case "media_library":
+                return .photoLibrary
             case "end":
                 return .end
             case "end_when_in_queue":

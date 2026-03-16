@@ -448,6 +448,15 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
             case "media_capture":
                 chatComponent = ChatComponent.takePhoto;
                 break;
+            case "take_photo":
+                chatComponent = ChatComponent.takePhoto;
+                break;
+            case "record_video":
+                chatComponent = ChatComponent.recordVideo;
+                break;
+            case "media_library":
+                chatComponent = ChatComponent.gallery;
+                break;
             case "end":
                 chatComponent = ChatComponent.end;
                 break;
