@@ -1728,8 +1728,11 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
 
     }
 
-    public static Map<String, Object> getChatMapObject(VisitorChat chat, boolean isEventStream) {
+    public static Map<String, Object> getChatMapObject(@androidx.annotation.Nullable VisitorChat chat, boolean isEventStream) {
         Map<String, Object> visitorMap = new HashMap<String, Object>();
+        if (chat == null) {
+            return visitorMap;
+        }
         visitorMap.put("id", chat.getChatID());         // No I18N
         visitorMap.put("unreadCount", chat.getUnreadCount());         // No I18N
         visitorMap.put("isBotAttender", chat.isBotAttender());         // No I18N
