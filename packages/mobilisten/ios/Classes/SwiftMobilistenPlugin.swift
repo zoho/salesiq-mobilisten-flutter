@@ -215,13 +215,14 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
         case "init":
             ZohoSalesIQ.setPlatform(platform: "Flutter")
             if let args = call.argumentDictionary, let appKey = args["appKey"] as? String, let accessKey = args["accessKey"] as? String {
-                ZohoSalesIQ.initWithAppKey(appKey, accessKey: accessKey, completion: { (success) in
-                    if (success == nil) {
-                        result(nil)
+                
+                ZohoSalesIQ.initWithAppKey(appKey, accessKey: accessKey) { error in
+                    if let error = error {
+                        result(self.getError(error: error))
                     } else {
-                        result(self.getErrorMessage("Mobilisten initialization failed"))
+                        result(nil)
                     }
-                })
+                }
                 ZohoSalesIQ.delegate = self
                 ZohoSalesIQ.FAQ.delegate = self
                 ZohoSalesIQ.Chat.delegate = self
@@ -1493,6 +1494,11 @@ extension SwiftMobilistenPlugin {
     private func getError(error: NSError?) -> FlutterError? {
         guard let err = error else { return nil }
         return FlutterError(code: String(err.code), message: err.localizedDescription, details: nil)
+    }
+
+    private func getError(error: SIQError?) -> FlutterError? {
+        guard let err = error else { return nil }
+        return FlutterError(code: String(err.code), message: err.message, details: nil)
     }
     
     private func getResourceError(error: SIQError?) -> FlutterError? {

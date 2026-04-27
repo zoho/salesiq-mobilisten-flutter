@@ -1,5 +1,9 @@
 ## Mobilisten Plugin Changelog
 
+- ### 6.6.6 - 24 Apr 2026
+- Miscellaneous bug fixes and performance improvements.
+ 
+
 - ### 6.6.5 - 02 Apr 2026
 
 - Updated Mobilisten SDK for Android
