@@ -753,7 +753,10 @@ enum SIQConfiguration {
   ChatBotCarousalCardPropertiesOrientation,
 
   /// Sets the visibility of images in carousel cards in chatbot.
-  ChatBotCarousalCardImageVisibility
+  ChatBotCarousalCardImageVisibility,
+
+  /// Fallback to departments list on reopening the chat window when all departments are offline.
+  ChatFallbackDepartmentsOnReopenIfOffline
 }
 
 class SIQChat {
@@ -955,6 +958,7 @@ class SIQEvent {
   static const String performChatAction = "performChatAction";
   static const String chatQueuePositionChange = "chatQueuePositionChange";
   static const String chatReopened = "chatReopened";
+  static const String chatExpired = "chatExpired";
 
   /// See [KnowledgeBaseEvent.resourceLiked].
   @Deprecated(

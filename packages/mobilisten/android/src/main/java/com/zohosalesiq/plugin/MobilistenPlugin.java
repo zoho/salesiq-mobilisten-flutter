@@ -1476,6 +1476,8 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
             configurationKey = "chat_bot_carousal_card_properties_orientation"; // No I18N
         } else if ("ChatBotCarousalCardImageVisibility".equals(key)) {
             configurationKey = "chat_bot_carousal_card_image_visibility";   // No I18N
+        } else if ("ChatFallbackDepartmentsOnReopenIfOffline".equals(key)) {
+            configurationKey = "fallbackDepartmentsOnReopenIfOffline";   // No I18N
         }
         if (configurationKey != null) {
             System.setProperty(configurationKey, value.toString());
@@ -2446,6 +2448,17 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         }
 
         @Override
+        public void onChatExpired(@Nullable VisitorChat chat) {
+            Map<String, Object> eventMap = new HashMap<>();
+            Map<String, Object> chatMapObject = getChatMapObject(chat, true);
+            eventMap.put("eventName", SIQEvent.chatExpired);
+            eventMap.put("chat", chatMapObject);
+            if (chatEventSink != null) {
+                chatEventSink.success(eventMap);
+            }
+        }
+
+        @Override
         public void onError(@Nullable VisitorChat chat, @Nullable ChatError error) {
             Map<String, Object> eventMap = new HashMap<>();
             Map<String, Object> chatMapObject = getChatMapObject(chat, true);
@@ -2684,6 +2697,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         static String performChatAction = "performChatAction";                                   // No I18N
         static String chatQueuePositionChange = "chatQueuePositionChange";                                   // No I18N
         static String chatReopened = "chatReopened";                                   // No I18N
+        static String chatExpired = "chatExpired";    // No I18N
         static String articleLiked = "articleLiked";                                   // No I18N
         static String articleDisliked = "articleDisliked";                                   // No I18N
         static String articleOpened = "articleOpened";                                   // No I18N

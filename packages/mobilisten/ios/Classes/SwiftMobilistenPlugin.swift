@@ -99,6 +99,7 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
         case resourceDisliked = "resourceDisliked"
         case notificationClicked = "notificationClicked"
         case chatError = "chatError"
+        case chatExpired = "chatExpired"
         case resourceError = "resourceError"
         
         
@@ -730,6 +731,8 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
             return .inputCarouselCardOrientation
         case "ChatBotCarousalCardImageVisibility":
             return .showInputCarouselCardImage
+        case "ChatFallbackDepartmentsOnReopenIfOffline":
+            return .fallbackDepartmentsOnReopenIfOffline
         default:
             print("Unsupported flag: \(key)")
         }
@@ -2093,6 +2096,11 @@ extension SwiftMobilistenPlugin: ZohoSalesIQChatDelegate {
     public func didFailWithError(chat: SIQVisitorChat?, error: ChatError) {
         let (chatObj, errorObj) = getChatErrorMap(chat: chat, error: error)
         sendChatEvent(name: .chatError, dataLabel: "chat", data: chatObj, error: errorObj)
+    }
+
+    public func chatExpired(chat: SIQVisitorChat?) {
+        guard let chatData = chat else { return }
+        sendChatEvent(name: .chatExpired, data:getChatObject(chatData))
     }
 }
  
