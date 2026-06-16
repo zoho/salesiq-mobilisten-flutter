@@ -1,5 +1,13 @@
 ## Mobilisten Calls Plugin Changelog
 
+### 0.0.10 - 15 Jun 2026
+
+- Updated Mobilisten Native SDK to
+  version [10.4.6](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/v10.4.6)
+
+- Updated MobilistenCalls Native SDK to
+  version [1.2.4](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/Calls-1.2.4)
+
 ### 0.0.9 - 12 May 2026
 
 - Updated Mobilisten Native SDK to

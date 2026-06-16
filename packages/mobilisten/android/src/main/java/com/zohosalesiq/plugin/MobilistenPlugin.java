@@ -68,6 +68,8 @@ import com.zoho.livechat.android.modules.common.ui.result.entities.SalesIQResult
 import com.zoho.livechat.android.modules.commonpreferences.data.local.CommonPreferencesLocalDataSource;
 import com.zoho.livechat.android.modules.conversations.models.CommunicationMode;
 import com.zoho.livechat.android.modules.conversations.models.SalesIQConversation;
+import com.zoho.livechat.android.modules.conversations.providers.DataProviderCallback;
+import com.zoho.livechat.android.modules.conversations.providers.SalesIQConversationDataProvider;
 import com.zoho.livechat.android.modules.deeplinking.models.SalesIQUriScheme;
 import com.zoho.livechat.android.modules.knowledgebase.ui.entities.Resource;
 import com.zoho.livechat.android.modules.knowledgebase.ui.entities.ResourceCategory;
@@ -81,7 +83,10 @@ import com.zoho.livechat.android.modules.knowledgebase.ui.listeners.SalesIQKnowl
 import com.zoho.livechat.android.modules.notifications.sdk.entities.SalesIQNotificationPayload;
 import com.zoho.livechat.android.operation.SalesIQApplicationManager;
 import com.zoho.livechat.android.utils.LiveChatUtil;
+import com.zoho.salesiq.core.config.SalesIQConfig;
 import com.zoho.salesiq.core.modules.conversations.models.SalesIQConversationAttributes;
+import com.zoho.salesiq.core.models.SalesIQData;
+import com.zoho.salesiq.core.models.SalesIQTimeoutType;
 import com.zoho.salesiq.mobilisten.core.plugin.MobilistenCorePlugin;
 import com.zoho.salesiqembed.ZohoSalesIQ;
 import com.zoho.salesiqembed.models.SalesIQConfiguration;
@@ -110,7 +115,8 @@ import io.flutter.plugin.common.MethodChannel.Result;
 
 public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, ActivityAware {
 
-    private MethodChannel channel, conversationsChannel, chatChannel, knowledgeBaseChannel, launcherChannel, notificationChannel;
+    private MethodChannel channel, chatChannel, knowledgeBaseChannel, launcherChannel, notificationChannel;
+    private static MethodChannel conversationsChannel;
     static Application application;
     private Activity activity;
 
@@ -418,6 +424,90 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         return actionSource;
     }
 
+    static class SalesIQProviders implements SalesIQConversationDataProvider {
+
+        private static MethodChannel providerChannel;
+        private static SalesIQProviders providerInstance;
+
+        static void register(@Nullable MethodChannel channel) {
+            providerChannel = channel;
+            if (providerChannel == null) {
+                return;
+            }
+            if (providerInstance == null) {
+                providerInstance = new SalesIQProviders();
+            }
+            ZohoSalesIQ.Conversation.setDataProvider(providerInstance);
+        }
+
+        static void unregister() {
+            ZohoSalesIQ.Conversation.setDataProvider(null);
+            providerChannel = null;
+            providerInstance = null;
+        }
+
+        @Override
+        public void getSecretFields(@NonNull SalesIQConversation conversation, @NonNull DataProviderCallback<Map<String, String>> callback) {
+            invokeProviderMethod("onSecretFieldsRequested", conversation, callback); // No I18N
+        }
+
+        @Override
+        public void getDisplayFields(@NonNull SalesIQConversation conversation, @NonNull DataProviderCallback<Map<String, String>> callback) {
+            invokeProviderMethod("onDisplayFieldsRequested", conversation, callback); // No I18N
+        }
+
+        private void invokeProviderMethod(
+                @NonNull String methodName,
+                @NonNull SalesIQConversation conversation,
+                @NonNull DataProviderCallback<Map<String, String>> callback
+        ) {
+            final MethodChannel channel = providerChannel;
+            if (channel == null) {
+                callback.onResult(null);
+                return;
+            }
+
+            final Map<String, Object> args = new HashMap<>();
+            final Map<String, Object> conversationMap = MobilistenCorePlugin.getMap(conversation);
+            args.put("conversation", conversationMap != null ? conversationMap : new HashMap<>()); // No I18N
+
+            MobilistenCorePlugin.getHandler().post(() ->
+                    channel.invokeMethod(methodName, args, new MethodChannel.Result() {
+                        @Override
+                        public void success(@Nullable Object result) {
+                            callback.onResult(getStringMapOrNull(result));
+                        }
+
+                        @Override
+                        public void error(String errorCode, @Nullable String errorMessage, @Nullable Object errorDetails) {
+                            callback.onResult(null);
+                        }
+
+                        @Override
+                        public void notImplemented() {
+                            callback.onResult(null);
+                        }
+                    })
+            );
+        }
+
+        @Nullable
+        private Map<String, String> getStringMapOrNull(@Nullable Object value) {
+            if (!(value instanceof Map)) {
+                return null;
+            }
+            Map<?, ?> resultMap = (Map<?, ?>) value;
+            Map<String, String> stringMap = new HashMap<>();
+            for (Map.Entry<?, ?> entry : resultMap.entrySet()) {
+                if (entry.getKey() == null || entry.getValue() == null) {
+                    continue;
+                }
+                stringMap.put(String.valueOf(entry.getKey()), String.valueOf(entry.getValue()));
+            }
+            return stringMap;
+        }
+    }
+
     private static @Nullable ChatComponent getChatComponent(final String componentName) {
         ChatComponent chatComponent = null;
         switch (componentName) {
@@ -491,6 +581,22 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
             case "setAttribute": {
                 SalesIQConversationAttributes attributes = MobilistenCorePlugin.getSalesIQConversationAttributes(call);
                 ZohoSalesIQ.Conversation.setAttributes(builder -> attributes.toBuilder());
+                break;
+            }
+
+            case "setDataProvider": {
+                boolean shouldEnableSecretFields = false;
+                boolean shouldEnableDisplayFields = false;
+                Map<String, Object> providerConfig = MobilistenCorePlugin.getMapOrNull(call.arguments);
+                if (providerConfig != null) {
+                    shouldEnableSecretFields = LiveChatUtil.getBoolean(providerConfig.get("secretFieldsEnabled")); // No I18N
+                    shouldEnableDisplayFields = LiveChatUtil.getBoolean(providerConfig.get("customInfoEnabled")); // No I18N
+                }
+                if (shouldEnableSecretFields || shouldEnableDisplayFields) {
+                    SalesIQProviders.register(conversationsChannel);
+                } else {
+                    SalesIQProviders.unregister();
+                }
                 break;
             }
 
@@ -1278,7 +1384,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 break;
 
             case "setChatActionTimeout":
-                final long timeout = LiveChatUtil.getLong(call.arguments);
+                Long timeout = LiveChatUtil.getLong(call.arguments);
                 handler.post(new Runnable() {
                     public void run() {
                         ZohoSalesIQ.ChatActions.setTimeout(timeout * 1000);
@@ -1403,6 +1509,21 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 }
                 setUriScheme(uriSchemeMap);
                 break;
+            case "refreshData": {
+                String type = getStringOrNull(call.argument("type")); // No I18N
+                String conversationId = getStringOrNull(call.argument("conversationId")); // No I18N
+                if (type == null || conversationId == null || conversationId.isEmpty()) {
+                    rawResult.error(INVALID_PARAM_TYPE_CODE, INVALID_PARAM_TYPE, null);
+                    return;
+                }
+                SalesIQData data = getRefreshData(type, conversationId);
+                if (data == null) {
+                    rawResult.error(INVALID_PARAM_TYPE_CODE, INVALID_PARAM_TYPE, null);
+                    return;
+                }
+                ZohoSalesIQ.refreshData(data);
+                break;
+            }
             case "updateConfiguration":
                 updateConfiguration(call.argument("key"), call.argument("value"));  // No I18N
                 break;
@@ -1469,7 +1590,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
     }
 
     private static void updateConfiguration(String key, Object value) {
-        String configurationKey = null;
+        String configurationKey;
         if ("NeutralRatingDisabled".equals(key)) {
             configurationKey = "binaryRating";  // No I18N
         } else if ("ChatBotCarousalCardPropertiesOrientation".equals(key)) {
@@ -1478,11 +1599,34 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
             configurationKey = "chat_bot_carousal_card_image_visibility";   // No I18N
         } else if ("ChatFallbackDepartmentsOnReopenIfOffline".equals(key)) {
             configurationKey = "fallbackDepartmentsOnReopenIfOffline";   // No I18N
-        }
-        if (configurationKey != null) {
-            System.setProperty(configurationKey, value.toString());
         } else {
-            LiveChatUtil.log("MobilistenPlugin - Invalid configuration key: " + key);   // No I18N
+            SalesIQConfig config = null;
+            if ("IncludeVisitorInfoInConversationInfo".equals(key)) {
+                config = new SalesIQConfig.IncludeVisitorInfoWithDisplayFields(LiveChatUtil.getBoolean(value));
+            } else if ("HideCreditCardMaskingConsentAlert".equals(key)) {
+                config = new SalesIQConfig.BypassCreditCardMaskingConsent(LiveChatUtil.getBoolean(value));
+            } else if ("SecretFieldsProviderTimeout".equals(key)) {
+                ZohoSalesIQ.setTimeout(SalesIQTimeoutType.SECRET_FIELDS, LiveChatUtil.getLong(value));
+            } else if ("DisplayFieldsProviderTimeout".equals(key)) {
+                ZohoSalesIQ.setTimeout(SalesIQTimeoutType.DISPLAY_FIELDS, LiveChatUtil.getLong(value));
+            }
+            if (config != null) {
+                ZohoSalesIQ.setConfig(config);
+            }
+            return;
+        }
+        System.setProperty(configurationKey, value.toString());
+    }
+
+    @Nullable
+    private static SalesIQData getRefreshData(@NonNull String type, @NonNull String conversationId) {
+        switch (type) {
+            case "secretFields":
+                return new SalesIQData.SecretFields(conversationId);
+            case "displayFields":
+                return new SalesIQData.DisplayFields(conversationId);
+            default:
+                return null;
         }
     }
 
@@ -1707,6 +1851,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
         chatChannel.setMethodCallHandler(null);
         launcherChannel.setMethodCallHandler(null);
         notificationChannel.setMethodCallHandler(null);
+        SalesIQProviders.unregister();
     }
 
     @Override

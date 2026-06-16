@@ -170,7 +170,7 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
         let launcher = LauncherPlugin()
         let notification = NotificationPlugin()
         let chatModule = ChatModulePlugin()
-        let conversationModule = ConversationPlugin()
+        let conversationModule = ConversationPlugin(channel: conversationChannel)
         sharedInstance = instance
         knowledgebaseInstance = knowledgebase
         launcherInstance = launcher
@@ -680,6 +680,18 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
             }
         case "refreshLauncher":
             ZohoSalesIQ.refreshLauncher()
+        case "refreshData":
+            if let args = call.argumentDictionary,
+               let type = args["type"] as? String,
+               let conversationId = args["conversationId"] as? String,
+               !conversationId.isEmpty {
+                refreshData(type: type, conversationId: conversationId, result: result)
+            } else {
+                result(self.getErrorMessage("Failed to refresh provider data"))
+            }
+        case "setTimeout":
+            // Need to handle this once the API is available for iOS. For now, keeping it as no-op to avoid breaking changes.
+            break
         case "present":
             if let args = call.argumentDictionary {
                 var tab = args["tab"] as? String
@@ -733,10 +745,40 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
             return .showInputCarouselCardImage
         case "ChatFallbackDepartmentsOnReopenIfOffline":
             return .fallbackDepartmentsOnReopenIfOffline
+            
+        case "HideCreditCardMaskingConsentAlert":
+            return .hideCreditCardMaskingConsentAlert
+        case "IncludeVisitorInfoInConversationInfo":
+            return .includeVisitorInfoInDisplayFields
+        case "SecretFieldsProviderTimeout":
+            return .getSecretFieldsTimeout
+        case "DisplayFieldsProviderTimeout":
+            return .getDisplayFieldsTimeout
         default:
             print("Unsupported flag: \(key)")
         }
         return nil
+    }
+
+    private func refreshData(type: String, conversationId: String, result: @escaping FlutterResult) {
+        let data: SalesIQData
+        switch type {
+        case "secretFields":
+            data = .secretFields(conversationId)
+        case "displayFields":
+            data = .displayFields(conversationId)
+        default:
+            result(getErrorMessage("Failed to refresh provider data"))
+            return
+        }
+
+        ZohoSalesIQ.refreshData(data) { [weak self] error in
+            if let error {
+                result(self?.getError(error: error))
+            } else {
+                result(nil)
+            }
+        }
     }
     
     private func createEvent(name: MobilistenEvent, dataLabel: String = "data", data: Any? = nil, error: Any? = nil) -> [String: Any]? {
@@ -972,9 +1014,21 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
         }
     }
     
-    class ConversationPlugin: NSObject, FlutterPlugin {
+    class ConversationPlugin: NSObject, FlutterPlugin, ZohoSalesIQConversationDelegate {
+        private static var conversationChannel: FlutterMethodChannel?
+        private var isSecretFieldsEnabled = false
+        private var isDisplayFieldsEnabled = false
+
+        init(channel: FlutterMethodChannel) {
+            Self.conversationChannel = channel
+        }
+
+        override init() {
+            super.init()
+        }
+
         static func register(with registrar: any FlutterPluginRegistrar) {
-        
+            conversationChannel = MobilistenChannel.conversationModule.createMethodChannel(registrar: registrar)
         }
         
         func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -1013,9 +1067,73 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
                         ZohoSalesIQ.Conversation.setDisplayPicture(displayPicture)
                     }
                 }
+            case "setDataProvider":
+                if let args = call.argumentDictionary {
+                    isSecretFieldsEnabled = args["secretFieldsEnabled"] as? Bool ?? false
+                    isDisplayFieldsEnabled = args["customInfoEnabled"] as? Bool ?? false
+                } else {
+                    isSecretFieldsEnabled = false
+                    isDisplayFieldsEnabled = false
+                }
+
+                if isSecretFieldsEnabled || isDisplayFieldsEnabled {
+                    ZohoSalesIQ.Conversation.delegate = self
+                } else {
+                    ZohoSalesIQ.Conversation.delegate = nil
+                }
+                result(nil)
             default:
                 break
             }
+        }
+
+        func getSecretFields(chat: SIQVisitorChat?, completion: @escaping ([String : Any]) -> Void) -> [String : Any]? {
+            if !isSecretFieldsEnabled {
+                return nil
+            }
+            invokeDataProviderMethod(method: "onSecretFieldsRequested", chat: chat, completion: completion)
+            return nil
+        }
+
+        func getDisplayFields(chat: SIQVisitorChat?, completion: @escaping ([String : Any]) -> Void) -> [String : Any]? {
+            if !isDisplayFieldsEnabled {
+                return nil
+            }
+            invokeDataProviderMethod(method: "onDisplayFieldsRequested", chat: chat, completion: completion)
+            return nil
+        }
+
+        private func invokeDataProviderMethod(method: String, chat: SIQVisitorChat?, completion: @escaping ([String : Any]) -> Void) {
+            guard let channel = Self.conversationChannel else {
+                completion([:])
+                return
+            }
+
+            var args: [String: Any] = [:]
+            var conversationMap: [String: Any] = ["type": "chat"]
+            if let chat = chat {
+                if let shared = SwiftMobilistenPlugin.sharedInstance {
+                    conversationMap.merge(shared.getChatObject(chat)) { _, new in new }
+                }
+            }
+            args["conversation"] = conversationMap
+
+            DispatchQueue.main.async {
+                channel.invokeMethod(method, arguments: args) { result in
+                    completion(self.getStringAnyMapOrEmpty(result))
+                }
+            }
+        }
+
+        private func getStringAnyMapOrEmpty(_ value: Any?) -> [String: Any] {
+            guard let map = value as? [AnyHashable: Any] else {
+                return [:]
+            }
+            var output: [String: Any] = [:]
+            map.forEach { key, value in
+                output[String(describing: key)] = value
+            }
+            return output
         }
         
         func getDepartmentList(_ list: [SIQDepartment]) -> [[String: Any]] {

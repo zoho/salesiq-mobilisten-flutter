@@ -51,9 +51,45 @@ class Chat {
     }).then((value) => SIQChat.fromMap(value));
   }
 
+  /// Initiates a new chat using a custom trigger defined in the SalesIQ bot/triggers configuration.
+  ///
+  /// This starts a chat with specific bot interactions or workflows based on
+  /// [customActionName].
+  ///
+  /// Parameters:
+  /// - [customActionName]: The name of the custom trigger defined in SalesIQ.
+  /// - [customChatId]: (Optional) A custom identifier for the chat session.
+  /// - [departmentName]: (Optional) Department to which the chat should be routed.
+  /// - [customSecretFields]: (Deprecated) Optional secret fields map.
+  ///
+  /// Deprecation:
+  /// [customSecretFields] is deprecated since v6.6.9. Use conversation-level data
+  /// providers via [SalesIQConversationDataProvider] and
+  /// `Conversation.setDataProvider(...)` instead.
+  ///
+  /// Backward compatibility:
+  /// Existing integrations using [customSecretFields] continue to work for now,
+  /// but should migrate to data providers before removal in a future major release.
+  ///
+  /// Returns:
+  /// A [Future] resolving to [SIQChat] for the initiated chat, or `null` if chat
+  /// initiation fails.
+  ///
+  /// Migration example:
+  /// ```dart
+  /// SalesIQ.conversation.setDataProvider(
+  ///   SalesIQConversationDataProvider(
+  ///     getSecretFields: (conversation) async {
+  ///       return {'token': 'value'};
+  ///     },
+  ///   ),
+  /// );
+  /// ```
   Future<SIQChat?> initiateWithTrigger(String customActionName,
       [String? customChatId,
       String? departmentName,
+      @Deprecated(
+          'customSecretFields is deprecated since v6.6.9 and will be removed in a future release.')
       Map<String, String>? customSecretFields]) async {
     return _channel.invokeMethod<Map<dynamic, dynamic>>(
         'initiateNewChatWithTrigger', <String, dynamic>{
@@ -163,7 +199,8 @@ enum ZSIQChatComponent {
   visitorName,
   emailTranscript,
   fileShare,
-  @Deprecated('mediaCapture is deprecated, use takePhoto or recordVideo instead')
+  @Deprecated(
+      'mediaCapture is deprecated, use takePhoto or recordVideo instead')
   mediaCapture,
   end,
   takePhoto,

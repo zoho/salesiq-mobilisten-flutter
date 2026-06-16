@@ -727,6 +727,26 @@ class ZohoSalesIQ {
     args.putIfAbsent("value", () => value);
     _channel.invokeMethod('updateConfiguration', args);
   }
+
+  /// Requests SDK to refresh provider-driven conversation data on demand.
+  ///
+  /// Applies currently for Android. On iOS, this is a no-op.
+  static Future<Null> refreshData(
+      SalesIQRefreshDataType type, String conversationId) async {
+    Map<String, dynamic> args = <String, dynamic>{};
+    args.putIfAbsent("type", () => type.name);
+    args.putIfAbsent("conversationId", () => conversationId);
+    await _channel.invokeMethod('refreshData', args);
+  }
+}
+
+/// Data provider payload type to refresh for a specific conversation.
+enum SalesIQRefreshDataType {
+  /// Refresh secret fields provider data.
+  secretFields,
+
+  /// Refresh custom info provider data.
+  displayFields
 }
 
 /// Configuration keys for SalesIQ SDK
@@ -756,7 +776,19 @@ enum SIQConfiguration {
   ChatBotCarousalCardImageVisibility,
 
   /// Fallback to departments list on reopening the chat window when all departments are offline.
-  ChatFallbackDepartmentsOnReopenIfOffline
+  ChatFallbackDepartmentsOnReopenIfOffline,
+
+  /// To hide the alert for credit card masking consent in chat.
+  HideCreditCardMaskingConsentAlert,
+
+  /// To include visitor information in the conversation info section of the SalesIQ console.
+  IncludeVisitorInfoInConversationInfo,
+
+  /// Timeout for getSecretFields provider callback.
+  SecretFieldsProviderTimeout,
+
+  /// Timeout for getCustomInfo provider callback.
+  DisplayFieldsProviderTimeout,
 }
 
 class SIQChat {
