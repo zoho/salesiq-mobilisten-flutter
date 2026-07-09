@@ -1637,7 +1637,7 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
             if ("registered_visitor".equals(type)) {
                 if (userId != null && !TextUtils.isEmpty(userId)) {
                     LiveChatUtil.log("MobilistenEncryptedSharedPreferences- re-registering visitor");   // No I18N
-                    LiveChatUtil.registerVisitor(userId, new RegisterListener() {
+                    LiveChatUtil.registerVisitor(userId, null, new RegisterListener() {
                         @Override
                         public void onSuccess() {
                             LoggerUtil.logDebugInfo(new DebugInfoData.VisitorFailureReRegistrationAcknowledged(userId));

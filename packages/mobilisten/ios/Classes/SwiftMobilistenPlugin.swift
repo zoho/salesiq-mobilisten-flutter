@@ -268,20 +268,20 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
             }
         case "registerVisitor":
             if let id = argument as? String {
-                ZohoSalesIQ.registerVisitor(id) { status in
+                ZohoSalesIQ.registerVisitor(id) { status, error in
                     if status {
                         result(nil)
                     } else {
-                        result(self.getErrorMessage("Failed to register visitor"))
+                        result(self.getError(error: error) ?? self.getErrorMessage("Failed to register visitor"))
                     }
                 }
             }
         case "unregisterVisitor":
-            ZohoSalesIQ.unregisterVisitor { status in
+            ZohoSalesIQ.unregisterVisitor { status, error in
                 if status {
                     result(nil)
                 } else {
-                    result(self.getErrorMessage("Failed to unregister visitor"))
+                    result(self.getError(error: error) ?? self.getErrorMessage("Failed to unregister visitor"))
                 }
             }
         case "setPageTitle":
