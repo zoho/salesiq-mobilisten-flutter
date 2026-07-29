@@ -1,5 +1,11 @@
 ## Mobilisten Plugin Changelog
 
+- ### 6.6.11 - 28 Jul 2026
+
+- Updated Mobilisten SDK for Android
+  to
+  version [8.3.10](https://github.com/zoho/salesiq-mobilisten-android-sample/releases/tag/v8.3.10)
+
 - ### 6.6.10 - 01 Jul 2026
 
 - Updated Mobilisten SDK for iOS

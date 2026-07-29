@@ -21,14 +21,14 @@ apply plugin: 'kotlin-android'
 apply plugin: 'dev.flutter.flutter-gradle-plugin'
 
 android {
-    compileSdk 35
+    compileSdk 36
     namespace "com.salesiq.demoapp"
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "com.salesiq.demoapp"
-        minSdkVersion 23
-        targetSdkVersion 35
+        minSdkVersion flutter.minSdkVersion
+        targetSdkVersion 36
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }
