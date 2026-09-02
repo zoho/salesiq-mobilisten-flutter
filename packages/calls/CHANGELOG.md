@@ -1,5 +1,7 @@
 ## Mobilisten Calls Plugin Changelog
 
+- Added Swift Package Manager support for iOS.
+
 ### 0.0.12 - 28 Jul 2026
 
 - Updated the README.md file

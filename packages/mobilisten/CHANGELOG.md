@@ -1,5 +1,7 @@
 ## Mobilisten Plugin Changelog
 
+- Added Swift Package Manager support for iOS.
+
 - ### 6.6.11 - 28 Jul 2026
 
 - Updated Mobilisten SDK for Android

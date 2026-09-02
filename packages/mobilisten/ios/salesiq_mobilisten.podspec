@@ -10,7 +10,7 @@ Pod::Spec.new do |s|
 SalesIQ Mobilisten Flutter Plugin
                        DESC
   s.homepage         = 'http://mobilisten.io'
-  s.license          = { :file => '../LICENSE' }
+  s.license          = { :type => 'MIT', :file => '../LICENSE' }
   s.author           = { 'Rishabh Raghunath' => 'support@zohosalesiq.com' }
   s.source           = { :path => '.' }
   s.source_files = 'salesiq_mobilisten/Sources/salesiq_mobilisten/**/*'
