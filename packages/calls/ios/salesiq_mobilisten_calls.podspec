@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'salesiq_mobilisten_calls'
-  s.version          = '1.2.7'
+  s.version          = '1.3.4'
   s.summary          = 'A new Flutter plugin for SalesIQ Mobilisten Calls'
   s.description      = <<-DESC
 SalesIQ Mobilisten Calls Flutter Plugin
@@ -13,13 +13,13 @@ SalesIQ Mobilisten Calls Flutter Plugin
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'Rishabh Raghunath' => 'support@zohosalesiq.com' }
   s.source           = { :path => '.' }
-  s.source_files = 'Classes/**/*'
+  s.source_files = 'salesiq_mobilisten_calls/Sources/salesiq_mobilisten_calls/**/*'
   s.dependency 'Flutter'
   s.platform = :ios, '13.0'
 
   # Flutter.framework does not contain a i386 slice.
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386' }
   s.dependency "MobilistenCalls", "#{s.version}"
-  s.dependency "Mobilisten", "10.4.8"
+  s.dependency "Mobilisten", "11.0.4"
   s.swift_version = '5.0'
 end

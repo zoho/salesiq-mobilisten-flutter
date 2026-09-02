@@ -269,6 +269,32 @@ class ZohoSalesIQCalls {
     _channel.invokeMethod('setCallKitIcon', icon);
   }
 
+  /// Enables VoIP (PushKit) call notifications for iOS using the given
+  /// PushKit [token].
+  ///
+  /// Set [isTestDevice] to `true` for test devices and [mode] to
+  /// [APNSMode.sandbox] while testing with a development build.
+  ///
+  /// Applies only for iOS; on Android, call notifications are delivered
+  /// through FCM via the notification registerPush API and this call
+  /// is a no-op.
+  static Future<void> enableVoIP(String token,
+      {bool isTestDevice = false, APNSMode mode = APNSMode.production}) {
+    return _channel.invokeMethod('enableVoIP', {
+      'token': token,
+      'isTestDevice': isTestDevice,
+      'mode': mode.name,
+    });
+  }
+
+  /// Handles a VoIP (PushKit) notification action using the given
+  /// notification payload [info].
+  ///
+  /// Applies only for iOS; resolves immediately on Android.
+  static Future<void> handleVOIPNotificationAction(Map info) async {
+    await _channel.invokeMethod('handleVOIPNotificationAction', info);
+  }
+
   /// Initiates a new call session or resumes an existing one. This method
   /// provides comprehensive options for configuring the call experience,
   /// including conversation attributes and UI behavior.
@@ -680,7 +706,11 @@ enum SalesIQCallStatus {
   /// Both parties are connected and can communicate.
   connected,
 
-  // onHold, // Commented out - call is temporarily paused
+  /// Call is temporarily placed on hold.
+  ///
+  /// Applies only for Android; the iOS native SDK does not report an
+  /// on-hold status.
+  onHold,
 
   /// Call is attempting to reconnect after connection loss.
   /// Temporary network issues are being resolved automatically.
@@ -743,7 +773,7 @@ enum SalesIQCallStatus {
         SalesIQCallStatus.ringing,
         SalesIQCallStatus.connecting,
         SalesIQCallStatus.connected,
-        // SalesIQCallStatus.onHold,
+        SalesIQCallStatus.onHold,
         SalesIQCallStatus.reconnecting,
         SalesIQCallStatus.queue,
       }.contains(this);
@@ -777,15 +807,24 @@ enum SalesIQCallStatus {
   static SalesIQCallStatus fromString(String? value) {
     if (value == null) {
       return SalesIQCallStatus.invalid;
+    } else if (value == "on_hold") {
+      return SalesIQCallStatus.onHold;
     }
-    // else if (value == "on_hold") {
-    //   return SalesIQCallStatus.onHold;
-    // }
     return SalesIQCallStatus.values.firstWhere(
       (e) => e.toString().split('.').last == value,
       orElse: () => SalesIQCallStatus.invalid,
     );
   }
+}
+
+/// The APNS environment used for VoIP (PushKit) notifications on iOS.
+/// See [ZohoSalesIQCalls.enableVoIP].
+enum APNSMode {
+  /// The APNS sandbox environment, used with development builds.
+  sandbox,
+
+  /// The APNS production environment.
+  production
 }
 
 /// Enum representing the possible actions that can be performed on a SalesIQ call.

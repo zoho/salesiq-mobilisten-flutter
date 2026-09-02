@@ -42,10 +42,18 @@ class Conversation {
   static SalesIQConversationDataProvider? _provider;
   static bool _methodHandlerRegistered = false;
 
-  /// Applies the specified meta data to all conversations. You can use this to customize the operator's name, display picture, additional information, and associate specific departments.
+  /// Applies the specified meta data ([attributes]) to all conversations. You
+  /// can use this to customize the operator's name, display picture,
+  /// additional information, and associate specific departments.
   void setAttributes(SalesIQConversationAttributes attributes) async {
     final attributesMap = await attributes.toMap();
     _channel.invokeMethod('setAttribute', attributesMap);
+  }
+
+  /// Enables or disables the conversation (chat) history using the value
+  /// provided for [visibility].
+  void setVisibility(bool visibility) {
+    _channel.invokeMethod('setVisibility', visibility);
   }
 
   /// Returns a list of departments (Instances of [SalesIQDepartment]).

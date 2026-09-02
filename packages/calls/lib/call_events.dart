@@ -182,7 +182,7 @@ class CreationFailure extends CallErrorInfo {
   /// Creates a new [CreationFailure] instance.
   CreationFailure() : super("creationFailure");
 
-  /// Creates a [CreationFailure] from a map.
+  /// Creates a [CreationFailure] from the native error [data] map.
   static CreationFailure fromMap(Map<dynamic, dynamic> data) {
     return CreationFailure();
   }

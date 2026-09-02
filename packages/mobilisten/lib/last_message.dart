@@ -17,7 +17,8 @@ class SIQMessage {
   late final DateTime? time;
   // final Status? status;
 
-  /// internal method to convert the map to the object
+  /// Builds a [SIQMessage] from the native message [map], or `null` when
+  /// [map] is `null`.
   static SIQMessage? getObject(Map? map) {
     if (map != null) {
       String? sender = map["sender"]?.toString();

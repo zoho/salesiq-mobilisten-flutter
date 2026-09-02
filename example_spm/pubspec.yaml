@@ -1,0 +1,31 @@
+name: my_flutter_app
+description: A Flutter project with SPM support and UISceneDelegate.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+  salesiq_mobilisten:
+    path: ../packages/mobilisten
+  salesiq_mobilisten_calls:
+    path: ../packages/calls
+
+# salesiq_mobilisten and salesiq_mobilisten_calls declare disjoint hosted
+# constraints on salesiq_mobilisten_core; resolve both against the local
+# workspace copy, mirroring example/pubspec.yaml.
+dependency_overrides:
+  salesiq_mobilisten_core:
+    path: ../packages/core
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true

@@ -26,7 +26,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId "com.salesiq.demoapp"
+        applicationId "com.zoho.salesiq.mobilisten.showcase"
         minSdkVersion flutter.minSdkVersion
         targetSdkVersion 36
         versionCode flutterVersionCode.toInteger()
@@ -53,12 +53,16 @@ android {
 
 
 dependencies {
-    implementation 'com.google.firebase:firebase-core:16.0.9'
-    implementation 'com.google.firebase:firebase-messaging:18.0.0'
+    // Firebase BoM keeps the messaging client current — the old firebase-messaging:18.0.0 uses the
+    // deprecated Instance ID API and fails to register an FCM token with modern Google Play services
+    // (no onNewToken / no getToken result). firebase-core is deprecated and no longer needed.
+    implementation platform('com.google.firebase:firebase-bom:33.7.0')
+    implementation 'com.google.firebase:firebase-messaging'
 }
 
 
 flutter {
     source '../..'
 }
-//apply plugin: 'com.google.gms.google-services'
+
+//apply plugin: 'com.google.gms.google-services'  // uncomment after adding your google-services.json

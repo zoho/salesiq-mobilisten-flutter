@@ -6,22 +6,22 @@ description: Demonstrates how to use the salesiq_mobilisten plugin.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
 environment:
-  sdk: ">=2.14.0 <4.0.0"
+  # The redesigned sample uses Dart 3 features (records, switch expressions,
+  # exhaustive enum patterns), so it requires a Dart 3 SDK.
+  sdk: ">=3.0.0 <4.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
 
-  salesiq_mobilisten:
-    path: ../packages/mobilisten
+  salesiq_mobilisten: ^7.0.0-beta.1
     # When depending on this package from a real application you should use:
     #   salesiq_mobilisten: ^x.y.z
     # See https://dart.dev/tools/pub/dependencies#version-constraints
     # The example app is bundled with the plugin so we use a path dependency on
     # the parent directory to use the current plugin's version.
 
-  salesiq_mobilisten_calls:
-    path: ../packages/calls
+  salesiq_mobilisten_calls: ^1.0.0-beta.1
     # When depending on this package from a real application you should use:
     #   salesiq_mobilisten_calls: ^x.y.z
     # See https://dart.dev/tools/pub/dependencies#version-constraints
@@ -32,6 +32,13 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
 #  firebase_messaging: ^16.0.0
+
+  # Notification-permission handling: request (Android 13+ POST_NOTIFICATIONS), read the current status
+  # (to drive the "notifications are off" warning), and open the app's OS settings.
+  permission_handler: ^11.3.1
+
+dependency_overrides:
+  salesiq_mobilisten_core: ^1.0.0-beta.1
 
 dev_dependencies:
   flutter_test:

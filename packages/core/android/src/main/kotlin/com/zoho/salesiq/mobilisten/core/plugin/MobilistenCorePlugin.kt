@@ -2,10 +2,12 @@ package com.zoho.salesiq.mobilisten.core.plugin
 
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.zoho.livechat.android.SIQDepartment
 import com.zoho.livechat.android.modules.common.ui.result.entities.SalesIQResult
+import com.zoho.livechat.android.modules.conversations.models.SalesIQConversation
 import com.zoho.salesiq.core.modules.conversations.models.SalesIQConversationAttributes
 import com.zoho.salesiq.mobilisten.core.enums.ResultType
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -70,6 +72,8 @@ class MobilistenCorePlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Act
             val mapType = object : TypeToken<HashMap<String, Any?>>() {}.type
             val hashMap = runCatching {
                 gson.fromJson<HashMap<String, Any?>>(gson.toJson(any), mapType)
+            }.onFailure {
+                Log.d("Mobilisten", it.message, it)
             }.getOrNull()
             val finalHashMap = hashMapOf<String, Any?>()
             hashMap?.forEach {
@@ -82,6 +86,30 @@ class MobilistenCorePlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Act
                 }
             }
             return finalHashMap
+        }
+
+        /**
+         * Serializes a [SalesIQConversation] into a map matching the Dart
+         * SalesIQConversation.fromMap shape (camelCase keys + a lowercase `type`
+         * discriminator). Shared by the mobilisten and calls plugins.
+         */
+        @JvmStatic
+        fun getConversationMap(conversation: SalesIQConversation?): HashMap<String, Any?>? {
+            if (conversation == null) {
+                return null
+            }
+            return getMap(conversation).apply {
+                when (conversation) {
+                    is SalesIQConversation.Call -> this["type"] = "call" // No I18N
+                    is SalesIQConversation.Chat -> {
+                        this["type"] = "chat" // No I18N
+                        (this["lastSalesIQMessage"] as? HashMap<String, Any?>)?.put(
+                            "senderId", // No I18N
+                            conversation.lastSalesIQMessage?.senderId
+                        )
+                    }
+                }
+            }
         }
 
         @JvmStatic

@@ -39,8 +39,8 @@ Ensure that your project meets the following requirements:
 dependencies:
   flutter:
     sdk: flutter
-+ salesiq_mobilisten: ^6.6.11
-+ salesiq_mobilisten_calls: ^0.0.12
++ salesiq_mobilisten: ^7.0.0-beta.1
++ salesiq_mobilisten_calls: ^1.0.0-beta.1
 ```
 
 2. Run `flutter pub get` to fetch dependencies for the project.

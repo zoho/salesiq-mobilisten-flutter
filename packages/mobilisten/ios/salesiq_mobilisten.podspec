@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'salesiq_mobilisten'
-  s.version          = '10.4.8'
+  s.version          = '11.0.4'
   s.summary          = 'A new Flutter plugin for SalesIQ Mobilisten'
   s.description      = <<-DESC
 SalesIQ Mobilisten Flutter Plugin
@@ -13,7 +13,7 @@ SalesIQ Mobilisten Flutter Plugin
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'Rishabh Raghunath' => 'support@zohosalesiq.com' }
   s.source           = { :path => '.' }
-  s.source_files = 'Classes/**/*'
+  s.source_files = 'salesiq_mobilisten/Sources/salesiq_mobilisten/**/*'
   s.dependency 'Flutter'
   s.platform = :ios, '13.0'
 

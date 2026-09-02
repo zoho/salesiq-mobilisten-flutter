@@ -1,0 +1,14 @@
+{
+  "pins" : [
+    {
+      "identity" : "salesiq-mobilisten-ios-sp",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/zoho/SalesIQ-Mobilisten-iOS-SP",
+      "state" : {
+        "revision" : "bc3a8ca0c6e7e3c040bf3044c004f0895de108b3",
+        "version" : "11.0.3"
+      }
+    }
+  ],
+  "version" : 2
+}

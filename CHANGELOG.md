@@ -1,5 +1,102 @@
 ## Mobilisten Plugin Changelog
 
+### 7.0.0-beta.1 - 02 Sep 2026
+
+- Major API-sync release aligning the Flutter wrapper with the latest native SalesIQ SDKs (Android 9.0.0-beta06.1 / iOS 11.0.3).
+- Reworked the public API into namespaced modules on `ZohoSalesIQ`: `chat`, `chatActions`, `conversation`, `helpCenter`, `homepage`, `knowledgeBase`, `launcher`, `notification`, `tracking`, and `visitor`.
+- Added `ChatActions`, `HelpCenter`, and `Homepage` modules.
+- Added the Knowledge Base `Resource` model with `ResourceType.articles`. (The FAQ resource type is prepared in the API but disabled until iOS support lands.)
+- Custom launcher now supports four icons (chat, call, create, close) via `LauncherProperties`.
+- `present()` now returns `Future<void>` (previously `Future<bool>`).
+- Renamed the start-flow config flag `DontNeedHomePageInStartFlow` to `EnableHomePageBackStackForChatInitiation` (inverted semantics).
+- Deprecated `ZohoSalesIQ.init(appKey, accessKey)`; use `ZohoSalesIQ.initialize(SalesIQConfiguration)` instead.
+- Removed the attribute-based `startConversation` / `startConversationWithTrigger` (SalesIQConversation-returning) chat-start APIs until iOS supports conversation attributes; use `chat.start` / `chat.startWithTrigger` meanwhile.
+- Removed `setNotificationIconForAndroid`; set the notification icon via the `siq_notification_small_icon` Android resource attribute.
+- Removed `userId` / `auth` from `SalesIQConfiguration` (auth flow reworked separately; `SalesIQJWTAuth` temporarily unavailable).
+- Retired the legacy FAQ API layer (article events + `ZohoSalesIQ.FAQ` methods); use the Knowledge Base module (`knowledgeBase.getResources` / `knowledgeBase.eventChannel`) instead.
+- Removed `Tracking.performCustomAction` (use `Visitor.performCustomAction`) and the `mediaCapture` chat component.
+- Async APIs now return `Future`. The deprecated `ZohoSalesIQ.performCustomAction` is fire-and-forget (`void`); the recommended `visitor.performCustomAction` returns `Future<void>`.
+- See the Migration Guide for the full list of breaking changes.
+
+
+### 6.6.11 - 28 Jul 2026
+
+- Updated Mobilisten SDK for Android
+  to
+  version [8.3.10](https://github.com/zoho/salesiq-mobilisten-android-sample/releases/tag/v8.3.10)
+
+### 6.6.10 - 01 Jul 2026
+
+- Updated Mobilisten SDK for iOS
+  to version [10.4.8](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/v10.4.8)
+- Updated Mobilisten SDK for Android
+  to version [8.3.9](https://github.com/zoho/salesiq-mobilisten-android-sample/releases/tag/v8.3.9)
+- Miscellaneous bug fixes and performance improvements.
+
+### 6.6.9 - 15 Jun 2026
+
+- Updated Mobilisten SDK for Android
+  to version [8.3.8](https://github.com/zoho/salesiq-mobilisten-android-sample/releases/tag/v8.3.8)
+  and iOS to version [10.4.6](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/v10.4.6)
+- Miscellaneous bug fixes and performance improvements.
+
+### 6.6.8 - 13 May 2026
+
+- Updated Mobilisten SDK for Android
+  to version [8.3.7](https://github.com/zoho/salesiq-mobilisten-android-sample/releases/tag/v8.3.7)
+
+### 6.6.7 - 12 May 2026
+
+- Updated Mobilisten SDK for iOS to
+  version [10.4.4](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/v10.4.4) and Android
+  to version [8.3.6](https://github.com/zoho/salesiq-mobilisten-android-sample/releases/tag/v8.3.6)
+- Miscellaneous bug fixes and performance improvements.
+ 
+
+### 6.6.6 - 24 Apr 2026
+
+- Miscellaneous bug fixes and performance improvements.
+ 
+
+### 6.6.5 - 02 Apr 2026
+
+- Updated Mobilisten SDK for Android
+  to version [8.3.4](https://github.com/zoho/salesiq-mobilisten-android-sample/releases/tag/v8.3.4)
+- Miscellaneous bug fixes and performance improvements.
+
+### 6.6.4 - 26 Mar 2026
+
+- Updated Mobilisten SDK for iOS to
+  version [10.4.3](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/v10.4.3) and Android
+  to version [8.3.3](https://github.com/zoho/salesiq-mobilisten-android-sample/releases/tag/v8.3.3)
+- Miscellaneous bug fixes and performance improvements.
+
+### 6.6.3 - 16 Mar 2026
+
+- Updated Mobilisten SDK for iOS
+  to version [10.4.2](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/v10.4.2)
+- Miscellaneous bug fixes and performance improvements.
+
+### 6.6.2 - 09 Mar 2026
+
+- Updated Mobilisten SDK for Android
+  to version [8.3.2](https://github.com/zoho/salesiq-mobilisten-android-sample/releases/tag/v8.3.2)
+- Miscellaneous bug fixes and performance improvements.
+
+### 6.6.1 - 17 Feb 2026
+
+- Updated Mobilisten SDK for iOS to
+  version [10.4.1](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/v10.4.1) and Android
+  to version [8.3.1](https://github.com/zoho/salesiq-mobilisten-android-sample/releases/tag/v8.3.1)
+- Miscellaneous bug fixes and performance improvements.
+
+### 6.6.0 - 24 Nov 2025
+
+- Updated Mobilisten SDK for iOS to
+  version [10.2.1](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/v10.2.1) and Android
+  to version [8.3.0](https://github.com/zoho/salesiq-mobilisten-android-sample/releases/tag/v8.3.0)
+- Miscellaneous bug fixes and performance improvements.
+
 ### 6.5.4 - 17 Oct 2025
 
 - Updated Mobilisten SDK for iOS to version [10.1.6](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/v10.1.6)
@@ -30,10 +127,11 @@
 - Miscellaneous bug fixes and performance improvements.
 
 ### 6.4.3 - 02 Jul 2025
+
 - Code formatting improvements for better readability and consistency.
 - No functional changes.
 
-### 6.4.2 - 02 Jul 2025
+### 6.4.2 - 24 Jun 2025
 
 - Updated Mobilisten SDK for Android to
   version [8.2.1](https://github.com/zoho/salesiq-mobilisten-android-sample/releases/tag/v8.2.1)
@@ -45,7 +143,7 @@
 - The ZohoSalesIQ.chat.initiateWithTrigger() and ZohoSalesIQ.chat.start() APIs supports secret fields that can be used with plugs.
 - Miscellaneous bug fixes and performance improvements.
 
-- ### 6.4.0 - 9 May 2025
+### 6.4.0 - 9 May 2025
 
 - Updated Mobilisten SDK for iOS to version [9.3.0](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/v9.3.0) and Android to version [8.2.0-beta01](https://github.com/zoho/salesiq-mobilisten-android-sample/releases/tag/v8.2.0-beta01)
 - The ZohoSalesIQ.chat.initiateWithTrigger() API allows initiating a bot/intelligent trigger chat.

@@ -56,14 +56,15 @@ class SalesIQUriScheme {
   /// Constructor for the class.
   SalesIQUriScheme(this.scheme);
 
-  /// Adds one or more hostnames (e.g., "example.com", "api.example.com").
-  /// Dart doesn't have `vararg`, so we accept a List of strings.
+  /// Adds one or more hostnames, [newHosts] (e.g. "example.com",
+  /// "api.example.com"). Returns `this` for a fluent, chainable API.
   SalesIQUriScheme addHosts(List<String> newHosts) {
     hosts.addAll(newHosts);
     return this; // Return `this` to allow for a fluent, chainable API.
   }
 
-  /// Adds one or more path conditions.
+  /// Adds one or more path conditions, [newPaths]. Returns `this` for a
+  /// fluent, chainable API.
   SalesIQUriScheme addPaths(List<PathMatcher> newPaths) {
     paths.addAll(newPaths);
     return this;

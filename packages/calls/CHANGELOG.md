@@ -1,5 +1,16 @@
 ## Mobilisten Calls Plugin Changelog
 
+### 1.0.0-beta.1 - 02 Sep 2026
+
+- Major version bump aligning the calls package with the 7.0.0-beta.1 Mobilisten release.
+- Added Swift Package Manager support on iOS; the plugin can now be consumed via SPM or CocoaPods.
+- Added iOS UIScene (SceneDelegate) lifecycle support. Legacy AppDelegate-only apps keep working unchanged.
+- Raised the minimum requirements to Flutter 3.38.0 and Dart 3.10.
+- Added VoIP support: `enableVoIP`, `handleVOIPNotificationAction`, and the `APNSMode` enum.
+- Added `SalesIQCallViewMode` (banner / floating) and call view-mode controls.
+- Conversation serialization now delegates to the shared core `getConversationMap`.
+
+
 ### 0.0.12 - 28 Jul 2026
 
 - Updated the README.md file
@@ -9,7 +20,7 @@
 - Updated Mobilisten Native SDK of iOS to
   version [10.4.7](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/v10.4.7)
 
-- ### 0.0.10 - 15 Jun 2026
+### 0.0.10 - 15 Jun 2026
 
 - Updated Mobilisten Native SDK of iOS to
   version [10.4.6](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/v10.4.6)

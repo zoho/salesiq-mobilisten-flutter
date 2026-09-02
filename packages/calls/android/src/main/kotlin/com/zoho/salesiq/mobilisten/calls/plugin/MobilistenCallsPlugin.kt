@@ -207,7 +207,7 @@ class MobilistenCallsPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 }
 
                 "setVisibility" -> {
-                    setVisibility(call, result)
+                    setVisibility(call)
                 }
 
                 "getStatusBarView" -> {
@@ -226,7 +226,7 @@ class MobilistenCallsPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                             )
                         )
                     }.onFailure {
-                        result.error("VIEW_ERROR", "Failed to initialize view: ${it.message}", null)
+                        result.error(CALL_VIEW_INIT_FAILED_CODE, "Failed to initialize view: ${it.message}", null)
                     }
                 }
 
@@ -236,6 +236,18 @@ class MobilistenCallsPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
                 "setCallKitIcon" -> {
 
+                }
+
+                "enableVoIP" -> {
+                    // iOS only: VoIP (PushKit) registration. On Android, call notifications
+                    // are delivered through FCM via ZohoSalesIQ.Notification.registerPush.
+                    result.success(null)
+                }
+
+                "handleVOIPNotificationAction" -> {
+                    // iOS only: VoIP (PushKit) notification handling. Resolve so the
+                    // dart layer never hangs on Android.
+                    result.success(null)
                 }
 
                 else -> {
@@ -251,11 +263,7 @@ class MobilistenCallsPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         internal val ZohoSalesIQCalls.SalesIQCallState.map: Map<String, Any?>
             get() = mapOf(
                 "isIncomingCall" to isIncomingCall,
-                "status" to (if (status == ZohoSalesIQCalls.SalesIQCallStatus.ON_HOLD) {
-                    ZohoSalesIQCalls.SalesIQCallStatus.CONNECTED
-                } else {
-                    status
-                }).name.lowercase()
+                "status" to status.name.lowercase()
             )
 
         internal val SalesIQCallAction.value: String
@@ -291,19 +299,8 @@ class MobilistenCallsPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             }
         }
 
-        private fun SalesIQConversation?.toCallConversationMap(): Map<String, Any?> {
-            return MobilistenCorePlugin.getMap(this).apply {
-                if (this@toCallConversationMap is SalesIQConversation.Call) {
-                    this["type"] = "Call"
-                } else if (this@toCallConversationMap is SalesIQConversation.Chat) {
-                    this["type"] = "Chat"
-                    (this["lastSalesIQMessage"] as? HashMap<String, Any?>)?.put(
-                        "senderId",
-                        this@toCallConversationMap.lastSalesIQMessage?.senderId
-                    )
-                }
-            }
-        }
+        private fun SalesIQConversation?.toCallConversationMap(): Map<String, Any?> =
+            MobilistenCorePlugin.getConversationMap(this) ?: hashMapOf()
 
         private fun List<SalesIQConversation>?.toCallConversationListMap() =
             this?.map { conversation ->
@@ -321,8 +318,8 @@ class MobilistenCallsPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                         SIQDepartment(
                             id = departmentMap["id"] as? String,
                             name = departmentMap["name"] as? String,
-                            communicationMode = departmentMap["communicationMode"]?.let {
-                                CommunicationMode.values()[it as? Int ?: 0]
+                            communicationMode = (departmentMap["communicationMode"] as? String)?.let { modeName ->
+                                CommunicationMode.entries.find { it.name == modeName }
                             })
                     }?.let {
                         setDepartments(it)
@@ -346,15 +343,12 @@ class MobilistenCallsPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             )
         }
 
-        fun setVisibility(call: MethodCall, result: MethodChannel.Result) {
+        fun setVisibility(call: MethodCall) {
             val callComponent = getCallComponent(call)
             if (callComponent != null) {
                 ZohoSalesIQCalls.setVisibility(
                     callComponent, call.argument("isVisible") as? Boolean ?: true
                 )
-                result.success(true)
-            } else {
-                result.error("INVALID_COMPONENT", "Invalid call component name", null)
             }
         }
 
@@ -389,6 +383,12 @@ class MobilistenCallsPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         }
 
         const val MOBILISTEN_CALLS_EVENT_CHANNEL = "mobilistenCallEvents"
+
+        // Shared fallback error codes for Calls. Negative (wrapper-synthetic, not native SalesIQ
+        // codes, which are positive) and kept in sync with the iOS Calls plugin
+        // (SwiftMobilistenCallsPlugin): -2000 invalid VoIP token (iOS-only; enableVoIP is a no-op on
+        // Android), -2001 view init failed.
+        private const val CALL_VIEW_INIT_FAILED_CODE = "-2001"
     }
 
     class CallsViewFactory(private val mobilistenCallsPlugin: MobilistenCallsPlugin) :

@@ -26,6 +26,9 @@ export 'package:salesiq_mobilisten/siqtheme/siqnonetworkbannertheme.dart';
 export 'package:salesiq_mobilisten/siqtheme/siqofflinebannertheme.dart';
 export 'package:salesiq_mobilisten/siqtheme/siqtabbartheme.dart';
 
+/// The visual theme applied to the Mobilisten UI, grouping the per-component
+/// theme customizations (launcher, tab bar, navigation, conversation, chat and
+/// more) under a single object.
 class SIQTheme {
   // ignore_for_file: public_member_api_docs
 
@@ -71,6 +74,7 @@ class SIQTheme {
         feedback = feedback ?? SIQFeedbackTheme(),
         inAppNotification = inAppNotification ?? SIQInAppNotificationTheme();
 
+  /// Serializes this theme to a map for the native bridge.
   Map<String, dynamic> toMap() {
     return {
       'themeColor': colorToHex(themeColor),

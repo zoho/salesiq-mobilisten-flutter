@@ -6,17 +6,38 @@ import 'package:salesiq_mobilisten_core/utils/primitive_type_cast_utils.dart';
 abstract class SalesIQConversation {
   /// Unique identifier for the conversation.
   final String? id;
+
+  /// The custom conversation id supplied at chat/call start, if any.
   final String? customConversationId;
+
+  /// The question the conversation was started with, if any.
   final String? question;
+
+  /// The unique id of the operator handling the conversation, if assigned.
   final String? attenderId;
+
+  /// The name of the operator handling the conversation, if assigned.
   final String? attenderName;
+
+  /// The email of the operator handling the conversation, if assigned.
   final String? attenderEmail;
+
+  /// The name of the department handling the conversation, if any.
   final String? departmentName;
+
+  /// The feedback left by the visitor, if any.
   final String? feedback;
+
+  /// The rating left by the visitor, if any.
   final String? rating;
+
+  /// The visitor's position in the queue; `-1` when not queued.
   final int queuePosition;
+
+  /// The associated call/media details, if any.
   final Media? media;
 
+  /// Creates a conversation with the given common attributes.
   SalesIQConversation({
     this.id,
     this.customConversationId,
@@ -31,8 +52,11 @@ abstract class SalesIQConversation {
     this.media,
   });
 
+  /// Serializes this conversation to a native-compatible map.
   Map<String, dynamic> toMap();
 
+  /// Builds a [SalesIQChatConversation] or [SalesIQCallConversation] from the
+  /// native [map] based on its `type`, or `null` when [map] is empty/invalid.
   static SalesIQConversation? fromMap(Map<dynamic, dynamic>? map) {
     if (map == null ||
         map.isEmpty ||
@@ -53,12 +77,21 @@ abstract class SalesIQConversation {
   }
 }
 
+/// A chat conversation. A [SalesIQConversation] whose type is `chat`.
 class SalesIQChatConversation extends SalesIQConversation {
+  /// Whether the current attender is a bot.
   final bool isBotAttender;
+
+  /// The current status of the chat.
   final ChatStatus? status;
+
+  /// The number of unread messages in the chat.
   final int unreadCount;
+
+  /// The most recent message in the chat, if any.
   final SalesIQMessage? lastSalesIQMessage;
 
+  /// Creates a chat conversation with the given attributes.
   SalesIQChatConversation(
     String? id,
     String? customConversationId,
@@ -89,6 +122,7 @@ class SalesIQChatConversation extends SalesIQConversation {
           media: media,
         );
 
+  /// Serializes this conversation to a map for the native bridge.
   @override
   Map<String, dynamic> toMap() {
     return {
@@ -136,9 +170,12 @@ class SalesIQChatConversation extends SalesIQConversation {
   }
 }
 
+/// A call conversation. A [SalesIQConversation] whose type is `call`.
 class SalesIQCallConversation extends SalesIQConversation {
+  /// The current status of the call.
   final CallStatus? status;
 
+  /// Creates a call conversation with the given attributes.
   SalesIQCallConversation(
     String? id,
     String? customConversationId,
@@ -165,6 +202,7 @@ class SalesIQCallConversation extends SalesIQConversation {
             queuePosition: queuePosition,
             media: media);
 
+  /// Serializes this conversation to a map for the native bridge.
   @override
   Map<String, dynamic> toMap() {
     return {
@@ -206,17 +244,36 @@ class SalesIQCallConversation extends SalesIQConversation {
   }
 }
 
+/// Call/media details associated with a [SalesIQConversation].
 class Media {
+  /// Unique identifier for the media session.
   final String? id;
+
+  /// The time (epoch ms) at which the media session ended, if ended.
   final int? endTime;
+
+  /// The party that initiated the media session.
   final UserType? initiatedBy;
+
+  /// The time (epoch ms) at which the media session was picked up.
   final int? pickupTime;
+
+  /// The time (epoch ms) at which the media session connected.
   final int? connectedTime;
+
+  /// The current status of the media session.
   final MediaStatus? status;
+
+  /// The party that ended the media session.
   final UserType? endedBy;
+
+  /// The media type (e.g. audio/video).
   final String? type;
+
+  /// The time (epoch ms) at which the media session was created.
   final int? createdTime;
 
+  /// Creates a media session with the given attributes.
   Media({
     this.id,
     this.endTime,
@@ -229,6 +286,7 @@ class Media {
     this.createdTime,
   });
 
+  /// Builds a [Media] from the native [map], or `null` when [map] is `null`.
   static Media? fromMap(Map<dynamic, dynamic>? map) {
     if (map == null) return null;
     return Media(
@@ -244,6 +302,7 @@ class Media {
     );
   }
 
+  /// Serializes this media session to a native-compatible map.
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -259,15 +318,30 @@ class Media {
   }
 }
 
+/// The status of a [Media] session.
 enum MediaStatus {
+  /// The media session ended.
   ended,
+
+  /// The media session was missed.
   missed,
+
+  /// The media session was cancelled.
   cancelled,
+
+  /// The media session is connected.
   connected,
+
+  /// The media session invite was sent.
   invited,
+
+  /// The media session was initiated.
   initiated,
+
+  /// The media session was accepted.
   accepted;
 
+  /// Returns the [MediaStatus] matching [status], or `null` if unrecognized.
   static MediaStatus? fromString(String? status) {
     switch (status?.toLowerCase()) {
       case 'ended':
@@ -290,10 +364,15 @@ enum MediaStatus {
   }
 }
 
+/// A party involved in a conversation or media session.
 enum UserType {
+  /// The visitor (end user).
   visitor,
+
+  /// The operator (agent).
   operator;
 
+  /// Returns the [UserType] matching [type], or `null` if unrecognized.
   static UserType? fromString(String? type) {
     switch (type?.toLowerCase()) {
       case 'visitor':
@@ -306,14 +385,27 @@ enum UserType {
   }
 }
 
+/// The status of a [SalesIQChatConversation].
 enum ChatStatus {
+  /// The chat is waiting in the queue.
   waiting,
+
+  /// The chat is connected to an operator.
   connected,
+
+  /// The chat was missed.
   missed,
+
+  /// The chat is closed.
   closed,
+
+  /// The chat was started by a trigger.
   triggered,
+
+  /// The chat was started proactively.
   proactive;
 
+  /// Returns the [ChatStatus] matching [status], or `null` if unrecognized.
   static ChatStatus? fromString(String? status) {
     switch (status?.toLowerCase()) {
       case 'waiting':
@@ -334,12 +426,21 @@ enum ChatStatus {
   }
 }
 
+/// The status of a [SalesIQCallConversation].
 enum CallStatus {
+  /// The call is waiting in the queue.
   waiting,
+
+  /// The call is connected to an operator.
   connected,
+
+  /// The call was missed.
   missed,
+
+  /// The call is closed.
   closed;
 
+  /// Returns the [CallStatus] matching [status], or `null` if unrecognized.
   static CallStatus? fromString(String? status) {
     switch (status?.toLowerCase()) {
       case 'waiting':
@@ -356,19 +457,36 @@ enum CallStatus {
   }
 }
 
+/// A single message within a [SalesIQChatConversation].
 class SalesIQMessage {
+  /// The display name of the message sender.
   final String? sender;
+
+  /// The text content of the message.
   final String? text;
+
+  /// The message type.
   final String? type;
+
   final String?
       _senderId; // This is private in Kotlin, we'll keep it the same in Dart
+
+  /// The time (epoch ms) at which the message was sent.
   final int? time;
+
+  /// Whether the message has been read.
   final bool isRead;
+
+  /// Whether the message was sent by the visitor.
   final bool sentByVisitor;
+
+  /// The attached file, if any.
   final SalesIQFile? file;
+
+  /// The delivery status of the message.
   final Status? status;
 
-  // Constructor
+  /// Creates a message with the given attributes.
   SalesIQMessage({
     this.sender,
     this.text,
@@ -381,7 +499,7 @@ class SalesIQMessage {
     this.status,
   }) : _senderId = senderId;
 
-  // Computed property for senderId
+  /// The normalized sender id, derived from the raw native sender id.
   String? get senderId {
     if (_senderId?.startsWith("\$") == true) {
       return _senderId?.substring(1);
@@ -393,6 +511,8 @@ class SalesIQMessage {
     }
   }
 
+  /// Builds a [SalesIQMessage] from the native [map], or `null` when [map]
+  /// is `null`.
   static SalesIQMessage? fromMap(Map<dynamic, dynamic>? map) {
     if (map == null) return null;
 
@@ -409,6 +529,7 @@ class SalesIQMessage {
     );
   }
 
+  /// Serializes this message to a native-compatible map.
   Map<String, dynamic> toMap() {
     return {
       'sender': sender,
@@ -424,13 +545,21 @@ class SalesIQMessage {
   }
 }
 
+/// A file attached to a [SalesIQMessage].
 class SalesIQFile {
+  /// The file name.
   final String? name;
+
+  /// The MIME content type of the file.
   final String? contentType;
+
+  /// An optional comment associated with the file.
   final String? comment;
+
+  /// The file size in bytes.
   final int? size;
 
-  // Constructor
+  /// Creates a file with the given attributes.
   SalesIQFile({
     this.name,
     this.contentType,
@@ -438,6 +567,8 @@ class SalesIQFile {
     this.size,
   });
 
+  /// Builds a [SalesIQFile] from the native [map], or `null` when [map] is
+  /// `null`.
   static SalesIQFile? fromMap(Map<dynamic, dynamic>? map) {
     if (map == null) return null;
     return SalesIQFile(
@@ -448,6 +579,7 @@ class SalesIQFile {
     );
   }
 
+  /// Serializes this file to a native-compatible map.
   Map<String, dynamic> toMap() {
     return {
       'name': name,
@@ -458,12 +590,21 @@ class SalesIQFile {
   }
 }
 
+/// The delivery status of a [SalesIQMessage].
 enum Status {
+  /// The message is being sent.
   sending,
+
+  /// An attachment is uploading.
   uploading,
+
+  /// The message was sent.
   sent,
+
+  /// The message failed to send.
   failed;
 
+  /// Returns the [Status] matching [status], or `null` if unrecognized.
   static Status? fromString(String? status) {
     switch (status?.toLowerCase()) {
       case 'sending':

@@ -1,13 +1,13 @@
 name: salesiq_mobilisten
 description: Mobilisten enables you to give your users the best in-app live chat experience. Mobilisten provides drop-in in-app chat and knowledge base.
-version: 6.6.11
+version: 7.0.0-beta.1
 repository: https://github.com/zoho/salesiq-mobilisten-flutter/tree/main/packages/mobilisten
 homepage: https://mobilisten.io/
 documentation: https://www.zoho.com/salesiq/help/developer-guides/flutter-sdk-installation.html
 
 environment:
-  sdk: ">2.17.0 < 4.0.0"
-  flutter: ">=1.20.0"
+  sdk: ^3.10.0
+  flutter: ">=3.38.0"
 
 dependencies:
   flutter:

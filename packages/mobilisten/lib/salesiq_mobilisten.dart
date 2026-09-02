@@ -8,28 +8,42 @@ import 'package:salesiq_mobilisten_core/salesiq_configuration.dart';
 import 'package:salesiq_mobilisten_core/salesiq_core_enums.dart';
 import 'package:salesiq_mobilisten_core/utils/salesiq_calls_helper.dart';
 
+import 'package:salesiq_mobilisten_core/salesiq_font.dart';
+
+import 'chat_actions.dart';
 import 'last_message.dart';
 import 'launcher.dart';
 import 'mobilisten_date_time.dart';
-import 'salesiq_auth.dart';
+import 'package:salesiq_mobilisten_core/salesiq_auth.dart';
 import 'salesiq_chat_module.dart';
+import 'tracking.dart';
+import 'salesiq_help_center.dart';
+import 'salesiq_homepage.dart';
 import 'salesiq_knowledge_base.dart';
+import 'salesiq_screen.dart';
+import 'salesiq_visitor.dart';
 import 'siqtheme.dart';
-import 'tab.dart';
 
+export 'package:salesiq_mobilisten/chat_actions.dart';
 export 'package:salesiq_mobilisten/conversations/salesiq_conversations.dart';
 export 'package:salesiq_mobilisten/launcher.dart';
 export 'package:salesiq_mobilisten/logger.dart';
+export 'package:salesiq_mobilisten/tracking.dart';
 export 'package:salesiq_mobilisten/notification.dart';
-export 'package:salesiq_mobilisten/salesiq_auth.dart';
+export 'package:salesiq_mobilisten_core/salesiq_auth.dart';
 export 'package:salesiq_mobilisten/salesiq_chat_module.dart';
+export 'package:salesiq_mobilisten/salesiq_help_center.dart';
+export 'package:salesiq_mobilisten/salesiq_homepage.dart';
 export 'package:salesiq_mobilisten/salesiq_knowledge_base.dart';
+export 'package:salesiq_mobilisten/salesiq_screen.dart';
+export 'package:salesiq_mobilisten/salesiq_visitor.dart';
 export 'package:salesiq_mobilisten/siqtheme.dart';
-export 'package:salesiq_mobilisten/tab.dart';
 export 'package:salesiq_mobilisten/uri/salesiq_uri_scheme.dart';
 export 'package:salesiq_mobilisten_core/salesiq_configuration.dart';
+export 'package:salesiq_mobilisten_core/salesiq_conversation.dart';
 export 'package:salesiq_mobilisten_core/salesiq_core_enums.dart';
 export 'package:salesiq_mobilisten_core/salesiq_department.dart';
+export 'package:salesiq_mobilisten_core/salesiq_font.dart';
 
 /// The main class for integrating Zoho SalesIQ Mobilisten SDK in Flutter application.
 class ZohoSalesIQ {
@@ -37,25 +51,39 @@ class ZohoSalesIQ {
       const MethodChannel('salesiq_mobilisten');
 
   /// Instance of [Launcher] to control the launcher view.
-  static Launcher launcher = Launcher();
+  static final Launcher launcher = Launcher();
 
-  /// Instance of [KnowledgeBase] to control the knowledge base and FAQs.
-  static KnowledgeBase knowledgeBase = KnowledgeBase();
+  /// Instance of [KnowledgeBase] to control the knowledge base.
+  static final KnowledgeBase knowledgeBase = KnowledgeBase();
 
   /// Instance of [SalesIQMobilistenNotification] to handle notifications.
-  static SalesIQMobilistenNotification notification =
+  static final SalesIQMobilistenNotification notification =
       SalesIQMobilistenNotification();
 
   /// Instance of [Chat] to control the chat module.
-  static Chat chat = Chat();
+  static final Chat chat = Chat();
 
   /// Instance of [Conversation] to control the chat module.
-  static Conversation conversation = Conversation();
+  static final Conversation conversation = Conversation();
+
+  /// Instance of [Visitor] to manage the visitor's information.
+  static final Visitor visitor = Visitor();
+
+  /// Instance of [Homepage] to control the SalesIQ homepage.
+  static final Homepage homepage = Homepage();
+
+  /// Instance of [HelpCenter] to interact with the Help Center.
+  static final HelpCenter helpCenter = HelpCenter();
+
+  /// Instance of [Tracking] to track the visitor's footpath.
+  static final Tracking tracking = Tracking();
+
+  /// Instance of [ChatActions] to register and manage custom chat actions.
+  static final ChatActions chatActions = ChatActions();
+
   static const String _mobilistenEventChannel = "mobilistenEventChannel";
   static const String _mobilistenChatEventChannel =
       "mobilistenChatEventChannel";
-  static const String _mobilistenArticleEventChannel =
-      "mobilistenFAQEventChannel";
 
   /// Stream to receive general mobilisten events.
   static final eventChannel =
@@ -65,23 +93,18 @@ class ZohoSalesIQ {
   static final chatEventChannel =
       EventChannel(_mobilistenChatEventChannel).receiveBroadcastStream();
 
-  /// Stream to receive events related to the knowledge base.
-  /// See [knowledgeBase.eventChannel] in [knowledgeBase]
-  @Deprecated(
-      'This EventChannel was deprecated after v3.1.2, Use eventChannel() in knowledgeBase instead.')
-  static final articleEventChannel =
-      EventChannel(_mobilistenArticleEventChannel).receiveBroadcastStream();
-
   /// Initializes Mobilisten using the [appKey] and [accessKey] generated for the bundle ID/package name of an application.
-  static Future<Null> init(String appKey, String accessKey) async {
+  @Deprecated('Use ZohoSalesIQ.initialize(SalesIQConfiguration) instead.')
+  static Future<void> init(String appKey, String accessKey) async {
     Map<String, dynamic> args = <String, dynamic>{};
     args.putIfAbsent("appKey", () => appKey);
     args.putIfAbsent("accessKey", () => accessKey);
     await _channel.invokeMethod('init', args);
   }
 
-  /// Initializes Mobilisten using the [SalesIQConfiguration] object.
-  static Future<Null> initialize(SalesIQConfiguration configuration) async {
+  /// Initializes Mobilisten using the [configuration] object
+  /// ([SalesIQConfiguration]).
+  static Future<void> initialize(SalesIQConfiguration configuration) async {
     Map<String, dynamic> args = <String, dynamic>{};
     args.putIfAbsent("isNewInitializationFlow", () => true);
     args.putIfAbsent("appKey", () => configuration.appKey);
@@ -92,10 +115,21 @@ class ZohoSalesIQ {
       args.putIfAbsent(
           "callViewMode", () => configuration.androidCallViewMode?.name);
     }
+    if (configuration.fonts != null) {
+      args.putIfAbsent(
+          "fonts",
+          () => <String, dynamic>{
+                "regular": {"path": configuration.fonts?.regular?.path},
+                "medium": {"path": configuration.fonts?.medium?.path},
+              });
+    }
     await _channel.invokeMethod('init', args);
   }
 
-  /// sets the custom font to be used inside the Mobilisten UI.
+  /// Sets the custom [font] to be used inside the Mobilisten UI.
+  ///
+  /// Prefer supplying fonts through `SalesIQConfiguration.fonts` at
+  /// [initialize] time; this method remains for runtime updates.
   static void setCustomFont(SalesIQFont font) async {
     Map<String, dynamic> map = <String, dynamic>{};
     Map<String, dynamic> regular = <String, dynamic>{};
@@ -107,17 +141,24 @@ class ZohoSalesIQ {
     await _channel.invokeMethod('setCustomFont', map);
   }
 
-  /// This API is used to present the Mobilisten UI.
-  static Future<bool> present([SIQTab? tab = null, String? id = null]) async {
-    Map<String, dynamic> args = <String, dynamic>{};
-    args.putIfAbsent("tab", () => tab?.toString());
-    args.putIfAbsent("id", () => id);
-    return await _channel
-        .invokeMethod<bool>('present', args)
-        .then((value) => value ?? false);
+  /// Presents the Mobilisten UI.
+  ///
+  /// When [screen] is provided, opens that screen: use [SIQConversationScreen]
+  /// to open a conversation or a conversation list and [SIQKnowledgeBaseScreen]
+  /// to open knowledge base articles. When [screen] is omitted, opens the SDK's
+  /// default UI.
+  ///
+  /// Set [showHomepage] to `false` to skip the homepage on back navigation.
+  static Future<void> present(
+      {SIQScreen? screen, bool showHomepage = true}) async {
+    await _channel.invokeMethod('presentScreen', <String, dynamic>{
+      'screen': screen?.toMap(),
+      'showHomepage': showHomepage,
+    });
   }
 
-  /// This API controls the behaviour of url opening behaviour
+  /// Controls whether URLs shared in chat are opened by the SDK, based on the
+  /// value provided for [openUrl].
   static void shouldOpenUrl(bool openUrl) {
     _channel.invokeMethod('shouldOpenUrl', openUrl);
   }
@@ -125,158 +166,164 @@ class ZohoSalesIQ {
   /// Controls the visibility of the default launcher using the value provided for [show].
   @Deprecated(
       'This method was deprecated after v4.0.0, Use launcher.show() method instead.')
-  static Future<Null> showLauncher(bool show) async {
-    await _channel.invokeMethod('showLauncher', show);
+  static void showLauncher(bool show) {
+    _channel.invokeMethod('showLauncher', show);
   }
 
   /// Sets the language used by Mobilisten using the language code provided in [language].
-  static Future<Null> setLanguage(String language) async {
-    await _channel.invokeMethod('setLanguage', language);
+  static void setLanguage(String language) {
+    _channel.invokeMethod('setLanguage', language);
   }
 
   /// Sets the department to which all chat requests are routed by default.
-  static Future<Null> setDepartment(String department) async {
-    await _channel.invokeMethod('setDepartment', department);
+  static void setDepartment(String department) {
+    _channel.invokeMethod('setDepartment', department);
   }
 
   /// Sets the list of departments to which chat requests may be routed.
-  static Future<Null> setDepartments(List<String> departmentList) async {
-    await _channel.invokeMethod('setDepartments', departmentList);
+  static void setDepartments(List<String> departmentList) {
+    _channel.invokeMethod('setDepartments', departmentList);
   }
 
   /// Prefills the text provided as [question] in the chat input field for a new chat window.
-  static Future<Null> setQuestion(String question) async {
-    await _channel.invokeMethod('setQuestion', question);
+  static void setQuestion(String question) {
+    _channel.invokeMethod('setQuestion', question);
   }
 
   /// Automatically attempts to starts a chat using the text provided in [question] as the question.
   @Deprecated(
       'This method was deprecated after v6.1.0, Use chat.start() method instead.')
-  static Future<Null> startChat(String question) async {
-    await _channel.invokeMethod('startChat', question);
+  static void startChat(String question) {
+    _channel.invokeMethod('startChat', question);
   }
 
-  /// Enables or disables conversation history using the value provided for [visibility].
-  static Future<Null> setConversationVisibility(bool visibility) async {
-    await _channel.invokeMethod('setConversationVisibility', visibility);
+  /// Enables or disables conversation history using the value provided for
+  /// [visibility].
+  @Deprecated('Use ZohoSalesIQ.conversation.setVisibility() instead.')
+  static void setConversationVisibility(bool visibility) {
+    _channel.invokeMethod('setConversationVisibility', visibility);
   }
 
   /// Sets the title for the conversations list.
-  static Future<Null> setConversationListTitle(String title) async {
-    await _channel.invokeMethod('setConversationListTitle', title);
-  }
-
-  /// Enables or disables the FAQs/the Knowledge base using the value provided for [visibility].
-  /// See [knowledgeBase.setVisibility(type, shouldShow)] in [knowledgeBase]
-  @Deprecated(
-      'This method was deprecated after v3.1.2, Use knowledgeBase.setVisibility() method instead.')
-  static Future<Null> setFAQVisibility(bool visibility) async {
-    await _channel.invokeMethod('setFAQVisibility', visibility);
+  static void setConversationListTitle(String title) {
+    _channel.invokeMethod('setConversationListTitle', title);
   }
 
   /// Registers a visitor using the unique ID provided for [registerID].
-  /// Once registered, conversations may be restored and synced across multiple devices that are registered with the same [registerID].
-  /// Use the API during a `login` operation to set the user's session.
+  /// Once registered, conversations may be restored and synced across multiple
+  /// devices that are registered with the same [registerID]. Use the API
+  /// during a `login` operation to set the user's session. Set profile details
+  /// via [visitor] `updateProfile`.
   static Future<dynamic> registerVisitor(String registerID) async {
     return await _channel.invokeMethod('registerVisitor', registerID);
   }
 
   /// Unregisters and clears conversations and data for the current user.
   /// Use the API during a `logout` operation to clear data.
-  static Future<Null> unregisterVisitor() async {
+  static Future<void> unregisterVisitor() async {
     await _channel.invokeMethod('unregisterVisitor');
   }
 
-  /// Sets the current page title to be shown in the visitor footpath on the SalesIQ console.
+  /// Sets the current page title, [pageTitle], shown in the visitor footpath
+  /// on the SalesIQ console.
+  @Deprecated('Use ZohoSalesIQ.tracking.setPageTitle() instead.')
   static void setPageTitle(String pageTitle) async {
     await _channel.invokeMethod('setPageTitle', pageTitle);
   }
 
   /// Performs a custom action using the action name provided in [actionName].
-  static Future<Null> performCustomAction(String actionName,
-      [@Deprecated(
-          "This param was deprecated after v6.4.0, Use ZohoSalesIQ.chat.initiateWithTrigger() method instead.")
-      bool shouldOpenChatWindow = false]) async {
+  @Deprecated('Use ZohoSalesIQ.visitor.performCustomAction() instead.')
+  static void performCustomAction(String actionName) {
     Map<String, dynamic> arguments = <String, dynamic>{};
     arguments.putIfAbsent("action_name", () => actionName);
-    arguments.putIfAbsent(
-        "should_open_chat_window", () => shouldOpenChatWindow);
-    await _channel.invokeMethod('performCustomAction', arguments);
+    _channel.invokeMethod('performCustomAction', arguments);
   }
 
   /// Enables in-app notifications from Mobilisten if previously disabled.
   /// In-app notifications are `enabled` by default.
-  static Future<Null> enableInAppNotification() async {
-    await _channel.invokeMethod('enableInAppNotification');
+  @Deprecated(
+      'Use ZohoSalesIQ.notification.enableInAppNotification(true) instead.')
+  static void enableInAppNotification() {
+    _channel.invokeMethod('enableInAppNotification', true);
   }
 
   /// Disables in-app notifications from Mobilisten.
-  static Future<Null> disableInAppNotification() async {
-    await _channel.invokeMethod('disableInAppNotification');
+  @Deprecated(
+      'Use ZohoSalesIQ.notification.enableInAppNotification(false) instead.')
+  static void disableInAppNotification() {
+    _channel.invokeMethod('enableInAppNotification', false);
   }
 
-  /// Sets the operator to whom all chat requests need to be routed using the provided [email].
-  static Future<Null> setOperatorEmail(String email) async {
-    await _channel.invokeMethod('setOperatorEmail', email);
+  /// Sets the operator to whom all chat requests need to be routed using the
+  /// provided [email].
+  @Deprecated('Use ZohoSalesIQ.chat.setOperatorEmail() instead.')
+  static void setOperatorEmail(String email) {
+    _channel.invokeMethod('setOperatorEmail', email);
   }
 
   /// Opens the Mobilisten UI. Invoke this API only after initialization is complete.
-  static Future<Null> show() async {
-    await _channel.invokeMethod('show');
+  @Deprecated('Use ZohoSalesIQ.present() instead.')
+  static void show() {
+    _channel.invokeMethod('show');
   }
 
-  /// Opens the chat window for a specified chat if provided the [chatID].
-  static Future<Null> openChatWithID(String chatID) async {
-    await _channel.invokeMethod('openChatWithID', chatID);
-  }
-
-  /// This method is used to refresh the launcher, it brings the launcher view to the front.
+  /// This method is used to refresh the launcher, it brings the launcher view
+  /// to the front.
+  @Deprecated('Use ZohoSalesIQ.launcher.refreshLauncher() instead.')
   void refreshLauncher() {
     _channel.invokeMethod('refreshLauncher');
   }
 
-  /// Opens a new chat window for creating a new chat.
-  static Future<Null> openNewChat() async {
-    await _channel.invokeMethod('openNewChat');
-  }
-
-  /// Shows an offline banner if all departments are offline.
-  /// This API is intended for use only when then chat waiting time is set to `Infinite`.
-  static Future<Null> showOfflineMessage(bool show) async {
-    await _channel.invokeMethod('showOfflineMessage', show);
+  /// Shows an offline banner if all departments are offline, based on the
+  /// value provided for [show].
+  /// This API is intended for use only when the chat waiting time is set to
+  /// `Infinite`.
+  @Deprecated('Use ZohoSalesIQ.chat.showOfflineMessage() instead.')
+  static void showOfflineMessage(bool show) {
+    _channel.invokeMethod('showOfflineMessage', show);
   }
 
   /// Ends the specified chat if provided the [chatID].
-  static Future<Null> endChat(String chatID) async {
-    await _channel.invokeMethod('endChat', chatID);
+  @Deprecated('Use ZohoSalesIQ.chat.end() instead.')
+  static void endChat(String chatID) {
+    _channel.invokeMethod('end', chatID);
   }
 
   /// Sets the visitor's name.
-  static Future<Null> setVisitorName(String visitorName) async {
-    await _channel.invokeMethod('setVisitorName', visitorName);
+  @Deprecated(
+      'This method is deprecated in v7.0.0, Use visitor.updateProfile() method instead.')
+  static void setVisitorName(String visitorName) {
+    _channel.invokeMethod('setVisitorName', visitorName);
   }
 
   /// Sets the visitor's email.
-  static Future<Null> setVisitorEmail(String visitorEmail) async {
-    await _channel.invokeMethod('setVisitorEmail', visitorEmail);
+  @Deprecated(
+      'This method is deprecated in v7.0.0, Use visitor.updateProfile() method instead.')
+  static void setVisitorEmail(String visitorEmail) {
+    _channel.invokeMethod('setVisitorEmail', visitorEmail);
   }
 
   /// Sets the visitor's contact number.
-  static Future<Null> setVisitorContactNumber(String contactNumber) async {
-    await _channel.invokeMethod('setVisitorContactNumber', contactNumber);
+  @Deprecated(
+      'This method is deprecated in v7.0.0, Use visitor.updateProfile() method instead.')
+  static void setVisitorContactNumber(String contactNumber) {
+    _channel.invokeMethod('setVisitorContactNumber', contactNumber);
   }
 
   /// Sets the visitor's custom information as [key], [value] pairs.
-  static Future<Null> setVisitorAddInfo(String key, String value) async {
+  @Deprecated(
+      'This method is deprecated in v7.0.0, Use visitor.updateProfile() method instead.')
+  static void setVisitorAddInfo(String key, String value) {
     Map<String, dynamic> addInfo = <String, dynamic>{};
     addInfo.putIfAbsent("key", () => key);
     addInfo.putIfAbsent("value", () => value);
-    await _channel.invokeMethod('setVisitorAddInfo', addInfo);
+    _channel.invokeMethod('setVisitorAddInfo', addInfo);
   }
 
   /// Sets the visitor's secondary location.
-  static Future<Null> setVisitorLocation(
-      SIQVisitorLocation locationDetails) async {
+  @Deprecated(
+      'This method is deprecated in v7.0.0, Use visitor.updateProfile() method instead.')
+  static void setVisitorLocation(SIQVisitorLocation locationDetails) {
     Map<String, dynamic> location = <String, dynamic>{};
     location.putIfAbsent("latitude", () => locationDetails.latitude);
     location.putIfAbsent("longitude", () => locationDetails.longitude);
@@ -285,96 +332,104 @@ class ZohoSalesIQ {
     location.putIfAbsent("country", () => locationDetails.country);
     location.putIfAbsent("countryCode", () => locationDetails.countryCode);
     location.putIfAbsent("zipCode", () => locationDetails.zipCode);
-    await _channel.invokeMethod('setVisitorLocation', location);
+    _channel.invokeMethod('setVisitorLocation', location);
   }
 
-  /// Sets the title displayed in the chat window prior to starting a conversation.
-  static Future<Null> setChatTitle(String chatTitle) async {
-    await _channel.invokeMethod('setChatTitle', chatTitle);
+  /// Sets the [chatTitle] displayed in the chat window prior to starting a
+  /// conversation.
+  @Deprecated('Use ZohoSalesIQ.chat.setTitle() instead.')
+  static void setChatTitle(String chatTitle) {
+    _channel.invokeMethod('setChatTitle', chatTitle);
   }
 
-  /// Sets the overall theme color used in the iOS platform.
-  static Future<Null> setThemeColorForiOS(String hexColor) async {
-    await _channel.invokeMethod('setThemeColorForiOS', hexColor);
+  /// Sets the overall theme color, [hexColor], used on the iOS platform.
+  static void setThemeColorForiOS(String hexColor) {
+    _channel.invokeMethod('setThemeColorForiOS', hexColor);
   }
 
-  /// Sets the given theme in the Android platform.
-  static Future<Null> setThemeForAndroid(String id) async {
-    await _channel.invokeMethod('setThemeForAndroid', id);
+  /// Sets the theme identified by the style resource [id] on the Android
+  /// platform.
+  static void setThemeForAndroid(String id) {
+    _channel.invokeMethod('setThemeForAndroid', id);
   }
 
-  /// Enables showing the operator's image in the default launcher.
-  static Future<Null> showOperatorImageInLauncher(bool show) async {
-    await _channel.invokeMethod('showOperatorImageInLauncher', show);
+  /// Enables or disables showing the operator's image in the default
+  /// launcher, based on the value provided for [show].
+  @Deprecated('Use ZohoSalesIQ.launcher.showOperatorImage() instead.')
+  static void showOperatorImageInLauncher(bool show) {
+    _channel.invokeMethod('showOperatorImage', show);
   }
 
   /// Enables or disables the display of sender images for incoming messages based on the value provided for [show].
   /// See [chat.setVisibility(chatComponent, visible)] in [chat]
   @Deprecated(
       'This method was deprecated since v6.3.1, Use [chat.setVisibility] method instead.')
-  static Future<Null> showOperatorImageInChat(bool show) async {
-    await _channel.invokeMethod('showOperatorImageInChat', show);
+  static void showOperatorImageInChat(bool show) {
+    _channel.invokeMethod('showOperatorImageInChat', show);
   }
 
-  /// Enables or disables showing the visitor name _if available_ as the sender name for outgoing messages within chat.
+  /// Enables or disables showing the visitor name _if available_ as the
+  /// sender name for outgoing messages within chat, based on [visibility].
   /// See [chat.setVisibility(chatComponent, visible)] in [chat]
   @Deprecated(
       'This method was deprecated since v6.3.1, Use [chat.setVisibility] method instead.')
-  static Future<Null> setVisitorNameVisibility(bool visibility) async {
-    await _channel.invokeMethod('setVisitorNameVisibility', visibility);
+  static void setVisitorNameVisibility(bool visibility) {
+    _channel.invokeMethod('setVisitorNameVisibility', visibility);
   }
 
-  /// Enables or disables the option to provide feedback for a chat once ended.
+  /// Enables or disables the option to provide feedback for a chat once
+  /// ended, based on [visibility].
   /// See [chat.setVisibility(chatComponent, visible)] in [chat]
   @Deprecated(
       'This method was deprecated since v6.3.1, Use [chat.setVisibility] method instead.')
-  static Future<Null> setFeedbackVisibility(bool visibility) async {
-    await _channel.invokeMethod('setFeedbackVisibility', visibility);
+  static void setFeedbackVisibility(bool visibility) {
+    _channel.invokeMethod('setFeedbackVisibility', visibility);
   }
 
-  /// Enables or disables the option to provide rating for a chat once ended.
+  /// Enables or disables the option to provide a rating for a chat once
+  /// ended, based on [visibility].
   /// See [chat.setVisibility(chatComponent, visible)] in [chat]
   @Deprecated(
       'This method was deprecated since v6.3.1, Use [chat.setVisibility] method instead.')
-  static Future<Null> setRatingVisibility(bool visibility) async {
-    await _channel.invokeMethod('setRatingVisibility', visibility);
+  static void setRatingVisibility(bool visibility) {
+    _channel.invokeMethod('setRatingVisibility', visibility);
   }
 
-  /// Sets the theme for iOS using the [SIQTheme] object.
-  static Future<Null> setThemeForiOS(SIQTheme theme) async {
-    await _channel.invokeMethod('setThemeColor', theme.toMap());
+  /// Sets the [theme] for iOS using the [SIQTheme] object.
+  static void setThemeForiOS(SIQTheme theme) {
+    _channel.invokeMethod('setThemeColor', theme.toMap());
   }
 
   /// Enables the option to capture screenshots from the attachments menu.
   /// See [chat.setVisibility(chatComponent, visible)] in [chat]
   @Deprecated(
       'This method was deprecated since v6.3.1, Use [chat.setVisibility] method instead.')
-  static Future<Null> enableScreenshotOption() async {
-    await _channel.invokeMethod('enableScreenshotOption');
+  static void enableScreenshotOption() {
+    _channel.invokeMethod('enableScreenshotOption');
   }
 
-  /// Disables the option to capture screenshots fromm the attachments menu.
+  /// Disables the option to capture screenshots from the attachments menu.
   /// See [chat.setVisibility(chatComponent, visible)] in [chat]
   @Deprecated(
       'This method was deprecated since v6.3.1, Use [chat.setVisibility] method instead.')
-  static Future<Null> disableScreenshotOption() async {
-    await _channel.invokeMethod('disableScreenshotOption');
+  static void disableScreenshotOption() {
+    _channel.invokeMethod('disableScreenshotOption');
   }
 
   /// Enables the pre-chat form if previously disables. Pre-chat forms are `enabled` by default.
   /// See [chat.setVisibility(chatComponent, visible)] in [chat]
   @Deprecated(
       'This method was deprecated since v6.3.1, Use [chat.setVisibility] method instead.')
-  static Future<Null> enablePreChatForms() async {
-    await _channel.invokeMethod('enablePreChatForms');
+  static void enablePreChatForms() {
+    _channel.invokeMethod('enablePreChatForms');
   }
 
   /// Disables the pre-chat form.
   /// See [chat.setVisibility(chatComponent, visible)] in [chat]
   @Deprecated(
       'This method was deprecated since v6.3.1, Use [chat.setVisibility] method instead.')
-  static Future<Null> disablePreChatForms() async {
-    await _channel.invokeMethod('disablePreChatForms');
+  static void disablePreChatForms() {
+    _channel.invokeMethod('disablePreChatForms');
   }
 
   /// Returns a list of chats (Instances of [SIQChat]).
@@ -383,7 +438,8 @@ class ZohoSalesIQ {
     return _getChatObjectList(mapList);
   }
 
-  /// Returns a list of chats (Instances of [SIQChat]) whose status matches [chatStatus].
+  /// Returns a list of chats (Instances of [SIQChat]) whose status matches
+  /// [chatStatus].
   static Future<List<SIQChat>> getChatsWithFilter(
       SIQChatStatus chatStatus) async {
     final List? mapList = await _channel.invokeMethod(
@@ -391,43 +447,17 @@ class ZohoSalesIQ {
     return _getChatObjectList(mapList);
   }
 
-  /// Returns a list of articles (Instances of [SIQArticle]).
-  /// See [knowledgeBase.getResources(type)] in [knowledgeBase]
-  @Deprecated(
-      'This method was deprecated after v3.1.2, Use knowledgeBase.getResources() method instead.')
-  static Future<List<SIQArticle>> getArticles() async {
-    final List? articleList = await _channel.invokeMethod('getArticles');
-    return _getArticleObjectList(articleList);
-  }
-
-  /// Returns a list of articles (Instances of [SIQArticle]) belonging to a specific category if provided a [categoryID].
-  /// See [knowledgeBase.getResources(type)] in [knowledgeBase]
-  @Deprecated(
-      'This method was deprecated after v3.1.2, Use knowledgeBase.getResources() method instead.')
-  static Future<List<SIQArticle>> getArticlesWithCategoryID(
-      String categoryID) async {
-    final List? articleList =
-        await _channel.invokeMethod('getArticlesWithCategoryID', categoryID);
-    return _getArticleObjectList(articleList);
-  }
-
-  /// Returns a list of article categories (Instances of [SIQArticleCategory]).
-  /// See [knowledgeBase.getCategories(type)] in [knowledgeBase]
-  @Deprecated(
-      'This method was deprecated after v3.1.2, Use knowledgeBase.getCategories() method instead.')
-  static Future<List<SIQArticleCategory>> getArticleCategories() async {
-    final List? categoryList =
-        await _channel.invokeMethod('getArticleCategories');
-    return _getArticleCategoryObjectList(categoryList);
-  }
-
   /// Returns a list of departments (Instances of [SIQDepartment]).
+  @Deprecated('Use ZohoSalesIQ.conversation.getDepartments() instead.')
   static Future<List<SIQDepartment>> getDepartments() async {
     final List? deptList = await _channel.invokeMethod('getDepartments');
     return _getDepartmentObjectList(deptList);
   }
 
-  /// Returns the base64 representation of an attender image for the given attender ID.
+  /// Returns the base64 representation of the attender image for the given
+  /// [attenderID]. Set [fetchDefaultImage] to `true` to fall back to the
+  /// default image when the attender has no image of their own.
+  @Deprecated('Use ZohoSalesIQ.chat.fetchAttenderImage() instead.')
   static Future<String> fetchAttenderImage(
       String attenderID, bool fetchDefaultImage) async {
     Map<String, dynamic> details = <String, dynamic>{};
@@ -439,81 +469,81 @@ class ZohoSalesIQ {
     return image;
   }
 
-  /// Opens an article from the knowledge base using the [articleID].
-  /// See [knowledgeBase.openResource(type, id)] in [knowledgeBase]
-  @Deprecated(
-      'This method was deprecated after v3.1.2, Use knowledgeBase.openResource() method instead.')
-  static Future<String> openArticle(String articleID) async {
-    final String articleList = await _channel
-        .invokeMethod<String>('openArticle', articleID)
-        .then((value) => value ?? "");
-    return articleList;
+  /// Registers a chat action, identified by [actionName], for use in
+  /// display cards.
+  @Deprecated('Use ZohoSalesIQ.chatActions.register() instead.')
+  static void registerChatAction(String actionName) {
+    _channel.invokeMethod('registerChatAction', actionName);
   }
 
-  /// Registers a chat action to be used in display-cards using an action name.
-  static Future<Null> registerChatAction(String actionName) async {
-    await _channel.invokeMethod('registerChatAction', actionName);
+  /// Unregisters the chat action identified by [actionName].
+  @Deprecated('Use ZohoSalesIQ.chatActions.unregister() instead.')
+  static void unregisterChatAction(String actionName) {
+    _channel.invokeMethod('unregisterChatAction', actionName);
   }
 
-  /// Unregisters a chat action to be used in display-cards using an action name.
-  static Future<Null> unregisterChatAction(String actionName) async {
-    await _channel.invokeMethod('unregisterChatAction', actionName);
+  /// Unregisters all registered chat actions.
+  @Deprecated('Use ZohoSalesIQ.chatActions.unregisterAll() instead.')
+  static void unregisterAllChatActions() {
+    _channel.invokeMethod('unregisterAllChatActions');
   }
 
-  /// Unregisters all registered chat action to be used in display-cards.
-  static Future<Null> unregisterAllChatActions() async {
-    await _channel.invokeMethod('unregisterAllChatActions');
-  }
-
-  /// Sets the timeout for all chat actions.
-  static Future<Null> setChatActionTimeout(int timeout) async {
-    await _channel.invokeMethod('setChatActionTimeout', timeout);
+  /// Sets the [timeout], in seconds, applied to all chat actions.
+  @Deprecated('Use ZohoSalesIQ.chatActions.setTimeout() instead.')
+  static void setChatActionTimeout(int timeout) {
+    _channel.invokeMethod('setChatActionTimeout', timeout);
   }
 
   /// Marks a chat action as complete provided the [actionUUID].
   @Deprecated('This method was deprecated after v1.0.5,'
       'Use sendEvent(event, values) method instead.')
-  static Future<Null> completeChatAction(String actionUUID) async {
-    await _channel.invokeMethod('completeChatAction', actionUUID);
+  static void completeChatAction(String actionUUID) {
+    _channel.invokeMethod('completeChatAction', actionUUID);
   }
 
   /// Enables push notifications for iOS using [token], [isTestDevice] and [productionMode].
   /// Set [isTestDevice] to `false` and [productionMode] to `true` before moving the app to production.
-  static Future<Null> enablePushForiOS(
-      String token, bool isTestDevice, bool productionMode) async {
+  static Future<void> enablePushForiOS(
+      String token, bool isTestDevice, bool productionMode) {
     Map<String, dynamic> args = <String, dynamic>{};
     args.putIfAbsent("token", () => token);
     args.putIfAbsent("isTestDevice", () => isTestDevice);
     args.putIfAbsent("productionMode", () => productionMode);
-    await _channel.invokeMethod('enablePushForiOS', args);
+    return _channel.invokeMethod('enablePushForiOS', args);
   }
 
-  /// Processes the content of push notifications in response to a the tap action in iOS.
-  /// Use this API only if push notification configuration is to be done manually in dart.
-  static Future<Null> handleNotificationResponseForiOS(Map userInfo) async {
-    await _channel.invokeMethod('handleNotificationResponseForiOS', userInfo);
+  /// Processes the push notification [userInfo] in response to a tap action
+  /// on iOS.
+  /// Use this API only if push notification configuration is done manually
+  /// in dart.
+  static Future<void> handleNotificationResponseForiOS(Map userInfo) {
+    return _channel.invokeMethod('handleNotificationResponseForiOS', userInfo);
   }
 
-  /// Processes the content of push notification received for iOS.
-  /// Use this API only if push notification configuration is to be done manually in dart.
-  static Future<Null> processNotificationWithInfoForiOS(Map userInfo) async {
-    await _channel.invokeMethod('processNotificationWithInfoForiOS', userInfo);
+  /// Processes the content of the push notification [userInfo] received on
+  /// iOS.
+  /// Use this API only if push notification configuration is done manually
+  /// in dart.
+  static Future<void> processNotificationWithInfoForiOS(Map userInfo) {
+    return _channel.invokeMethod('processNotificationWithInfoForiOS', userInfo);
   }
 
-  /// Marks a chat action as complete provided the [actionUUID], completion state and the message to be shown upon completion.
+  /// Marks the chat action identified by [actionUUID] as complete, using the
+  /// completion [state] and the [message] shown upon completion.
   @Deprecated('This method was deprecated after v1.0.5, '
       'Use sendEvent(event, values) method instead.')
-  static Future<Null> completeChatActionWithMessage(
-      String actionUUID, bool state, String message) async {
+  static void completeChatActionWithMessage(
+      String actionUUID, bool state, String message) {
     Map<String, dynamic> chatActionDetails = <String, dynamic>{};
     chatActionDetails.putIfAbsent("actionUUID", () => actionUUID);
     chatActionDetails.putIfAbsent("state", () => state);
     chatActionDetails.putIfAbsent("message", () => message);
-    await _channel.invokeMethod(
-        'completeChatActionWithMessage', chatActionDetails);
+    _channel.invokeMethod('completeChatActionWithMessage', chatActionDetails);
   }
 
-  /// A Boolean value used to determine whether a visitor can start multiple parallel open chats.
+  /// A Boolean value used to determine whether a visitor can start multiple
+  /// parallel open chats.
+  @Deprecated('Use ZohoSalesIQ.chat.isMultipleOpenChatRestricted instead.')
   static Future<bool> get isMultipleOpenChatRestricted async {
     return await _channel
         .invokeMethod<bool>('isMultipleOpenChatRestricted')
@@ -521,6 +551,7 @@ class ZohoSalesIQ {
   }
 
   /// An integer value representing the number of unread messages.
+  @Deprecated('Use ZohoSalesIQ.chat.unreadCount instead.')
   static Future<int> get chatUnreadCount async {
     return await _channel
         .invokeMethod<int>('getChatUnreadCount')
@@ -531,6 +562,19 @@ class ZohoSalesIQ {
   /// This method is used to close the Mobilisten UI.
   static void dismissUI() {
     _channel.invokeMethod('dismissUI');
+  }
+
+  /// Sets a custom session ID, [sessionID], for the current session.
+  static void setSessionID(String sessionID) {
+    _channel.invokeMethod('setSessionID', sessionID);
+  }
+
+  /// Sets the [source] from which the SDK theme is applied.
+  ///
+  /// Applies only for Android; the iOS native SDK does not expose a
+  /// theme source API and this call is a no-op on iOS.
+  static void setThemeSource(ThemeSource source) {
+    _channel.invokeMethod('setThemeSource', source.name);
   }
 
   static List<SIQChat> _getChatObjectList(List? mapList) {
@@ -545,59 +589,6 @@ class ZohoSalesIQ {
       }
     }
     return chatList;
-  }
-
-  @Deprecated('This method was deprecated after v3.1.2')
-  static List<SIQArticle> _getArticleObjectList(List? mapList) {
-    if (mapList == null) {
-      return [];
-    }
-    List<SIQArticle> articleList = [];
-    for (int i = 0; i < mapList.length; i++) {
-      Map? map = mapList[i] as Map?;
-
-      String? id = map?["id"]?.toString();
-      String name = map?["name"]?.toString() ?? "-";
-      String? categoryId = map?["categoryID"]?.toString();
-      String categoryName = map?["categoryName"]?.toString() ?? "-";
-      int viewCount = map?["viewCount"] as int? ?? 0;
-      int likeCount = map?["likeCount"] as int? ?? 0;
-      int dislikeCount = map?["dislikeCount"] as int? ?? 0;
-      double? createdTimeMS = map?["createdTime"] as double?;
-      double? modifiedTimeMS = map?["modifiedTime"] as double?;
-
-      late DateTime? createdTime =
-          DateTimeUtils.convertDoubleToDateTime(createdTimeMS);
-      late DateTime? modifiedTime =
-          DateTimeUtils.convertDoubleToDateTime(modifiedTimeMS) ?? createdTime;
-
-      if (id != null && categoryId != null) {
-        SIQArticle article = SIQArticle(id, name, categoryId, categoryName,
-            viewCount, likeCount, dislikeCount, createdTime, modifiedTime);
-        articleList.add(article);
-      }
-    }
-    return articleList;
-  }
-
-  @Deprecated('This method was deprecated after v3.1.2')
-  static List<SIQArticleCategory> _getArticleCategoryObjectList(List? mapList) {
-    if (mapList == null) {
-      return [];
-    }
-    List<SIQArticleCategory> categoryList = [];
-    for (int i = 0; i < mapList.length; i++) {
-      Map? map = mapList[i] as Map?;
-      String? id = map?["id"]?.toString();
-      String? name = map?["name"]?.toString();
-      int articleCount = map?["articleCount"] as int? ?? 0;
-      if (id != null && name != null) {
-        SIQArticleCategory category =
-            SIQArticleCategory(id, name, articleCount);
-        categoryList.add(category);
-      }
-    }
-    return categoryList;
   }
 
   static List<SIQDepartment> _getDepartmentObjectList(List? mapList) {
@@ -618,16 +609,10 @@ class ZohoSalesIQ {
     return departmentList;
   }
 
-  /// Sets the order for the bottom navigation tabs inside the SDK
-  static void setTabOrder(List<SIQTab> tabs) {
-    _channel.invokeMethod(
-        'setTabOrder', tabs.map((tab) => tab.toString()).toList());
-  }
-
-  /// Use this API to send events to the SDK with [SIQSendEvent] and it's values
-  /// with respect to the event
-  static Future<Null> sendEvent(
-      final SIQSendEvent eventName, final List<Object> values) async {
+  /// Sends an event, [eventName] (a [SIQSendEvent]), to the SDK along with its
+  /// associated [values].
+  static Future<void> sendEvent(
+      final SIQSendEvent eventName, final List<Object> values) {
     Map<String, Object> map = <String, Object>{};
     map.putIfAbsent("eventName", () => eventName.toString());
     if (eventName == SIQSendEvent.visitorRegistrationFailure) {
@@ -638,19 +623,20 @@ class ZohoSalesIQ {
     } else {
       map.putIfAbsent("values", () => values);
     }
-    await _channel.invokeMethod('sendEvent', map);
+    return _channel.invokeMethod('sendEvent', map);
   }
 
-  /// Sets the properties for the launcher using [LauncherProperties].
-  /// This API is used to customize launcher's mode, y position, sides and icon.
+  /// Sets the launcher properties using [launcherProperties].
+  /// This API is used to customize the launcher's mode, position, sides and
+  /// icon.
   ///
   /// Applies only for Android
   static void setLauncherPropertiesForAndroid(
       LauncherProperties launcherProperties) {
     Map<String, Object> map = <String, Object>{};
     map.putIfAbsent("mode", () => launcherProperties.mode.toString());
-    if (launcherProperties.y != null) {
-      map.putIfAbsent("y", () => launcherProperties.y!);
+    if (launcherProperties.yFromBottom != null) {
+      map.putIfAbsent("yFromBottom", () => launcherProperties.yFromBottom!);
     }
     if (launcherProperties.horizontalDirection != null) {
       map.putIfAbsent("horizontal_direction",
@@ -660,36 +646,30 @@ class ZohoSalesIQ {
       map.putIfAbsent("vertical_direction",
           () => launcherProperties.verticalDirection.toString());
     }
-    if (launcherProperties.icon != null) {
-      map.putIfAbsent("icon", () => launcherProperties.icon!);
+    if (launcherProperties.chatIcon != null) {
+      map.putIfAbsent("chat_icon", () => launcherProperties.chatIcon!);
+    }
+    if (launcherProperties.callIcon != null) {
+      map.putIfAbsent("call_icon", () => launcherProperties.callIcon!);
+    }
+    if (launcherProperties.createIcon != null) {
+      map.putIfAbsent("create_icon", () => launcherProperties.createIcon!);
+    }
+    if (launcherProperties.closeIcon != null) {
+      map.putIfAbsent("close_icon", () => launcherProperties.closeIcon!);
     }
     _channel.invokeMethod('setLauncherPropertiesForAndroid', map);
   }
 
-  /// This API sets the icon for the notifications created from SDK.
-  ///
-  /// Applies only for Android
-  ///
-  /// params: resourceName  - specifies the name of the resource
-  ///                         in the drawable folder
-  static void setNotificationIconForAndroid(String resourceName) {
-    _channel.invokeMethod('setNotificationIconForAndroid', resourceName);
-  }
-
-  /// If this API is enabled, the SDK theme will work in sync with system's
-  /// dark/light mode
+  /// Syncs the SDK theme with the system's dark/light mode when [value] is
+  /// `true`.
   ///
   /// Applies only for Android
   static void syncThemeWithOSForAndroid(bool value) {
     _channel.invokeMethod('syncThemeWithOSForAndroid', value);
   }
 
-  /// The android mobilisten debug logs will be printed only when true is set.
-  static void printDebugLogsForAndroid(bool value) {
-    _channel.invokeMethod('printDebugLogsForAndroid', value);
-  }
-
-  /// Registers a localization file for iOS.
+  /// Registers the localization file identified by [value] for iOS.
   static void registerLocalizationFileForiOS(String value) {
     _channel.invokeMethod('registerLocalizationFileForiOS', value);
   }
@@ -701,18 +681,23 @@ class ZohoSalesIQ {
         .then((onValue) => CommunicationMode.fromString(onValue));
   }
 
-  /// Handles push notification action for iOS.
-  static Future<Null> handlePushNotificationAction(
-      String actionIdentifier, Map userInfo, String responseText) async {
+  /// Handles the push notification action identified by [actionIdentifier]
+  /// for iOS, using the notification [userInfo] and any [responseText]
+  /// entered by the user.
+  @Deprecated('This method is deprecated in v7.0.0, Use '
+      'notification.handlePushNotificationAction() method instead.')
+  static Future<void> handlePushNotificationAction(
+      String actionIdentifier, Map userInfo, String responseText) {
     Map<String, dynamic> args = <String, dynamic>{};
     args.putIfAbsent("actionIdentifier", () => actionIdentifier);
     args.putIfAbsent("userInfo", () => userInfo);
     args.putIfAbsent("responseText", () => responseText);
-    await _channel.invokeMethod('handlePushNotificationAction', args);
+    return _channel.invokeMethod('handlePushNotificationAction', args);
   }
 
-  /// Sets the URI scheme for Android.
-  /// This is required to be set if you are using custom URI scheme for your application.
+  /// Sets the URI scheme, [uriScheme], for Android.
+  /// This is required to be set if you are using a custom URI scheme for your
+  /// application.
   static void setAndroidUriScheme(SalesIQUriScheme uriScheme) {
     _channel.invokeMethod('setAndroidUriScheme', uriScheme.toMap());
   }
@@ -789,36 +774,71 @@ enum SIQConfiguration {
 
   /// Timeout for getCustomInfo provider callback.
   DisplayFieldsProviderTimeout,
+
+  /// Enables the homepage back stack when a chat is initiated through
+  /// Mobilisten APIs. Maps to
+  /// `SalesIQConfig.EnableHomePageBackStackForChatInitiation` on Android, and
+  /// to the inverse of `dontNeedHomePageInStartFlow` on iOS.
+  EnableHomePageBackStackForChatInitiation
 }
 
+/// A snapshot of a chat, returned by the chat listing APIs.
 class SIQChat {
+  /// Unique identifier of the chat.
   final String? id;
+
+  /// The question the chat was started with, if any.
   final String? question;
+
+  /// The visitor's position in the queue, if queued.
   final int? queuePosition;
 
+  /// The name of the operator handling the chat, if assigned.
   final String? attenderName;
+
+  /// The email of the operator handling the chat, if assigned.
   final String? attenderEmail;
+
+  /// The unique id of the operator handling the chat, if assigned.
   final String? attenderID;
+
+  /// Whether the current attender is a bot.
   final bool isBotAttender;
 
+  /// The name of the department handling the chat, if any.
   final String? departmentName;
+
+  /// The current status of the chat.
   final SIQChatStatus status;
+
+  /// The number of unread messages in the chat.
   final int unreadCount;
 
+  /// The text of the last message.
   @Deprecated(
       'lastMessage was deprecated after v2.1.2, Use recentMessage.text instead.')
   final String? lastMessage;
+
+  /// The time of the last message.
   @Deprecated(
       'lastMessageTime was deprecated after v2.1.2, Use recentMessage.time instead.')
   final DateTime? lastMessageTime;
+
+  /// The sender of the last message.
   @Deprecated(
       'lastMessageSender was deprecated after v2.1.2, Use recentMessage.sender instead.')
   final String? lastMessageSender;
+
+  /// The most recent message in the chat, if any.
   final SIQMessage? recentMessage;
 
+  /// The feedback left by the visitor, if any.
   final String? feedback;
+
+  /// The rating left by the visitor, if any.
   final String? rating;
 
+  /// Creates a chat snapshot with the given attributes.
   SIQChat(
       this.id,
       this.question,
@@ -837,6 +857,8 @@ class SIQChat {
       this.feedback,
       this.rating);
 
+  /// Builds a [SIQChat] from the native [map], or `null` when [map] is
+  /// `null`.
   static SIQChat? fromMap(Map<dynamic, dynamic>? map) {
     if (map != null) {
       String? id = map["id"]?.toString();
@@ -888,146 +910,155 @@ class SIQChat {
   }
 }
 
+/// A department, as returned by the legacy department listing APIs.
 class SIQDepartment {
+  /// Unique identifier of the department.
   final String id;
+
+  /// Display name of the department.
   final String name;
+
+  /// Whether the department is currently available.
   final bool available;
 
+  /// Creates a department with the given [id], [name] and [available] flag.
   SIQDepartment(this.id, this.name, this.available);
 }
 
-/// See [Resource] class .
-@Deprecated(
-    'This class was deprecated after v3.1.2, Use [Resource] class instead.')
-class SIQArticle {
-  @Deprecated(
-      'This reference was deprecated after v3.1.2, Use id from Resource class instead.')
-  final String id;
-  @Deprecated(
-      'This reference was deprecated after v3.1.2, Use name from Resource class instead.')
-  final String name;
-
-  @Deprecated(
-      'This reference was deprecated after v3.1.2, Use category from Resource class instead.')
-  final String categoryId;
-  @Deprecated(
-      'This reference was deprecated after v3.1.2, Use category from Resource class instead.')
-  final String categoryName;
-
-  @Deprecated(
-      'This reference was deprecated after v3.1.2, Use stats from Resource class instead.')
-  final int viewCount;
-  @Deprecated(
-      'This reference was deprecated after v3.1.2, Use stats from Resource class instead.')
-  final int likeCount;
-  @Deprecated(
-      'This reference was deprecated after v3.1.2, Use stats from Resource class instead.')
-  final int dislikeCount;
-
-  @Deprecated(
-      'This reference was deprecated after v3.1.2, Use createdTime from Resource class instead.')
-  final DateTime? createdTime;
-  @Deprecated(
-      'This reference was deprecated after v3.1.2, Use modifiedTime from Resource class instead.')
-  final DateTime? modifiedTime;
-
-  SIQArticle(
-      this.id,
-      this.name,
-      this.categoryId,
-      this.categoryName,
-      this.viewCount,
-      this.likeCount,
-      this.dislikeCount,
-      this.createdTime,
-      this.modifiedTime);
-}
-
-/// See [ResourceCategory] class .
-@Deprecated(
-    'This class was deprecated after v3.1.2, Use Resource class instead.')
-class SIQArticleCategory {
-  @Deprecated(
-      'This reference was deprecated after v3.1.2, Use id from ResourceCategory class instead.')
-  final String id;
-  @Deprecated(
-      'This reference was deprecated after v3.1.2, Use name from ResourceCategory class instead.')
-  final String name;
-  @Deprecated(
-      'This reference was deprecated after v3.1.2, Use count from ResourceCategory class instead.')
-  final int articleCount;
-
-  SIQArticleCategory(this.id, this.name, this.articleCount);
-}
-
+/// A secondary geographic location for a visitor.
 class SIQVisitorLocation {
+  /// The latitude in decimal degrees.
   double? latitude;
+
+  /// The longitude in decimal degrees.
   double? longitude;
+
+  /// The city name.
   String? city;
+
+  /// The state/region name.
   String? state;
+
+  /// The country name.
   String? country;
+
+  /// The ISO country code.
   String? countryCode;
+
+  /// The postal/zip code.
   String? zipCode;
 }
 
+/// Event name constants emitted on [ZohoSalesIQ.eventChannel] /
+/// [ZohoSalesIQ.chatEventChannel].
 class SIQEvent {
+  /// The support (chat window) was opened.
   static const String supportOpened = "supportOpened";
+
+  /// The support (chat window) was closed.
   static const String supportClosed = "supportClosed";
+
+  /// One or more operators came online.
   static const String operatorsOnline = "operatorsOnline";
+
+  /// All operators went offline.
   static const String operatorsOffline = "operatorsOffline";
+
+  /// The visitor's IP was blocked.
   static const String visitorIPBlocked = "visitorIPBlocked";
+
+  /// A custom trigger fired.
   static const String customTrigger = "customTrigger";
+
+  /// A bot trigger fired.
   static const String botTrigger = "botTrigger";
+
+  /// The chat view was opened.
   static const String chatViewOpened = "chatViewOpened";
+
+  /// The chat view was closed.
   static const String chatViewClosed = "chatViewClosed";
+
+  /// A chat was opened.
   static const String chatOpened = "chatOpened";
+
+  /// A chat was closed.
   static const String chatClosed = "chatClosed";
+
+  /// A chat was attended by an operator.
   static const String chatAttended = "chatAttended";
+
+  /// A chat was missed.
   static const String chatMissed = "chatMissed";
+
+  /// Feedback was received for a chat.
   static const String chatFeedbackReceived = "chatFeedbackReceived";
+
+  /// A rating was received for a chat.
   static const String chatRatingReceived = "chatRatingReceived";
+
+  /// A chat error occurred.
   static const String chatError = "chatError";
+
+  /// A chat action was performed.
   static const String performChatAction = "performChatAction";
+
+  /// The visitor's queue position changed.
   static const String chatQueuePositionChange = "chatQueuePositionChange";
+
+  /// A chat was reopened.
   static const String chatReopened = "chatReopened";
+
+  /// A chat expired.
   static const String chatExpired = "chatExpired";
 
-  /// See [KnowledgeBaseEvent.resourceLiked].
-  @Deprecated(
-      "This constant was deprecated after v3.1.2, Use KnowledgeBaseEvent.resourceLiked constant instead.")
-  static const String articleLiked = "articleLiked";
-
-  /// See [KnowledgeBaseEvent.resourceDisliked].
-  @Deprecated(
-      "This constant was deprecated after v3.1.2, Use KnowledgeBaseEvent.resourceDisliked constant instead.")
-  static const String articleDisliked = "articleDisliked";
-
-  /// See [KnowledgeBaseEvent.resourceOpened].
-  @Deprecated(
-      "This constant was deprecated after v3.1.2, Use KnowledgeBaseEvent.resourceOpened constant instead.")
-  static const String articleOpened = "articleOpened";
-
-  /// See [KnowledgeBaseEvent.resourceClosed].
-  @Deprecated(
-      "This constant was deprecated after v3.1.2, Use KnowledgeBaseEvent.resourceClosed constant instead.")
-  static const String articleClosed = "articleClosed";
+  /// The unread chat message count changed.
   static const String chatUnreadCountChanged = "chatUnreadCountChanged";
+
+  /// A URL should be handled by the app.
   static const String handleURL = "handleURL";
+
+  /// The custom launcher visibility changed.
   static const String customLauncherVisibility = "customLauncherVisibility";
+
+  /// Visitor registration (authentication) failed.
   static const String visitorRegistrationFailure = "visitorRegistrationFailure";
+
+  /// The SDK requires the device to re-register for push notifications.
+  ///
+  /// Handle this by calling [ZohoSalesIQ.notification] `reRegisterPush`.
+  /// Emitted on iOS only.
+  static const String reRegisterPush = "reRegisterPush";
 }
 
+/// The status of a [SIQChat].
 enum SIQChatStatus {
+  /// The chat is open.
   open,
+
+  /// The chat is connected to an operator.
   connected,
+
+  /// The chat is closed.
   closed,
+
+  /// The chat was ended.
   ended,
+
+  /// The chat was missed.
   missed,
+
+  /// The chat is waiting in the queue.
   waiting,
+
+  /// The chat was started by a trigger.
   triggered,
+
+  /// The chat was started proactively.
   proactive
 }
 
+/// Conversion helpers between [SIQChatStatus] and its native string value.
 extension SIQChatStatusString on SIQChatStatus {
   static const Map<SIQChatStatus, String> _stringValues = const {
     SIQChatStatus.open: "open",
@@ -1040,6 +1071,7 @@ extension SIQChatStatusString on SIQChatStatus {
     SIQChatStatus.proactive: "proactive"
   };
 
+  /// Returns the native string value for this status.
   String toShortString() {
     var code = SIQChatStatusString._stringValues[this];
     if (code == null) {
@@ -1048,6 +1080,8 @@ extension SIQChatStatusString on SIQChatStatus {
     return code;
   }
 
+  /// Returns the [SIQChatStatus] matching the native [chatString], defaulting
+  /// to [SIQChatStatus.closed] when unrecognized.
   static SIQChatStatus toChatType(String chatString) {
     var valueList = SIQChatStatus.values;
     for (var i = 0; i < valueList.length; i++) {
@@ -1060,17 +1094,32 @@ extension SIQChatStatusString on SIQChatStatus {
   }
 }
 
-enum ActionSource { app, sdk }
+/// The source that triggered a notification action.
+enum ActionSource {
+  /// The action originated from the host app.
+  app,
 
+  /// The action originated from the SDK.
+  sdk
+}
+
+/// Identifies an event type sent to the SDK via [ZohoSalesIQ.sendEvent].
 class SIQSendEvent {
   const SIQSendEvent._(this.index);
 
+  /// The ordinal index of the event.
   final int index;
 
+  /// Instructs the SDK how to handle a URL open request.
   static const SIQSendEvent openUrl = SIQSendEvent._(0);
+
+  /// Marks a chat action as complete.
   static const SIQSendEvent completeChatAction = SIQSendEvent._(1);
+
+  /// Acknowledges a visitor registration (authentication) failure.
   static const SIQSendEvent visitorRegistrationFailure = SIQSendEvent._(2);
 
+  /// All available [SIQSendEvent] values.
   static const List<SIQSendEvent> values = <SIQSendEvent>[
     openUrl,
     completeChatAction,
@@ -1085,12 +1134,12 @@ class SIQSendEvent {
       }[index]!;
 }
 
-class SalesIQFont {
-  SalesIQFontType? regular = null, medium = null;
-}
+/// The source from which the SDK theme is applied.
+/// See [ZohoSalesIQ.setThemeSource].
+enum ThemeSource {
+  /// Use the theme configured in the SalesIQ portal.
+  portal,
 
-class SalesIQFontType {
-  String? path = null; //,name = null, file = null;
-
-  SalesIQFontType(this.path); //, [this.name, this.file]);
+  /// Use the theme configured locally through the SDK.
+  sdk
 }
