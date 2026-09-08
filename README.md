@@ -27,7 +27,7 @@ Ensure that your project meets the following requirements:
 dependencies:
   flutter:
     sdk: flutter
-+ salesiq_mobilisten: ^7.0.0-beta.1
++ salesiq_mobilisten: ^7.0.0-beta.2
 
 // Add this only if you want to integrate Mobilisten Calls along with Mobilisten
 + salesiq_mobilisten_calls: ^0.1.0

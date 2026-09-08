@@ -19,7 +19,7 @@ public class MyFireBaseMessaging extends FirebaseMessagingService
 
     @Override
     public void onNewToken(String token){
-        Log.d("Mobilisten","FCM push token: " + token);
+        Log.d("Mobilisten","FCM push token: " + token); //No I18N
         MobilistenPlugin.enablePush(token,true);
     }
 }

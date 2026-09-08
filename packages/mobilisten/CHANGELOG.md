@@ -1,5 +1,9 @@
 ## Mobilisten Plugin Changelog
 
+### 7.0.0-beta.2 - 08 Sep 2026
+
+- Updated salesiq_mobilisten_core module to the version ^1.0.0-beta.1.
+
 ### 7.0.0-beta.1 - 02 Sep 2026
 
 - Major API-sync release aligning the Flutter wrapper with the latest native SalesIQ SDKs (Android 9.0.0-beta06.1 / iOS 11.0.3).
