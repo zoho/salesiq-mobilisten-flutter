@@ -1,5 +1,11 @@
 ## Mobilisten Plugin Changelog
 
+### 6.6.11+web.1 - dotswan fork
+
+- Added a web implementation (`MobilistenWebPlugin`) backed by the Zoho SalesIQ
+  website widget and its `$zoho.salesiq` JavaScript API.
+- Raised the minimum Dart SDK to 3.3.0 for `dart:js_interop`.
+
 ### 6.5.4 - 17 Oct 2025
 
 - Updated Mobilisten SDK for iOS to version [10.1.6](https://github.com/zoho/SalesIQ-Mobilisten-iOS/releases/tag/v10.1.6)
