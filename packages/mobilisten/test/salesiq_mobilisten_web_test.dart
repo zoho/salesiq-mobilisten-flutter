@@ -182,6 +182,19 @@ void main() {
     expect(calls, <String>['floatwindow:show']);
   });
 
+  test('registerVisitor fails loudly rather than faking authentication',
+      () async {
+    await init();
+    signalWidgetReady();
+
+    await expectLater(
+      plugin.handleMainCall(const MethodCall('registerVisitor', 'visitor-1')),
+      throwsA(isA<PlatformException>()
+          .having((e) => e.code, 'code', 'unsupported_on_web')),
+    );
+    expect(calls, isEmpty);
+  });
+
   test('unmapped methods resolve to null rather than throwing', () async {
     await init();
     signalWidgetReady();

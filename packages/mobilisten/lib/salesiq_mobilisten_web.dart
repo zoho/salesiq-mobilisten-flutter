@@ -33,6 +33,12 @@ import 'package:web/web.dart' as web;
 /// Calls that have no website equivalent — launcher geometry, native themes,
 /// push notifications, the knowledge base and conversation modules — are
 /// accepted and ignored rather than raising `MissingPluginException`.
+///
+/// `registerVisitor` is the one exception: ignoring it would leave the caller
+/// believing the visitor is authenticated when they are not, so it fails
+/// loudly instead. The website widget appears to expose a `jwttoken` entry
+/// point, but Zoho publishes no contract for it, and authentication is not
+/// something to infer from a live object.
 class MobilistenWebPlugin {
   /// Registers the web implementation with the Flutter web plugin registry.
   static void registerWith(Registrar registrar) {
@@ -128,6 +134,17 @@ class MobilistenWebPlugin {
       case 'dismissUI':
         _whenReady(() => _invoke('floatwindow.visible', <JSAny?>['hide'.toJS]));
         return null;
+
+      // Silently accepting this would misrepresent an unauthenticated visitor
+      // as an authenticated one.
+      case 'registerVisitor':
+        throw PlatformException(
+          code: 'unsupported_on_web',
+          message: 'Visitor authentication is not implemented for the SalesIQ '
+              'website widget. Identify visitors with setVisitorName and '
+              'setVisitorEmail, which are unauthenticated, and do not rely on '
+              'registerVisitor for trust decisions on web.',
+        );
 
       // `reset` clears cookies, ends open chats and drops every value set
       // through the JS API, which is what unregistering a visitor means here.

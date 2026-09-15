@@ -5,6 +5,8 @@
 - Added a web implementation (`MobilistenWebPlugin`) backed by the Zoho SalesIQ
   website widget and its `$zoho.salesiq` JavaScript API.
 - Raised the minimum Dart SDK to 3.3.0 for `dart:js_interop`.
+- `registerVisitor` throws on web instead of being ignored, so an
+  unauthenticated visitor is never mistaken for an authenticated one.
 
 ### 6.5.4 - 17 Oct 2025
 

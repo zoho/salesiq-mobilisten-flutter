@@ -183,6 +183,14 @@ themes, push notifications, the knowledge base and conversation modules —
 resolves to `null` rather than raising `MissingPluginException`. Launcher
 position and theming are configured per brand in the SalesIQ console instead.
 
+`registerVisitor` is the one deliberate exception: it throws on web. Quietly
+accepting it would leave callers treating an unauthenticated visitor as an
+authenticated one. The widget appears to expose a `jwttoken` entry point, but
+Zoho publishes no contract for it, so visitor authentication is left
+unimplemented rather than guessed at. `setVisitorName` and `setVisitorEmail`
+still work and remain unauthenticated, exactly as they are on a plain website
+embed.
+
 ## API Documentation
 
 You can find the list of all APIs and their documentation [here](https://www.zoho.com/salesiq/help/developer-guides/flutter-sdk-installation.html) under the **API Reference** section.
