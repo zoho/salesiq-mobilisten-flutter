@@ -127,6 +127,70 @@ ZohoSalesIQ.initialize(configuration).then((_) {
 ```
 11. Build and run the flutter application on Android and iOS.
 
+## Web support (dotswan fork)
+
+Upstream Mobilisten targets Android and iOS only. This fork adds a web
+implementation so a Flutter web build can use the same `ZohoSalesIQ` API
+instead of guarding every call with a platform check.
+
+There is no Mobilisten SDK for the web. On the web, Zoho SalesIQ is the regular
+website chat widget, so this implementation loads that widget and forwards the
+supported calls to its `$zoho.salesiq` JavaScript API.
+
+### Configuration
+
+The website widget is installed with a **widget code**, not the Mobilisten
+app key/access key pair. Copy it from the SalesIQ console under
+`Settings > Brands > <brand> > Installation > Website`, then supply it in
+whichever of these is most convenient — they are checked in this order:
+
+1. a `widgetCode` entry in the `init` arguments;
+2. `window.zohoSalesIQWidgetCode`, declared in `web/index.html`;
+3. the `appKey` argument — i.e. call
+   `ZohoSalesIQ.init(<widget code>, <data centre host>)` on web.
+
+The data centre host defaults to `salesiq.zohopublic.com`. Override it with a
+`domain` argument, `window.zohoSalesIQDomain`, or the `accessKey` position when
+the widget code also came from `appKey`.
+
+```dart
+if (kIsWeb) {
+  await ZohoSalesIQ.init('<widget code>', 'salesiq.zohopublic.eu');
+} else {
+  await ZohoSalesIQ.init(appKey, accessKey);
+}
+```
+
+The widget script is injected on the first `init` call, not at page load, so
+nothing third-party loads until the app asks for chat.
+
+### What maps, and what does not
+
+| Mobilisten API | Web |
+| --- | --- |
+| `setVisitorName` | `visitor.name` — the name is split into `firstname`/`lastname` |
+| `setVisitorEmail` | `visitor.email` |
+| `setLanguage` | `language` |
+| `launcher.show` / `showLauncher` | `floatbutton.visible` |
+| `present` / `show` / `startChat` | `floatwindow.visible` |
+| `unregisterVisitor` | `reset` |
+
+Calls made before the widget finishes loading are queued and replayed once it
+signals readiness, so callers never need to wait on `init`.
+
+Everything the website widget has no equivalent for — launcher geometry, native
+themes, push notifications, the knowledge base and conversation modules —
+resolves to `null` rather than raising `MissingPluginException`. Launcher
+position and theming are configured per brand in the SalesIQ console instead.
+
+`registerVisitor` is the one deliberate exception: it throws on web. Quietly
+accepting it would leave callers treating an unauthenticated visitor as an
+authenticated one. The widget appears to expose a `jwttoken` entry point, but
+Zoho publishes no contract for it, so visitor authentication is left
+unimplemented rather than guessed at. `setVisitorName` and `setVisitorEmail`
+still work and remain unauthenticated, exactly as they are on a plain website
+embed.
+
 ## API Documentation
 
 You can find the list of all APIs and their documentation [here](https://www.zoho.com/salesiq/help/developer-guides/flutter-sdk-installation.html) under the **API Reference** section.
