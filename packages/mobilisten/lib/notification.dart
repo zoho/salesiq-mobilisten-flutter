@@ -2,22 +2,22 @@ import 'package:flutter/services.dart';
 
 import 'salesiq_mobilisten.dart';
 
-/// This class provides APIs to handle push notifications in the Zoho SalesIQ SDK.
+/// Provides the APIs to handle push notifications in the Zoho SalesIQ SDK.
 class SalesIQMobilistenNotification {
   static final MethodChannel _methodChannel =
       const MethodChannel('salesiqNotificationModule');
 
-  /// Stream of notification events (e.g. a notification being tapped).
+  /// The stream of notification events, such as a tap on a notification.
   final eventChannel = EventChannel("mobilistenNotificationEvents")
       .receiveBroadcastStream()
       .map((event) => NotificationEvent(
           NotificationAction.from(event["eventName"] as String),
           _getNotificationPayload(event["payload"] as Map)));
 
-  /// Enables push notifications for Android using the FCM [token].
+  /// Turns on push notifications for Android with the FCM [token].
   ///
-  /// Set [isTestDevice] to `true` to register the device against the test
-  /// (development) push environment.
+  /// To register the device with the test, or development, push environment,
+  /// set [isTestDevice] to `true`.
   Future<void> registerPush(String token, bool isTestDevice) {
     Map<String, dynamic> map = <String, dynamic>{};
     map.putIfAbsent("token", () => token);
@@ -25,24 +25,22 @@ class SalesIQMobilistenNotification {
     return _methodChannel.invokeMethod('registerPush', map);
   }
 
-  /// Disables push notifications for Android.
+  /// Turns off push notifications for Android.
   ///
-  /// The FCM token captured during [registerPush] is reused internally, so no
-  /// token needs to be passed here.
+  /// The SDK reuses the FCM token that it received in [registerPush], so you do
+  /// not need to pass a token here.
   Future<void> disablePush() {
     return _methodChannel.invokeMethod('disablePush');
   }
 
-  /// Enables or disables in-app notifications from Mobilisten, based on the
-  /// value provided for [enabled]. In-app notifications are enabled by default.
+  /// Turns in-app notifications from the SDK on or off, based on the value of
+  /// [enabled]. In-app notifications are on by default.
   void enableInAppNotification(bool enabled) {
     _methodChannel.invokeMethod('enableInAppNotification', enabled);
   }
 
-  /// Returns the current badge count for unread conversations.
-  ///
-  /// On iOS, the unread message count is returned as the badge-count
-  /// equivalent.
+  /// Returns the current badge count, which is the total number of unread
+  /// messages across all conversations.
   Future<int> getBadgeCount() async {
     return await _methodChannel
         .invokeMethod<int>('getBadgeCount')
@@ -56,44 +54,43 @@ class SalesIQMobilistenNotification {
         .then((value) => value ?? false);
   }
 
-  /// Processes the SalesIQ notification contained in [map].
+  /// Processes the SalesIQ notification in [map].
   ///
-  /// Applies only for Android, where it is called from your
-  /// `FirebaseMessagingService` to hand an incoming FCM message to the SDK. On
-  /// iOS, notifications are handled through
-  /// [ZohoSalesIQ.processNotificationWithInfoForiOS] /
+  /// This works only on Android. Call it from your `FirebaseMessagingService`
+  /// to pass an incoming FCM message to the SDK. On iOS, use
+  /// [ZohoSalesIQ.processNotificationWithInfoForiOS] or
   /// [ZohoSalesIQ.handleNotificationResponseForiOS] instead.
   void process(Map map) {
     _methodChannel.invokeMethod('process', map);
   }
 
-  /// Returns the parsed notification payload extracted from the raw
-  /// notification [data].
+  /// Returns the parsed notification payload from the raw notification [data].
   Future<SalesIQNotificationPayload?> getPayload(Map data) async {
     return _getNotificationPayload(await _methodChannel
         .invokeMethod<Map<dynamic, dynamic>>('getNotificationPayload', data));
   }
 
-  /// Sets the notification action source using the given [actionSource].
+  /// Sets the source of notification actions to the given [actionSource].
   void setActionSource(ActionSource actionSource) {
     _methodChannel.invokeMethod(
         'setNotificationActionSource', actionSource.name);
   }
 
-  /// Re-registers the device for push notifications with the SalesIQ SDK.
+  /// Registers the device for push notifications with the SalesIQ SDK again.
   ///
-  /// Call this in response to a `SIQEvent.reRegisterPush` event, which the SDK
-  /// emits when the existing push registration is no longer valid.
+  /// Call this method when you receive an `SIQEvent.reRegisterPush` event. The
+  /// SDK sends this event when the current push registration is no longer
+  /// valid.
   ///
-  /// Applies only for iOS; the Android native SDK does not expose a
-  /// re-registration API and this call is a no-op on Android.
+  /// This works only on iOS. The Android SDK has no re-registration API, so
+  /// this call has no effect on Android.
   Future<void> reRegisterPush() async {
     await _methodChannel.invokeMethod('reRegisterPush');
   }
 
-  /// Handles the push notification action identified by [actionIdentifier]
-  /// for iOS, using the notification [userInfo] and any [responseText]
-  /// entered by the user.
+  /// Handles the push notification action with the given [actionIdentifier] on
+  /// iOS. It uses the notification [userInfo] and any [responseText] that the
+  /// visitor entered.
   Future<void> handlePushNotificationAction(
       String actionIdentifier, Map userInfo, String responseText) {
     Map<String, dynamic> args = <String, dynamic>{};
@@ -104,9 +101,10 @@ class SalesIQMobilistenNotification {
   }
 }
 
-/// An event emitted on the notification stream (e.g. a notification tap).
+/// An event that the notification stream sends, such as a tap on a
+/// notification.
 class NotificationEvent {
-  /// The action that occurred, if recognized.
+  /// The action that occurred, if it is recognized.
   NotificationAction? action;
 
   /// The payload associated with the notification, if any.
@@ -116,19 +114,19 @@ class NotificationEvent {
   NotificationEvent(this.action, this.payload);
 }
 
-/// The user action performed on a SalesIQ notification.
+/// The action that the visitor performed on a SalesIQ notification.
 class NotificationAction {
   const NotificationAction._(this.value);
 
   /// The raw native value of the action.
   final String value;
 
-  /// The notification was clicked/tapped.
+  /// The visitor clicked or tapped the notification.
   static const NotificationAction clicked =
       NotificationAction._("notificationClicked");
 
-  /// Returns the [NotificationAction] matching the raw event [value], or
-  /// `null` if it is unrecognized.
+  /// Returns the [NotificationAction] that matches the raw event [value], or
+  /// `null` if it is not recognized.
   static NotificationAction? from(String value) {
     if (value == clicked.value) {
       return clicked;
@@ -198,9 +196,10 @@ Department? _getDepartment(Map<dynamic, dynamic> payload) {
   return department;
 }
 
-/// Base class for the payload carried by a SalesIQ notification.
+/// Represents the payload that a SalesIQ notification carries. It is the base
+/// class for each payload type.
 abstract class SalesIQNotificationPayload {
-  /// Serializes this payload to a native-compatible map.
+  /// Converts this payload to a map that the native SDKs can read.
   Map<String, dynamic> toMap();
 }
 
@@ -209,16 +208,16 @@ class SalesIQNotificationPayloadChat extends SalesIQNotificationPayload {
   /// The message text.
   final String? message;
 
-  /// The user id associated with the chat.
+  /// The ID of the sender on the other end of the chat, usually the operator or bot.
   final String? userId;
 
-  /// The chat id.
+  /// The ID of the chat.
   final String? chatId;
 
   /// The display name of the message sender.
   final String? senderName;
 
-  /// The UID of the previous message, used for ordering.
+  /// The UID of the previous message, which is used for ordering.
   final String? previousMessageUID;
 
   /// The UID of this message.
@@ -246,7 +245,7 @@ class SalesIQNotificationPayloadChat extends SalesIQNotificationPayload {
     this.department,
   });
 
-  /// Serializes this notification payload to a native-compatible map.
+  /// Converts this notification payload to a map that the native SDKs can read.
   @override
   Map<String, dynamic> toMap() {
     return {
@@ -266,18 +265,18 @@ class SalesIQNotificationPayloadChat extends SalesIQNotificationPayload {
   }
 }
 
-/// A department referenced by a notification payload.
+/// A department that a notification payload refers to.
 class Department {
-  /// Unique identifier of the department.
+  /// The unique ID of the department.
   final String? id;
 
-  /// Display name of the department.
+  /// The display name of the department.
   final String? name;
 
   /// Creates a department reference with the given [id] and [name].
   Department({this.id, this.name});
 
-  /// Serializes this department to a native-compatible map.
+  /// Converts this department to a map that the native SDKs can read.
   Map<String, dynamic> toMap() {
     return {
       "id": id,
@@ -286,13 +285,13 @@ class Department {
   }
 }
 
-/// The payload of a visitor-history notification.
+/// The payload of a visitor history notification.
 class SalesIQNotificationPayloadVisitorHistory
     extends SalesIQNotificationPayload {
-  /// The image path shown with the notification.
+  /// The path of the image that appears with the notification.
   final String? imagePath;
 
-  /// The target link opened when the notification is tapped.
+  /// The link that opens when the visitor taps the notification.
   final String? targetLink;
 
   /// The notification title.
@@ -301,7 +300,7 @@ class SalesIQNotificationPayloadVisitorHistory
   /// The notification message.
   final String? message;
 
-  /// Creates a visitor-history notification payload.
+  /// Creates a visitor history notification payload.
   SalesIQNotificationPayloadVisitorHistory({
     this.imagePath,
     this.targetLink,
@@ -309,7 +308,7 @@ class SalesIQNotificationPayloadVisitorHistory
     this.message,
   });
 
-  /// Serializes this notification payload to a native-compatible map.
+  /// Converts this notification payload to a map that the native SDKs can read.
   @override
   Map<String, dynamic> toMap() {
     return {
@@ -324,16 +323,16 @@ class SalesIQNotificationPayloadVisitorHistory
   }
 }
 
-/// The payload of an end-of-chat details notification.
+/// The payload of a notification with the details of an ended chat.
 class SalesIQNotificationPayloadEndChatDetails
     extends SalesIQNotificationPayload {
   /// The message text.
   final String? message;
 
-  /// The user id associated with the chat.
+  /// The ID of the operator or bot on the other end of the chat.
   final String? userId;
 
-  /// The chat id.
+  /// The ID of the chat.
   final String? chatId;
 
   /// The notification title.
@@ -342,7 +341,7 @@ class SalesIQNotificationPayloadEndChatDetails
   /// The department associated with the chat, if any.
   final Department? department;
 
-  /// Creates an end-of-chat details notification payload.
+  /// Creates a notification payload with the details of an ended chat.
   SalesIQNotificationPayloadEndChatDetails({
     this.message,
     this.userId,
@@ -351,7 +350,7 @@ class SalesIQNotificationPayloadEndChatDetails
     this.department,
   });
 
-  /// Serializes this notification payload to a native-compatible map.
+  /// Converts this notification payload to a map that the native SDKs can read.
   @override
   Map<String, dynamic> toMap() {
     return {
@@ -369,22 +368,22 @@ class SalesIQNotificationPayloadEndChatDetails
 
 /// The payload of a call details notification.
 class SalesIQNotificationPayloadCallDetails extends SalesIQNotificationPayload {
-  /// The notification content text.
+  /// The content text of the notification.
   final String? content;
 
-  /// The user id associated with the call.
+  /// The ID of the operator on the other end of the call.
   final String? userId;
 
-  /// The display name of the caller.
+  /// The display name of the operator on the other end of the call.
   final String? userName;
 
-  /// The chat/call id.
+  /// The ID of the chat or call.
   final String? chatId;
 
   /// The notification title.
   final String? title;
 
-  /// The call operation (incoming/miss/cancel).
+  /// The call operation, such as an incoming, missed, or canceled call.
   final Operation? operation;
 
   /// The department associated with the call, if any.
@@ -401,7 +400,7 @@ class SalesIQNotificationPayloadCallDetails extends SalesIQNotificationPayload {
     this.department,
   });
 
-  /// Serializes this notification payload to a native-compatible map.
+  /// Converts this notification payload to a map that the native SDKs can read.
   @override
   Map<String, dynamic> toMap() {
     return {
@@ -419,7 +418,7 @@ class SalesIQNotificationPayloadCallDetails extends SalesIQNotificationPayload {
   }
 }
 
-/// The call operation described by a call notification payload.
+/// Defines the call operation that a call notification payload describes.
 enum Operation {
   /// An incoming call.
   incoming,
@@ -427,10 +426,11 @@ enum Operation {
   /// A missed call.
   miss,
 
-  /// A cancelled call.
+  /// A canceled call.
   cancel;
 
-  /// Returns the [Operation] matching [value], or `null` if unrecognized.
+  /// Returns the [Operation] that matches [value], or `null` if it is not
+  /// recognized.
   static Operation? fromString(String? value) {
     switch (value) {
       case 'incoming':

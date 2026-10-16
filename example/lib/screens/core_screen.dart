@@ -91,6 +91,8 @@ class _CoreScreenState extends State<CoreScreen> {
         _statusLoaded = true;
       });
     } catch (e) {
+      // Best-effort status snapshot for the banner; log and mark loaded.
+      debugPrint('Core status load failed: $e');
       if (!mounted) return;
       setState(() => _statusLoaded = true);
     }
@@ -189,7 +191,7 @@ class _CoreScreenState extends State<CoreScreen> {
       setState(() => _result = {'presented': true});
     } catch (e) {
       setState(() => _result = {'error': e.toString()});
-      showToast('Failed to present SDK', ToastTone.danger);
+      showToast('Failed to present SDK${reason(e)}', ToastTone.danger);
     }
   }
 
@@ -200,7 +202,7 @@ class _CoreScreenState extends State<CoreScreen> {
       setState(() => _result = {'presentedDefault': true});
     } catch (e) {
       setState(() => _result = {'error': e.toString()});
-      showToast('Failed to present SDK', ToastTone.danger);
+      showToast('Failed to present SDK${reason(e)}', ToastTone.danger);
     }
   }
 
@@ -295,7 +297,7 @@ class _CoreScreenState extends State<CoreScreen> {
           });
     } catch (e) {
       setState(() => _result = {'error': e.toString()});
-      showToast('Failed to fetch departments', ToastTone.danger);
+      showToast('Failed to fetch departments${reason(e)}', ToastTone.danger);
     }
   }
 

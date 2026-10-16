@@ -4,7 +4,7 @@ version '1.0'
 buildscript {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
     }
 
     dependencies {
@@ -15,7 +15,7 @@ buildscript {
 rootProject.allprojects {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
     }
 }
 
@@ -42,7 +42,7 @@ try {
 dependencies {
     implementation project(":salesiq_mobilisten_core")
 
-    api 'com.zoho.salesiq:mobilisten:9.0.0'
+    api 'com.zoho.salesiq:mobilisten:9.0.2'
     // koin is a runtime-scoped transitive dependency of mobilisten; javac needs it on the
     // compile classpath because public SDK entry points (LauncherUtil) implement KoinComponent.
     compileOnly 'io.insert-koin:koin-core:4.1.1'

@@ -75,7 +75,7 @@ class _HomepageHelpCenterScreenState extends State<HomepageHelpCenterScreen> {
       showToast('Help center opened', ToastTone.success);
     } catch (e) {
       setState(() => _result = {'error': e.toString()});
-      showToast('Help center failed to open', ToastTone.danger);
+      showToast('Help center failed to open${reason(e)}', ToastTone.danger);
     }
   }
 

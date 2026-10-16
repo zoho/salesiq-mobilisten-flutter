@@ -2,18 +2,18 @@
 
 import 'package:flutter/services.dart';
 
-/// Provides APIs to control the SalesIQ homepage.
-/// Access this via [ZohoSalesIQ.homepage].
+/// Provides the APIs to control the SalesIQ homepage. To use it, call
+/// [ZohoSalesIQ.homepage].
 class Homepage {
   final MethodChannel _channel = const MethodChannel('salesiq_homepage_module');
 
-  /// Enables or disables the homepage using the value provided for [enabled].
+  /// Turns the homepage on or off, based on the value of [enabled].
   void setEnabled(bool enabled) {
     _channel.invokeMethod('setHomepageEnabled', enabled);
   }
 
-  /// Controls the visibility of the given homepage [widget], using the value
-  /// provided for [visible].
+  /// Shows or hides the given homepage [widget], based on the value of
+  /// [visible].
   void setVisibility(SIQWidget widget, bool visible) {
     _channel.invokeMethod('setHomepageWidgetVisibility', <String, dynamic>{
       'widget': widget.name,
@@ -22,27 +22,27 @@ class Homepage {
   }
 }
 
-/// Widgets available on the SalesIQ homepage.
+/// Defines the widgets that the SalesIQ homepage can show.
 enum SIQWidget {
-  /// The chat widget to start a new conversation.
+  /// The chat widget, which starts a new conversation.
   chat,
 
-  /// The call widget to initiate a support call.
+  /// The call widget, which starts a support call.
   call,
 
-  /// The knowledge base articles widget.
+  /// The widget for Knowledge Base articles.
   articles,
 
   // FAQs is pending the iOS native implementation. Uncomment when iOS supports it.
   // /// The knowledge base FAQs widget.
   // faqs,
 
-  /// The widget displaying previous chat and call history.
+  /// The widget that shows the history of previous chats and calls.
   previousConversations,
 
-  /// A card displaying a promotional or informational image.
+  /// A card that shows a promotional or informational image.
   imageCard,
 
-  /// A card displaying a promotional or informational video.
+  /// A card that shows a promotional or informational video.
   videoCard
 }

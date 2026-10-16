@@ -1,4 +1,4 @@
-/// Helpers for safely casting `dynamic` values from native maps.
+/// Provides helper methods that safely cast `dynamic` values from native maps.
 class PrimitiveTypeCastUtils {
   /// Converts a dynamic value to an int.
   static int? toInt(dynamic value) {
@@ -14,7 +14,7 @@ class PrimitiveTypeCastUtils {
     return null;
   }
 
-  /// Converts a dynamic value to an int, returning `0` when it cannot be
+  /// Converts a dynamic value to an int. Returns `0` when the value cannot be
   /// converted.
   static int toIntOrZero(dynamic value) {
     final int? result = toInt(value);

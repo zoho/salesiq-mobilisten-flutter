@@ -18,7 +18,10 @@ void runSdk(String label, VoidCallback fn) {
   try {
     fn();
     if (label.isNotEmpty) showToast(label, ToastTone.success);
-  } catch (_) {
-    showToast('Add keys in Settings to run live');
+  } catch (e) {
+    // Usually "SDK not initialized" before keys are added — keep the hint, but
+    // append the real reason and log it so genuine failures aren't hidden.
+    debugPrint('Store SDK call "$label" failed: $e');
+    showToast('Add keys in Settings to run live${reason(e)}');
   }
 }

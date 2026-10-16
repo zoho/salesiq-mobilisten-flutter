@@ -2,86 +2,84 @@ import 'package:flutter/services.dart';
 
 // ignore_for_file: public_member_api_docs
 
-/// Provides APIs to control the SalesIQ launcher view.
+/// Provides the APIs to control the SalesIQ launcher view.
 ///
-/// Mirrors the native `ZohoSalesIQ.Launcher` namespace. Access this via
-/// [ZohoSalesIQ.launcher].
+/// It matches the native `ZohoSalesIQ.Launcher` namespace on Android and iOS.
+/// To use it, call [ZohoSalesIQ.launcher].
 class Launcher {
   final MethodChannel _channel = const MethodChannel("salesiq_launcher_module");
 
-  /// Broadcast stream of launcher events, scoped to the `ZohoSalesIQ.Launcher`
+  /// The broadcast stream of launcher events from the `ZohoSalesIQ.Launcher`
   /// namespace.
   ///
-  /// Currently carries the custom-launcher visibility change. This is backed by
-  /// a dedicated native `EventChannel` ("mobilistenLauncherEventChannel"),
-  /// independent of the public [ZohoSalesIQ.eventChannel]; the generic
-  /// [SIQEvent.customLauncherVisibility] event continues to be emitted on the
-  /// public channel for back-compatibility.
+  /// For now, it sends only the change in visibility of the custom launcher. For
+  /// backward compatibility, [ZohoSalesIQ.eventChannel] still sends the general
+  /// [SIQEvent.customLauncherVisibility] event too.
   final Stream<LauncherEvent> eventChannel =
       EventChannel("mobilistenLauncherEventChannel")
           .receiveBroadcastStream()
           .map((event) =>
               CustomLauncherVisibilityEvent(event["visible"] as bool? ?? false));
 
-  /// Controls the visibility of the default launcher using the given [mode].
+  /// Controls the visibility of the default launcher with the given [mode].
   void show(VisibilityMode mode) {
     Map<String, dynamic> arguments = <String, dynamic>{};
     arguments.putIfAbsent("visibility_mode", () => mode.index);
     _channel.invokeMethod('show', arguments);
   }
 
-  /// Sets the visibility [mode] applied to a custom launcher view.
+  /// Sets the visibility [mode] of a custom launcher view.
   ///
-  /// A custom launcher defaults to [VisibilityMode.never], so it stays hidden
-  /// until a visibility mode is set through this method.
+  /// A custom launcher uses [VisibilityMode.never] by default, so it stays
+  /// hidden until you set a visibility mode with this method.
   void setVisibilityModeToCustomLauncher(VisibilityMode mode) {
     Map<String, dynamic> arguments = <String, dynamic>{};
     arguments.putIfAbsent("visibility_mode", () => mode.index);
     _channel.invokeMethod('setVisibilityModeToCustomLauncher', arguments);
   }
 
-  /// Enables or disables drag-to-dismiss for the launcher, using the value
-  /// provided for [enable].
+  /// Turns drag to dismiss on or off for the launcher, based on the value of
+  /// [enable].
   void enableDragToDismiss(bool enable) {
     _channel.invokeMethod('enableDragToDismiss', enable);
   }
 
-  /// Sets the minimum press duration, [value] (in milliseconds), required to
-  /// start dragging the launcher.
+  /// Sets [value], the minimum press duration in milliseconds that the visitor
+  /// needs to start dragging the launcher.
   void setMinimumPressDuration(int value) {
     _channel.invokeMethod('setMinimumPressDuration', value);
   }
 
-  /// Enables or disables showing the operator's image on the launcher during
-  /// an active chat, using the value provided for [show].
+  /// Shows or hides the operator's image on the launcher during an active chat,
+  /// based on the value of [show].
   void showOperatorImage(bool show) {
     _channel.invokeMethod('showOperatorImage', show);
   }
 
-  /// Refreshes the launcher, bringing the launcher view to the front.
+  /// Refreshes the launcher and brings the launcher view to the front.
   void refreshLauncher() {
     _channel.invokeMethod('refresh');
   }
 }
 
-/// Base type for events delivered on [Launcher.eventChannel].
+/// The base type for the events that [Launcher.eventChannel] sends.
 ///
-/// Each concrete event carries only the data relevant to it, so a field such as
-/// [CustomLauncherVisibilityEvent.visible] can never be accessed on an
-/// unrelated event. A new event is a new subclass; consumers handle events with
-/// an exhaustive `switch` over this sealed type.
+/// Each event carries only its own data, so you can never read a field such as
+/// [CustomLauncherVisibilityEvent.visible] on an unrelated event. Each kind of
+/// event is its own subclass, so check the type of an event with `is` before
+/// you read its fields.
 abstract class LauncherEvent {}
 
-/// Emitted when the custom launcher's visibility changes.
+/// Sent when the visibility of the custom launcher changes.
 class CustomLauncherVisibilityEvent extends LauncherEvent {
   /// Whether the custom launcher should now be visible.
   final bool visible;
 
-  /// Creates a custom-launcher visibility event with the given [visible] state.
+  /// Creates a custom launcher visibility event with the given [visible] state.
   CustomLauncherVisibilityEvent(this.visible);
 }
 
-/// Controls when the launcher is visible.
+/// Defines when the launcher is visible.
 enum VisibilityMode {
   /// The launcher is always visible.
   always,
@@ -93,17 +91,17 @@ enum VisibilityMode {
   whenActiveChat
 }
 
-/// The layout mode of the launcher view.
+/// Defines the layout mode of the launcher view.
 class LauncherMode {
   const LauncherMode._(this.index);
 
   /// The ordinal index of the mode.
   final int index;
 
-  /// A launcher fixed at a static position.
+  /// A launcher that stays at a fixed position.
   static const LauncherMode static = LauncherMode._(0);
 
-  /// A launcher that floats and can be dragged around the screen.
+  /// A floating launcher that the visitor can drag around the screen.
   static const LauncherMode floating = LauncherMode._(1);
 
   /// All available launcher modes.
@@ -115,15 +113,15 @@ class LauncherMode {
   }
 }
 
-/// The initial placement and appearance of the launcher, used when configuring
+/// The initial position and appearance of the launcher, for when you configure
 /// a custom launcher.
 class LauncherProperties {
   /// The layout mode of the launcher.
   LauncherMode mode = LauncherMode.floating;
 
-  /// Vertical offset (in dp) measured from the bottom of the screen.
+  /// The vertical offset, in pixels, from the bottom of the screen.
   ///
-  /// Applies only for Android; maps to the native
+  /// This works only on Android. It matches the native
   /// `LauncherProperties.setYFromBottom()`.
   int? yFromBottom;
 
@@ -133,16 +131,17 @@ class LauncherProperties {
   /// The resource name of the custom **call** launcher icon.
   String? callIcon;
 
-  /// The resource name of the custom **create** (new chat) launcher icon.
+  /// The resource name of the custom **create** launcher icon, which starts a
+  /// new chat.
   String? createIcon;
 
   /// The resource name of the custom **close** launcher icon.
   String? closeIcon;
 
-  /// The horizontal edge the launcher is anchored to.
+  /// The horizontal edge that the launcher is anchored to.
   Horizontal? horizontalDirection;
 
-  /// The vertical edge the launcher is anchored to.
+  /// The vertical edge that the launcher is anchored to.
   Vertical? verticalDirection;
 
   /// Creates launcher properties for the given [launcherMode].
@@ -151,17 +150,17 @@ class LauncherProperties {
   }
 }
 
-/// The horizontal edge the launcher is anchored to.
+/// The horizontal edge that the launcher is anchored to.
 class Horizontal {
   const Horizontal._(this.index);
 
   /// The ordinal index of the direction.
   final int index;
 
-  /// Anchor the launcher to the left edge.
+  /// Anchors the launcher to the left edge.
   static const Horizontal left = Horizontal._(0);
 
-  /// Anchor the launcher to the right edge.
+  /// Anchors the launcher to the right edge.
   static const Horizontal right = Horizontal._(1);
 
   /// All available horizontal directions.
@@ -176,17 +175,17 @@ class Horizontal {
   }
 }
 
-/// The vertical edge the launcher is anchored to.
+/// The vertical edge that the launcher is anchored to.
 class Vertical {
   const Vertical._(this.index);
 
   /// The ordinal index of the direction.
   final int index;
 
-  /// Anchor the launcher to the top edge.
+  /// Anchors the launcher to the top edge.
   static const Vertical top = Vertical._(0);
 
-  /// Anchor the launcher to the bottom edge.
+  /// Anchors the launcher to the bottom edge.
   static const Vertical bottom = Vertical._(1);
 
   /// All available vertical directions.

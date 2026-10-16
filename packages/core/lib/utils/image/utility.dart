@@ -8,9 +8,9 @@ import 'package:image_picker/image_picker.dart';
 
 /// Encodes an image [source] as a base64 `data:` URI string.
 ///
-/// Accepts a network URL, [File], [Uint8List], base64 string, [ByteData],
-/// [XFile], `file://` URI string, [Uri], or an asset path. Returns `null`
-/// when [source] is `null` or cannot be read.
+/// It accepts a network URL, a [File], a [Uint8List], a base64 string,
+/// [ByteData], an [XFile], a `file://` URI string, a [Uri], or an asset path.
+/// Returns `null` when [source] is `null` or cannot be read.
 Future<String?> getBase64EncodedImage(dynamic source) async {
   try {
     if (source == null) return null;

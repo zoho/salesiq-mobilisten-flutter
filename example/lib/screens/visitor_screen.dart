@@ -162,7 +162,7 @@ class _VisitorScreenState extends State<VisitorScreen> {
       showToast('Visitor registered', ToastTone.success);
     } catch (e) {
       setState(() => _result = {'error': e.toString()});
-      showToast('Registration failed', ToastTone.danger);
+      showToast('Registration failed${reason(e)}', ToastTone.danger);
     }
   }
 
@@ -174,7 +174,7 @@ class _VisitorScreenState extends State<VisitorScreen> {
       showToast('Visitor unregistered', ToastTone.success);
     } catch (e) {
       setState(() => _result = {'error': e.toString()});
-      showToast('Unregister failed', ToastTone.danger);
+      showToast('Unregister failed${reason(e)}', ToastTone.danger);
     }
   }
 

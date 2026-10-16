@@ -2,25 +2,26 @@
 
 import 'salesiq_font.dart';
 
-/// This file is part of the core package for the SalesIQ Flutter plugin.
-/// It contains the configuration class for SalesIQ, which includes
-/// the app key, access key, and optional call view mode.
-/// The SalesIQConfiguration class is used to initialize
-/// and manage the configuration settings for SalesIQ in a Flutter application.
+/// Holds the configuration that initializes the SDK and manages its settings in
+/// your Flutter app. It is part of the core package of the SalesIQ Flutter
+/// plugin. It includes the App Key, the Access Key, and an optional call view
+/// mode.
+///
 /// Parameters:
-/// - [appKey]: The unique key for the generated in SalesIQ.
-/// - [accessKey]: The access key for the brand.
-/// - [androidCallViewMode]: Optional parameter to set the call view mode.
-/// - [fonts]: Optional custom fonts for the Mobilisten UI (Android only).
+/// - [appKey]: The unique App Key that is generated in SalesIQ.
+/// - [accessKey]: The Access Key of the brand.
+/// - [androidCallViewMode]: An optional parameter that sets the call view mode.
+/// - [fonts]: Optional custom fonts for the SDK's UI. This works only on
+///   Android.
 class SalesIQConfiguration {
   final String appKey;
   final String accessKey;
   final SalesIQCallViewMode? androidCallViewMode;
 
-  /// Custom fonts for the Mobilisten UI.
+  /// Custom fonts for the SDK's UI.
   ///
-  /// Applies only on Android; the iOS native SDK does not support configuring
-  /// fonts through the SDK, so this value is ignored on iOS.
+  /// This works only on Android. The iOS SDK does not support setting fonts
+  /// through the SDK, so iOS ignores this value.
   final SalesIQFont? fonts;
 
   const SalesIQConfiguration(
@@ -42,11 +43,11 @@ class SalesIQConfiguration {
   }
 }
 
-/// How the in-call view is presented on Android.
+/// Defines how the call view appears on Android during a call.
 enum SalesIQCallViewMode {
-  /// The call is shown as a banner docked at the top of the screen.
+  /// The call appears as a banner at the top of the screen.
   banner,
 
-  /// The call is shown in a floating, draggable window.
+  /// The call appears in a floating window that the visitor can drag.
   floating
 }

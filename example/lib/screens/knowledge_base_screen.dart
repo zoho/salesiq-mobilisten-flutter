@@ -91,7 +91,7 @@ class _KnowledgeBaseScreenState extends State<KnowledgeBaseScreen> {
       showToast('Found ${res.resources.length} articles', ToastTone.success);
     } catch (e) {
       setState(() => _result = {'error': e.toString()});
-      showToast('Search failed', ToastTone.danger);
+      showToast('Search failed${reason(e)}', ToastTone.danger);
     }
   }
 
@@ -103,6 +103,7 @@ class _KnowledgeBaseScreenState extends State<KnowledgeBaseScreen> {
       showToast(enabled ? 'Articles enabled' : 'Articles disabled');
     } catch (e) {
       setState(() => _result = {'error': e.toString()});
+      showToast('Check failed${reason(e)}', ToastTone.danger);
     }
   }
 
@@ -150,7 +151,7 @@ class _KnowledgeBaseScreenState extends State<KnowledgeBaseScreen> {
       showToast('Categories loaded', ToastTone.success);
     } catch (e) {
       setState(() => _result = {'error': e.toString()});
-      showToast('Failed to load categories', ToastTone.danger);
+      showToast('Failed to load categories${reason(e)}', ToastTone.danger);
     }
   }
 
@@ -166,7 +167,7 @@ class _KnowledgeBaseScreenState extends State<KnowledgeBaseScreen> {
       showToast('Departments loaded', ToastTone.success);
     } catch (e) {
       setState(() => _result = {'error': e.toString()});
-      showToast('Failed to load departments', ToastTone.danger);
+      showToast('Failed to load departments${reason(e)}', ToastTone.danger);
     }
   }
 
@@ -177,7 +178,7 @@ class _KnowledgeBaseScreenState extends State<KnowledgeBaseScreen> {
       setState(() => _result = {'opened': ok, 'id': id});
     } catch (e) {
       setState(() => _result = {'error': e.toString()});
-      showToast('Failed to open article', ToastTone.danger);
+      showToast('Failed to open article${reason(e)}', ToastTone.danger);
     }
   }
 

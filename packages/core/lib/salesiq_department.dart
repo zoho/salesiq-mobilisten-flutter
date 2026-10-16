@@ -1,11 +1,11 @@
 import 'salesiq_core_enums.dart';
 
-/// A SalesIQ department a conversation can be routed to.
+/// A SalesIQ department that a conversation can be routed to.
 class SalesIQDepartment {
-  /// Unique identifier of the department.
+  /// The unique ID of the department.
   final String? id;
 
-  /// Display name of the department.
+  /// The display name of the department.
   final String? name;
 
   /// Whether the department is currently available.
@@ -15,7 +15,7 @@ class SalesIQDepartment {
   // final bool isEngaged;
   // final int queueSize;
   // final int currentQueueSize;
-  /// The communication modes (chat/call) supported by the department.
+  /// The communication modes, chat or call, that the department supports.
   final CommunicationMode? communicationMode;
 
   /// Creates a department with the given attributes.
@@ -26,7 +26,7 @@ class SalesIQDepartment {
     this.communicationMode,
   });
 
-  /// Creates a department from its [id], [name] and supported
+  /// Creates a department from its [id], [name], and supported
   /// [communicationMode].
   factory SalesIQDepartment.fromBasic({
     String? id,
@@ -51,7 +51,7 @@ class SalesIQDepartment {
     );
   }
 
-  /// Builds a [SalesIQDepartment] from the native [map], or `null` when
+  /// Builds a [SalesIQDepartment] from the native [map]. Returns `null` when
   /// [map] is `null`.
   static SalesIQDepartment? fromMap(Map<String, dynamic>? map) {
     if (map == null) return null;
@@ -64,8 +64,8 @@ class SalesIQDepartment {
     );
   }
 
-  /// Builds a list of [SalesIQDepartment] from the native [mapList],
-  /// returning an empty list when [mapList] is `null`.
+  /// Builds a list of [SalesIQDepartment] from the native [mapList]. Returns an
+  /// empty list when [mapList] is `null`.
   static List<SalesIQDepartment> fromList(List? mapList) {
     if (mapList == null) {
       return [];
@@ -85,7 +85,7 @@ class SalesIQDepartment {
     return departments;
   }
 
-  /// Serializes this department to a native-compatible map.
+  /// Converts this department to a map that the native SDKs can read.
   Map<String, Object?> toMap() {
     return {
       "id": id,
@@ -96,12 +96,13 @@ class SalesIQDepartment {
   }
 }
 
-/// Filters [departments] to those usable for **chat** — `communicationMode` is `chat` or `chatAndCall`.
-/// Null-safe (returns `[]` for null).
+/// Returns the [departments] that support **chat**, which means that their
+/// `communicationMode` is `chat` or `chatAndCall`. It is null-safe, so it
+/// returns `[]` for null.
 ///
-/// Cross-platform counterpart of the Android SDK's `List<SIQDepartment>.chatDepartments()` extension
-/// (com.zoho.livechat.android.modules.extensions.SIQDepartmentExtensions). Use it after
-/// `Conversation.getDepartments()` to keep only chat-capable departments.
+/// It matches the `chatDepartments()` extension of the Android SDK. Use it
+/// after `Conversation.getDepartments()` to keep only the departments that
+/// support chat.
 List<SalesIQDepartment> chatDepartments(List<SalesIQDepartment>? departments) {
   if (departments == null) return [];
   return departments
@@ -111,9 +112,10 @@ List<SalesIQDepartment> chatDepartments(List<SalesIQDepartment>? departments) {
       .toList();
 }
 
-/// Filters [departments] to those usable for **calls** — `communicationMode` is `call` or `chatAndCall`.
-/// Null-safe (returns `[]` for null). `chatAndCall` departments intentionally appear in both
-/// [chatDepartments] and this list.
+/// Returns the [departments] that support **calls**, which means that their
+/// `communicationMode` is `call` or `chatAndCall`. It is null-safe, so it
+/// returns `[]` for null. Departments with `chatAndCall` appear both in
+/// [chatDepartments] and in this list, by design.
 List<SalesIQDepartment> callDepartments(List<SalesIQDepartment>? departments) {
   if (departments == null) return [];
   return departments

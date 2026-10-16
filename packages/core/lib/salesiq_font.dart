@@ -1,17 +1,17 @@
 // ignore_for_file: public_member_api_docs
 
-/// Custom fonts to be used inside the Mobilisten UI.
+/// Defines the custom fonts that the SDK uses in its UI.
 ///
-/// Note: Wired through the native configuration on Android; the iOS
-/// native SDK has no equivalent configuration hook.
+/// This works only on Android, through the native configuration. The iOS SDK
+/// has no matching configuration option.
 class SalesIQFont {
   SalesIQFontType? regular = null, medium = null;
 }
 
-/// A single custom font, referenced by the [path] to its font file, used
-/// within the Mobilisten UI.
+/// A single custom font that the SDK uses in its UI. It refers to its font file
+/// by [path].
 class SalesIQFontType {
-  /// The file-system path to the font resource.
+  /// The path of the font resource in the file system.
   String? path = null;
 
   /// Creates a [SalesIQFontType] for the font at the given [path].

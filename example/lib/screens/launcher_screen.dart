@@ -77,7 +77,8 @@ class _LauncherScreenState extends State<LauncherScreen> {
 
       showToast('Launcher settings applied', ToastTone.success);
     } catch (e) {
-      showToast('Failed to apply launcher settings', ToastTone.danger);
+      debugPrint('Failed to apply launcher settings: $e');
+      showToast('Failed to apply launcher settings${reason(e)}', ToastTone.danger);
     }
   }
 

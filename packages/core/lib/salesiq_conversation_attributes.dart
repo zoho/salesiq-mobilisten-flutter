@@ -1,19 +1,21 @@
 import 'package:salesiq_mobilisten_core/salesiq_department.dart';
 import 'package:salesiq_mobilisten_core/utils/image/utility.dart';
 
-/// Metadata applied to conversations, used to customize the operator's name,
-/// display picture, additional information, and associated departments.
+/// The metadata that you apply to conversations. Use it to customize the
+/// operator's name, display picture, additional information, and linked
+/// departments.
 class SalesIQConversationAttributes {
-  /// The operator name shown for the conversation.
+  /// The operator name that appears for the conversation.
   final String? name;
 
-  /// Additional information shown alongside the conversation.
+  /// Additional information that appears with the conversation.
   final String? additionalInfo;
 
-  /// The operator display picture (an asset path or bytes).
+  /// The display picture of the operator. It can be an image URL, a Flutter
+  /// asset path, a `file://` URI, a `File`, a `Uint8List`, or a base64 string.
   final Object? displayPicture;
 
-  /// The departments associated with the conversation.
+  /// The departments that are linked to the conversation.
   final List<SalesIQDepartment>? departments;
 
   /// Creates a set of conversation attributes.
@@ -24,8 +26,8 @@ class SalesIQConversationAttributes {
     this.departments,
   });
 
-  /// Returns a copy of these attributes overriding [name], [additionalInfo],
-  /// [displayPicture] and/or [departments] with the provided values.
+  /// Returns a copy of these attributes, with the given values for [name],
+  /// [additionalInfo], [displayPicture], or [departments].
   SalesIQConversationAttributes copyWith({
     String? name,
     String? additionalInfo,
@@ -40,8 +42,8 @@ class SalesIQConversationAttributes {
     );
   }
 
-  /// Serializes these attributes to a native-compatible map, encoding the
-  /// display picture as a base64 string when present.
+  /// Converts these attributes to a map that the native SDKs can read. If there
+  /// is a display picture, it is encoded as a base64 string.
   Future<Map<String, Object?>> toMap() async {
     Map<String, Object?> map = {
       "name": name,

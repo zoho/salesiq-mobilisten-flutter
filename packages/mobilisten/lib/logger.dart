@@ -1,6 +1,7 @@
 import 'package:flutter/services.dart';
 
-/// The severity of a debug log message written through [ZohoSalesIQLogger].
+/// Defines the severity of a debug log message that you write with
+/// [ZohoSalesIQLogger].
 class Level {
   // ignore_for_file: public_member_api_docs
 
@@ -9,16 +10,16 @@ class Level {
   /// The ordinal index of the level.
   final int index;
 
-  /// Informational message.
+  /// An informational message.
   static const Level info = Level._(0);
 
-  /// Warning message.
+  /// A warning message.
   static const Level warning = Level._(1);
 
-  /// Error message.
+  /// An error message.
   static const Level error = Level._(2);
 
-  /// All log levels, ordered by increasing severity.
+  /// All log levels, in order of increasing severity.
   static const List<Level> values = <Level>[info, warning, error];
 
   @override
@@ -27,10 +28,11 @@ class Level {
   }
 }
 
-/// Controls Mobilisten's debug logger — writing, clearing and enabling log
-/// output. Accessed via [ZohoSalesIQ.logger].
+/// Controls the debug logger of the SDK. With it, you can write logs, clear
+/// them, and turn the logger on or off. It is a static class, so call its
+/// methods directly on [ZohoSalesIQLogger].
 class ZohoSalesIQLogger {
-  /// The platform channel used to reach the native logger.
+  /// The platform channel that connects to the native logger.
   static MethodChannel methodChannel =
       const MethodChannel('salesiq_mobilisten');
 
@@ -42,24 +44,25 @@ class ZohoSalesIQLogger {
     await methodChannel.invokeMethod('writeLogForiOS', args);
   }
 
-  /// Use this API to clear the Debug log
+  /// Clears the debug log.
   static void clearLogsForiOS() {
     methodChannel.invokeMethod('clearLogsForiOS');
   }
 
-  /// returns a boolean value that is used to determine whether the logger is enabled or not.
+  /// Returns whether the logger is enabled.
   static Future<bool> get isEnabled async {
     return await methodChannel
         .invokeMethod<bool>('isLoggerEnabled')
         .then((value) => value ?? false);
   }
 
-  /// Enables the logger when [enable] is `true`, otherwise disables it.
+  /// Turns on the logger when [enable] is `true`, and turns it off otherwise.
   static void setEnabled(bool enable) async {
     await methodChannel.invokeMethod('setLoggerEnabled', enable);
   }
 
-  /// Sets the file-system path, [enable], to which debug logs are written.
+  /// Sets the path in the file system where the SDK writes debug logs. Pass
+  /// the path as [enable]. This works only on iOS.
   static void setPathForiOS(String enable) async {
     await methodChannel.invokeMethod('setPathForiOS', enable);
   }

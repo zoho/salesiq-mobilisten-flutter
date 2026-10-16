@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'
+    show PlatformException, MissingPluginException;
 
 import '../../theme/theme.dart';
 import '../../theme/tokens.dart';
@@ -14,6 +16,35 @@ enum ToastTone { defaultTone, success, danger }
 /// resolves. A [ToastHost] must be mounted near the app root.
 void showToast(String text, [ToastTone tone = ToastTone.defaultTone]) {
   _ToastController.instance?._show(text, tone);
+}
+
+/// Turns an SDK failure into a short, user-facing detail that can be *appended*
+/// to a failure toast so people see WHY an action failed, not just "Failed".
+///
+/// SDK calls run over a MethodChannel, so failures arrive as a
+/// [PlatformException] (with `message`/`code`) or a [MissingPluginException];
+/// anything else falls back to `toString()`. Returns a string already prefixed
+/// with ": " (e.g. `": Operator offline"`), or "" when there is no useful
+/// detail — so callers can safely write `'Couldn't start chat${reason(e)}'`.
+String reason(Object? error) {
+  final detail = _reasonDetail(error);
+  return (detail == null || detail.isEmpty) ? '' : ': $detail';
+}
+
+String? _reasonDetail(Object? error) {
+  if (error == null) return null;
+  if (error is PlatformException) {
+    final message = error.message?.trim();
+    if (message != null && message.isNotEmpty) return message;
+    final code = error.code.trim();
+    return code.isEmpty ? null : code;
+  }
+  if (error is MissingPluginException) {
+    final message = error.message?.trim();
+    return (message == null || message.isEmpty) ? null : message;
+  }
+  final text = error.toString().trim();
+  return text.isEmpty ? null : text;
 }
 
 class _ToastMessage {

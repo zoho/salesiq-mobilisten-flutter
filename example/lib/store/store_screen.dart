@@ -404,7 +404,7 @@ class _HelpTabState extends State<_HelpTab> {
                 onPressed: () => runSdk('Opening chat…',
                     () => ZohoSalesIQ.chat.start('Hi, I have a question'))),
             const SizedBox(height: 10),
-            // Start an audio/video call session with an operator.
+            // Start a voice call session with an operator.
             AppButton(
                 title: 'Request a callback',
                 variant: ButtonVariant.secondary,

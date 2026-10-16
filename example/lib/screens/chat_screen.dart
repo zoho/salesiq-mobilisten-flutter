@@ -137,7 +137,7 @@ class _ChatScreenState extends State<ChatScreen> {
           builder: (_) => ChatDetailScreen(chat: chat)));
     } catch (e) {
       setState(() => _result = {'error': e.toString()});
-      showToast('Failed to fetch chat', ToastTone.danger);
+      showToast('Failed to fetch chat${reason(e)}', ToastTone.danger);
     }
   }
 
@@ -220,21 +220,23 @@ class _ChatScreenState extends State<ChatScreen> {
         _attenderImage = null;
         _result = {'error': e.toString()};
       });
-      showToast('Failed to fetch image', ToastTone.danger);
+      showToast('Failed to fetch image${reason(e)}', ToastTone.danger);
     }
   }
 
   /// Renders the fetched attender image, which arrives as an http URL, a data:
   /// URI, or a raw base64 string (mirrors the RN/Cordova samples).
   Widget? _attenderImageWidget() {
-    final s = _attenderImage;
-    if (s == null || s.isEmpty) return null;
-    if (s.startsWith('http')) {
-      return Image.network(s, width: 72, height: 72, fit: BoxFit.cover);
+    final imageData = _attenderImage;
+    if (imageData == null || imageData.isEmpty) return null;
+    if (imageData.startsWith('http')) {
+      return Image.network(imageData, width: 72, height: 72, fit: BoxFit.cover);
     }
-    final b64 = s.contains(',') ? s.split(',').last : s;
+    final base64Body =
+        imageData.contains(',') ? imageData.split(',').last : imageData;
     try {
-      return Image.memory(base64Decode(b64), width: 72, height: 72, fit: BoxFit.cover);
+      return Image.memory(base64Decode(base64Body),
+          width: 72, height: 72, fit: BoxFit.cover);
     } catch (_) {
       return null;
     }
@@ -311,7 +313,7 @@ class _ChatScreenState extends State<ChatScreen> {
       showToast('Conversation started', ToastTone.success);
     } catch (e) {
       setState(() => _result = {'error': e.toString()});
-      showToast('Failed to start chat', ToastTone.danger);
+      showToast('Failed to start chat${reason(e)}', ToastTone.danger);
     }
   }
 
@@ -328,7 +330,7 @@ class _ChatScreenState extends State<ChatScreen> {
       showToast('Trigger fired', ToastTone.success);
     } catch (e) {
       setState(() => _result = {'error': e.toString()});
-      showToast('Trigger failed', ToastTone.danger);
+      showToast('Trigger failed${reason(e)}', ToastTone.danger);
     }
   }
 

@@ -5,26 +5,24 @@ import 'package:salesiq_mobilisten_core/salesiq_conversation.dart';
 import 'package:salesiq_mobilisten_core/salesiq_conversation_attributes.dart';
 import 'package:salesiq_mobilisten_core/salesiq_department.dart';
 
-/// Callback to supply conversation secret fields on demand.
+/// Called when the SDK needs the secret fields of a conversation.
 ///
-/// Return `null` to indicate that no value is provided for the given
-/// [conversation].
+/// Return `null` when you have no value for the given [conversation].
 typedef SalesIQSecretFieldsProvider = FutureOr<Map<String, String>?> Function(
     SalesIQConversation conversation);
 
-/// Callback to supply conversation custom info on demand.
+/// Called when the SDK needs the display fields of a conversation.
 ///
-/// Return `null` to indicate that no value is provided for the given
-/// [conversation].
+/// Return `null` when you have no value for the given [conversation].
 typedef SalesIQDisplayFieldsProvider = FutureOr<Map<String, String>?> Function(
     SalesIQConversation conversation);
 
-/// Configuration for conversation-level data provider callbacks.
+/// The data provider callbacks for conversations.
 class SalesIQConversationDataProvider {
-  /// Invoked by the SDK when secret fields are requested.
+  /// Called when the SDK requests the secret fields.
   final SalesIQSecretFieldsProvider? getSecretFields;
 
-  /// Invoked by the SDK when custom info is requested.
+  /// Called when the SDK requests the display fields.
   final SalesIQDisplayFieldsProvider? getDisplayFields;
 
   /// Creates a conversation data provider.
@@ -34,7 +32,7 @@ class SalesIQConversationDataProvider {
   });
 }
 
-/// This class provides APIs to manage conversations in the Zoho SalesIQ SDK.
+/// Provides the APIs to manage conversations in the Zoho SalesIQ SDK.
 class Conversation {
   final MethodChannel _channel =
       const MethodChannel("salesiq_conversations_module");
@@ -42,32 +40,32 @@ class Conversation {
   static SalesIQConversationDataProvider? _provider;
   static bool _methodHandlerRegistered = false;
 
-  /// Applies the specified meta data ([attributes]) to all conversations. You
-  /// can use this to customize the operator's name, display picture,
-  /// additional information, and associate specific departments.
+  /// Applies the given metadata, [attributes], to all conversations. Use it to
+  /// customize the operator's name, display picture, and additional
+  /// information, and to link specific departments.
   void setAttributes(SalesIQConversationAttributes attributes) async {
     final attributesMap = await attributes.toMap();
     _channel.invokeMethod('setAttribute', attributesMap);
   }
 
-  /// Enables or disables the conversation (chat) history using the value
-  /// provided for [visibility].
+  /// Turns the conversation, or chat, history on or off, based on the value of
+  /// [visibility].
   void setVisibility(bool visibility) {
     _channel.invokeMethod('setVisibility', visibility);
   }
 
-  /// Returns a list of departments (Instances of [SalesIQDepartment]).
+  /// Returns the departments, as [SalesIQDepartment] instances.
   Future<List<SalesIQDepartment>> getDepartments() async {
     return await _channel
         .invokeMethod('fetchDepartments')
         .then((onValue) => SalesIQDepartment.fromList(onValue));
   }
 
-  /// Registers a conversation-level data provider.
+  /// Registers a data provider for conversations.
   ///
   /// The callback receives a non-null [SalesIQConversation] payload.
   ///
-  /// Pass `null` to unregister the currently set provider.
+  /// To unregister the current provider, pass `null`.
   Future<void> setDataProvider(
       SalesIQConversationDataProvider? provider) async {
     _provider = provider;

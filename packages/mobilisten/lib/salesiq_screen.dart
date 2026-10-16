@@ -1,55 +1,54 @@
 // ignore_for_file: public_member_api_docs
 
-/// Screen types used with `ZohoSalesIQ.present` to open a specific
-/// module of the Mobilisten UI, mirroring the native `PresentOptions.Screen`
-/// (Android) and `ZSIQScreen` (iOS) types.
+/// Defines the screen types that you pass to `ZohoSalesIQ.present` to open a
+/// specific module of the SDK's UI. They match the native
+/// `PresentOptions.Screen` type on Android and the `ZSIQScreen` type on iOS.
 abstract class SIQScreen {
-  /// Serializes this screen configuration to a map for the native bridge.
+  /// Converts this screen configuration to a map for the native bridge.
   Map<String, dynamic> toMap();
 }
 
-/// The type of real-time session to create or resume.
+/// Defines the type of real-time session to create or resume.
 enum SIQSessionType { chat, call }
 
-/// Filter applied to a conversation list.
+/// Defines the filter for a conversation list.
 enum SIQConversationListFilter { ongoing, ended, all }
 
-/// The type of conversation list shown when navigating back from a
-/// detail view (or when directly opening the list screen).
+/// The type of conversation list that appears when the visitor navigates back
+/// from a detail view, or opens the list screen directly.
 class SIQConversationList {
   final String _type;
 
-  /// The filter applied to the list.
+  /// The filter for the list.
   final SIQConversationListFilter filter;
 
   const SIQConversationList._(this._type, this.filter);
 
-  /// Show a filtered chat list.
+  /// Shows a filtered chat list.
   const SIQConversationList.chat(
       [SIQConversationListFilter filter = SIQConversationListFilter.all])
       : this._('chat', filter);
 
-  /// Show a filtered call list.
+  /// Shows a filtered call list.
   const SIQConversationList.call(
       [SIQConversationListFilter filter = SIQConversationListFilter.all])
       : this._('call', filter);
 
-  /// Show a filtered list of all conversations (chats and calls).
+  /// Shows a filtered list of all conversations, both chats and calls.
   const SIQConversationList.all(
       [SIQConversationListFilter filter = SIQConversationListFilter.all])
       : this._('all', filter);
 
-  /// Do not show a list screen; back navigation dismisses the SDK.
+  /// Shows no list screen. Back navigation closes the SDK.
   const SIQConversationList.none()
       : this._('none', SIQConversationListFilter.all);
 
-  /// Serializes this conversation-list configuration to a map for the native
+  /// Converts this conversation list configuration to a map for the native
   /// bridge.
   Map<String, dynamic> toMap() => {'type': _type, 'filter': filter.name};
 }
 
-/// Controls how a session is opened when no specific conversation ID
-/// is provided.
+/// Controls how a session opens when no specific conversation ID is given.
 class SIQSessionBehavior {
   final String _type;
 
@@ -66,19 +65,19 @@ class SIQSessionBehavior {
       [SIQSessionType sessionType = SIQSessionType.chat])
       : this._('alwaysNew', sessionType);
 
-  /// Resumes an ongoing session of the given [sessionType] if one exists;
-  /// otherwise creates a new one.
+  /// Resumes an ongoing session of the given [sessionType] if one exists.
+  /// Otherwise, it creates a new one.
   const SIQSessionBehavior.continueOrNew(
       [SIQSessionType sessionType = SIQSessionType.chat])
       : this._('continueOrNew', sessionType);
 
-  /// Serializes this session-behavior configuration to a map for the native
+  /// Converts this session behavior configuration to a map for the native
   /// bridge.
   Map<String, dynamic> toMap() =>
       {'type': _type, 'sessionType': sessionType.name};
 }
 
-/// A screen within the Conversation module (chats and calls).
+/// A screen in the Conversation module, which holds chats and calls.
 class SIQConversationScreen extends SIQScreen {
   /// The ID of the specific conversation to open, if any.
   final String? id;
@@ -86,30 +85,30 @@ class SIQConversationScreen extends SIQScreen {
   /// The type of the conversation identified by [id].
   final SIQSessionType? sessionType;
 
-  /// The conversation list shown on back navigation.
+  /// The conversation list that appears on back navigation.
   final SIQConversationList list;
 
-  /// How a session is opened when no specific conversation [id] is given.
+  /// How a session opens when no specific conversation [id] is given.
   final SIQSessionBehavior sessionBehavior;
 
-  /// Opens the specific conversation identified by [id].
+  /// Opens the specific conversation with the given [id].
   ///
-  /// [sessionType] must match the actual type of the conversation
-  /// (chat or call). The given [list] is shown on back navigation.
+  /// [sessionType] must match the actual type of the conversation, which is
+  /// chat or call. The given [list] appears on back navigation.
   SIQConversationScreen.withId(String this.id,
       {SIQSessionType this.sessionType = SIQSessionType.chat,
       this.list = const SIQConversationList.all()})
       : sessionBehavior = const SIQSessionBehavior.none();
 
-  /// Opens the given conversation [list], optionally starting or resuming
-  /// a session based on [sessionBehavior].
+  /// Opens the given conversation [list]. It can also start or resume a
+  /// session, based on [sessionBehavior].
   SIQConversationScreen.withList(
       {this.list = const SIQConversationList.all(),
       this.sessionBehavior = const SIQSessionBehavior.none()})
       : id = null,
         sessionType = null;
 
-  /// Serializes this conversation screen to a map for the native bridge.
+  /// Converts this conversation screen to a map for the native bridge.
   @override
   Map<String, dynamic> toMap() => {
         'screenType': 'conversation',
@@ -120,9 +119,9 @@ class SIQConversationScreen extends SIQScreen {
       };
 }
 
-/// A screen within the Knowledge Base module.
+/// A screen in the Knowledge Base module.
 class SIQKnowledgeBaseScreen extends SIQScreen {
-  /// Optional ID of the article or FAQ to open directly.
+  /// The optional ID of the article or FAQ to open directly.
   final String? id;
 
   final String _resourceType;
@@ -138,7 +137,7 @@ class SIQKnowledgeBaseScreen extends SIQScreen {
   // /// Opens the combined articles and FAQs knowledge base.
   // SIQKnowledgeBaseScreen.both([this.id]) : _resourceType = 'both';
 
-  /// Serializes this knowledge base screen to a map for the native bridge.
+  /// Converts this Knowledge Base screen to a map for the native bridge.
   @override
   Map<String, dynamic> toMap() => {
         'screenType': 'knowledgeBase',

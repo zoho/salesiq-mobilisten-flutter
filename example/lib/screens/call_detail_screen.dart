@@ -19,10 +19,10 @@ class CallDetailScreen extends StatefulWidget {
 class _CallDetailScreenState extends State<CallDetailScreen> {
   Object? _result;
 
-  SalesIQConversation get _c => widget.conversation;
+  SalesIQConversation get _conversation => widget.conversation;
 
   Future<void> _open() async {
-    final id = _c.id;
+    final id = _conversation.id;
     if (id == null) {
       showToast('Call has no conversation ID', ToastTone.danger);
       return;
@@ -36,18 +36,19 @@ class _CallDetailScreenState extends State<CallDetailScreen> {
       setState(() => _result = {'opened': id, 'presented': true});
     } catch (e) {
       setState(() => _result = {'error': e.toString()});
-      showToast('Failed to open conversation', ToastTone.danger);
+      showToast('Failed to open conversation${reason(e)}', ToastTone.danger);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final call =
-        _c is SalesIQCallConversation ? _c as SalesIQCallConversation : null;
+    final call = _conversation is SalesIQCallConversation
+        ? _conversation as SalesIQCallConversation
+        : null;
     final missed = call?.status == CallStatus.missed;
     return ScreenScaffold(
       title: 'Call',
-      subtitle: 'conversationId · ${_c.id ?? '—'}',
+      subtitle: 'conversationId · ${_conversation.id ?? '—'}',
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 2),
@@ -67,12 +68,14 @@ class _CallDetailScreenState extends State<CallDetailScreen> {
           child: AppCard(
             children: [
               ListRow(
-                title: _c.attenderName ?? 'Unassigned',
-                subtitle: _c.attenderEmail ?? 'Operator',
+                title: _conversation.attenderName ?? 'Unassigned',
+                subtitle: _conversation.attenderEmail ?? 'Operator',
                 icon: AppIcon.visitor,
               ),
-              ListRow(title: 'Department', value: _c.departmentName ?? '—'),
-              ListRow(title: 'Question', value: _c.question ?? '—'),
+              ListRow(
+                  title: 'Department',
+                  value: _conversation.departmentName ?? '—'),
+              ListRow(title: 'Question', value: _conversation.question ?? '—'),
             ],
           ),
         ),

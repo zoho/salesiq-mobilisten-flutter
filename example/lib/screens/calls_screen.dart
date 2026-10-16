@@ -102,12 +102,13 @@ class _CallsScreenState extends State<CallsScreen> {
 
   Future<void> _startCall() async {
     try {
-      // Start a new voice/video call with an operator.
+      // Start a new voice call with an operator.
       await ZohoSalesIQCalls.start();
       showToast('Call started', ToastTone.success);
       _refreshCallState();
-    } catch (_) {
-      showToast('Failed to start call', ToastTone.danger);
+    } catch (e) {
+      debugPrint('Failed to start call: $e');
+      showToast('Failed to start call${reason(e)}', ToastTone.danger);
     }
   }
 
@@ -117,8 +118,9 @@ class _CallsScreenState extends State<CallsScreen> {
       await ZohoSalesIQCalls.end();
       showToast('Call ended');
       _refreshCallState();
-    } catch (_) {
-      showToast('Failed to end call', ToastTone.danger);
+    } catch (e) {
+      debugPrint('Failed to end call: $e');
+      showToast('Failed to end call${reason(e)}', ToastTone.danger);
     }
   }
 

@@ -1,15 +1,16 @@
 import 'package:salesiq_mobilisten_calls/salesiq_mobilisten_calls.dart';
 
-/// Base abstract class for all call-related events in the SalesIQ Mobilisten calls system.
+/// Represents a call event in the SalesIQ Mobilisten calls feature. It is the
+/// base class for every call event.
 ///
-/// This class serves as the foundation for all call events that can occur during
-/// the lifecycle of a SalesIQ call. It provides a common interface for handling
-/// different types of call events in a type-safe manner.
+/// Every event that can occur during the lifecycle of a SalesIQ call extends
+/// this class. It gives you one type-safe way to handle the different types of
+/// call events.
 ///
-/// All concrete call event classes should extend this base class to ensure
-/// consistent event handling throughout the application.
+/// Each call event class extends this base class, so your app can handle all
+/// events in the same way.
 ///
-/// Example usage:
+/// Example:
 /// ```dart
 /// void handleCallEvent(CallEvent event) {
 ///   if (event is CallStateChanged) {
@@ -21,54 +22,52 @@ import 'package:salesiq_mobilisten_calls/salesiq_mobilisten_calls.dart';
 /// ```
 abstract class CallEvent {}
 
-/// Event fired when the visitor's position in the call queue changes.
+/// Sent when the visitor's position in the call queue changes.
 ///
-/// This event is triggered when there are changes to the visitors's position
-/// in the waiting queue for SalesIQ calls. It provides information about
-/// which conversation the change relates to and the new position in the queue.
+/// It tells you which conversation the change belongs to, and the new position
+/// in the queue.
 ///
-/// A lower position number indicates the visitor is closer to being connected
-/// to an agent (position 1 means next in line).
+/// A lower number means that the visitor is closer to being connected to an
+/// operator. Position 1 means that the visitor is next in line.
 ///
-/// Example usage:
+/// Example:
 /// ```dart
 /// void onQueuePositionChanged(QueuePositionChanged event) {
 ///   print('Conversation ${event.conversationId} is now at position ${event.position}');
 /// }
 /// ```
 class QueuePositionChanged extends CallEvent {
-  /// The unique identifier of the conversation for which the queue position changed.
+  /// The unique ID of the conversation whose queue position changed.
   ///
-  /// This ID can be used to correlate this event with a specific conversation
-  /// or call session in your application.
+  /// Use this ID to match the event with a conversation or call session in your
+  /// app.
   final String conversationId;
 
   /// The new position in the call queue.
   ///
-  /// A value of 1 indicates the visitor is next in line to be connected.
-  /// Higher numbers indicate more people ahead in the queue.
-  /// This value should always be greater than 0.
+  /// A value of 1 means that the visitor is next in line to be connected. A
+  /// higher number means that more people are ahead in the queue. This value is
+  /// always greater than 0.
   final int position;
 
   /// Creates a new queue position changed event.
   ///
   /// Parameters:
-  /// - [conversationId]: The unique identifier of the conversation
-  /// - [position]: The new position in the queue (must be > 0)
+  /// - [conversationId]: The unique ID of the conversation.
+  /// - [position]: The new position in the queue. It must be greater than 0.
   QueuePositionChanged(this.conversationId, this.position);
 }
 
-/// Event fired when the state of a SalesIQ call changes.
+/// Sent when the state of a SalesIQ call changes.
 ///
-/// This event is triggered whenever there's a change in the call state,
-/// such as when a call is initiated, connected, ended, or encounters an error.
-/// It provides access to the complete call state information including
-/// status, participants, duration, and other call-related data.
+/// It is sent for every change in the call state, such as when a call starts,
+/// connects, ends, or has an error. It gives you the new call state, which has
+/// the call status and whether the call is incoming.
 ///
-/// This is one of the most important events for tracking call lifecycle
-/// and updating UI components that depend on call status.
+/// Use this event to follow the call lifecycle and to update the parts of your
+/// UI that depend on the call status.
 ///
-/// Example usage:
+/// Example:
 /// ```dart
 /// void onCallStateChanged(CallStateChanged event) {
 ///   if (event.state.status.isCallActive) {
@@ -81,67 +80,61 @@ class QueuePositionChanged extends CallEvent {
 class CallStateChanged extends CallEvent {
   /// The current state of the SalesIQ call.
   ///
-  /// This object contains comprehensive information about the call including:
-  /// - Call status (active, inactive, connecting, etc.)
-  /// - Participant information
-  /// - Call duration and timing
-  /// - Audio/video settings
-  /// - Any error states or messages
+  /// It has the call status, such as connecting, connected, or ended, and
+  /// whether the call is incoming. For details, see [SalesIQCallState].
   final SalesIQCallState state;
 
   /// Creates a new call state changed event.
   ///
   /// Parameters:
-  /// - [state]: The new call state containing all relevant call information
+  /// - [state]: The new call state.
   CallStateChanged(this.state);
 }
 
-/// Event fired when an error occurs with the SalesIQ calls.
-///
-/// This event is triggered when there is an error in the call process, such as
-/// connection failures, media issues, or any other problems that prevent the call from functioning properly. It provides an error message that can be used for
-/// debugging or displaying user-friendly error information.
 
-/// Event fired when an error occurs during a SalesIQ call.
+/// Sent when an error occurs during a SalesIQ call.
 ///
-/// This event is triggered when there is an error in the call process, such as
-/// connection failures, media issues, or any other problems that prevent the call from functioning properly.
-/// It provides an error message, error code, and additional error info that can be used for
-/// debugging or displaying user-friendly error information.
+/// It is sent when there is an error in the call process. For example, a
+/// connection fails, a media problem occurs, or another problem stops the call
+/// from working. It gives an error message, an error code, and more information
+/// about the error. Use them for debugging, or to show a clear error message to
+/// the visitor.
 class CallErrorOccurred extends CallEvent {
-  /// The error message describing what went wrong.
+  /// The error message that describes what went wrong.
   final String errorMessage;
 
-  /// The error code associated with the error.
+  /// The error code of the error.
   final int errorCode;
 
-  /// Additional error information, if available.
+  /// More information about the error, if available.
   final CallErrorInfo? info;
 
   /// Creates a new [CallErrorOccurred] event.
   ///
   /// Parameters:
-  /// - [errorMessage]: The error message describing the failure.
-  /// - [errorCode]: The error code associated with the error.
-  /// - [info]: Additional error information, if available.
+  /// - [errorMessage]: The error message that describes the failure.
+  /// - [errorCode]: The error code of the error.
+  /// - [info]: More information about the error, if available.
   CallErrorOccurred(this.errorMessage, this.errorCode, this.info);
 }
 
-/// Base class for additional error information related to call errors.
+/// Represents more information about a call error.
 ///
-/// This abstract class represents detailed error information that can be attached
-/// to a [CallErrorOccurred] event. Subclasses provide specific error context for
-/// different error scenarios, such as creation failures or action failures.
+/// You can attach this information to a [CallErrorOccurred] event. Each
+/// subclass gives the context of one kind of error, such as a creation failure
+/// or an action failure.
 abstract class CallErrorInfo {
-  /// The type of error info (e.g., "creationFailure", "actionFailure").
+  /// The type of the error information, such as "creationFailure" or
+  /// "actionFailure".
   final String type;
 
   /// Creates a new [CallErrorInfo] with the given [type].
   CallErrorInfo(this.type);
 
-  /// Factory method to create a [CallErrorInfo] from a map.
+  /// Creates a [CallErrorInfo] from a map.
   ///
-  /// Returns a [CreationFailure] or [ActionFailure] depending on the "type" field in [data].
+  /// Returns a [CreationFailure] or an [ActionFailure], based on the "type"
+  /// field in [data].
   static CallErrorInfo? fromMap(Map<dynamic, dynamic> data) {
     String type = data["type"];
     switch (type) {
@@ -154,10 +147,10 @@ abstract class CallErrorInfo {
   }
 }
 
-/// Error info for failures related to specific call actions.
+/// Represents an error with a specific call action.
 ///
-/// This class provides context about which call action failed, such as answering,
-/// holding, or ending a call. It is used as additional info in [CallErrorOccurred].
+/// It tells you which call action failed, such as answering, holding, or ending
+/// a call. It is used as more information in [CallErrorOccurred].
 class ActionFailure extends CallErrorInfo {
   /// The call action that failed.
   final SalesIQCallAction action;
@@ -174,10 +167,10 @@ class ActionFailure extends CallErrorInfo {
   }
 }
 
-/// Error info for failures that occur during call creation.
+/// Represents an error that occurs while a call is created.
 ///
-/// This class represents errors that happen when a call cannot be created or initialized.
-/// It is used as additional info in [CallErrorOccurred].
+/// It describes errors that happen when a call cannot be created or
+/// initialized. It is used as more information in [CallErrorOccurred].
 class CreationFailure extends CallErrorInfo {
   /// Creates a new [CreationFailure] instance.
   CreationFailure() : super("creationFailure");
@@ -188,18 +181,17 @@ class CreationFailure extends CallErrorInfo {
   }
 }
 
-/// Event fired when an unknown or unrecognized call state is encountered.
+/// Sent when the SDK finds a call state that it does not recognize.
 ///
-/// This event serves as a fallback for situations where the call system
-/// encounters a state that doesn't match any of the known call states.
-/// This can happen during system updates, when new call states are introduced,
-/// or when there are communication issues with the underlying call infrastructure.
+/// This event is a fallback for when the call system finds a state that does
+/// not match any known call state. This can happen during system updates, when
+/// new call states are added, or when there are communication problems with the
+/// call infrastructure.
 ///
-/// Applications should handle this event gracefully, typically by logging
-/// the occurrence and maintaining the last known good state until a
-/// recognized state is received.
+/// Your app should handle this event safely. Usually, it logs the event and
+/// keeps the last known good state until it receives a known state.
 ///
-/// Example usage:
+/// Example:
 /// ```dart
 /// void onUnknownCallState(UnknownCallState event) {
 ///   logger.warning('Unknown call state encountered');
@@ -209,7 +201,7 @@ class CreationFailure extends CallErrorInfo {
 class UnknownCallState extends CallEvent {
   /// Creates a new unknown call state event.
   ///
-  /// This constructor doesn't require any parameters as unknown states
-  /// typically don't carry additional context information.
+  /// This constructor takes no parameters, because unknown states usually do
+  /// not carry more context.
   UnknownCallState();
 }

@@ -51,7 +51,7 @@ class EventListeners {
       );
     }, onError: _onError));
 
-    // Stream of audio/video call events (state, queue position, errors).
+    // Stream of voice-call events (state, queue position, errors).
     _subs.add(ZohoSalesIQCalls.events.listen((event) {
       final (name, payload) = _callEvent(event);
       store.add(name, EventSource.calls, payload);

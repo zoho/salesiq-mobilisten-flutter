@@ -3,23 +3,25 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:salesiq_mobilisten_calls/salesiq_mobilisten_calls.dart';
 
-/// Manages call events from the native platform and provides a stream of parsed call events.
+/// Manages the call events from the native platform, and provides a stream of
+/// parsed call events.
 ///
-/// This singleton class acts as a bridge between the native platform (iOS/Android)
-/// and the Flutter application for handling SalesIQ call events. It receives raw
-/// event data from the native side through an EventChannel and converts them into
-/// strongly-typed Dart objects that extend [CallEvent].
+/// This singleton class connects the native platform, iOS or Android, with your
+/// Flutter app for SalesIQ call events. It receives raw event data from the
+/// native side through an EventChannel. It then converts the data into typed
+/// Dart objects that extend [CallEvent].
 ///
-/// The manager uses the singleton pattern to ensure there's only one instance
-/// managing the event stream throughout the application lifecycle.
+/// The manager is a singleton, so only one instance manages the event stream
+/// during the whole app lifecycle.
 ///
-/// Key responsibilities:
-/// - Establishes communication with the native platform via EventChannel
-/// - Deserializes raw event data into typed CallEvent objects
-/// - Provides a continuous stream of call events for the application to listen to
-/// - Handles unknown event types gracefully
+/// Main tasks:
+/// - Sets up the communication with the native platform through an
+///   EventChannel.
+/// - Converts the raw event data into typed CallEvent objects.
+/// - Provides a continuous stream of call events that your app can listen to.
+/// - Handles unknown event types safely.
 ///
-/// Example usage:
+/// Example:
 /// ```dart
 /// final eventManager = CallEventManager();
 /// eventManager.events.listen((event) {
@@ -33,13 +35,11 @@ import 'package:salesiq_mobilisten_calls/salesiq_mobilisten_calls.dart';
 class CallEventManager {
   static final CallEventManager _instance = CallEventManager._internal();
 
-  /// Factory constructor that returns the singleton instance of [CallEventManager].
+  /// Returns the single instance of [CallEventManager].
   ///
-  /// This ensures that only one instance of the event manager exists throughout
-  /// the application lifecycle, maintaining a consistent event stream and avoiding
-  /// multiple connections to the native platform.
-  ///
-  /// Returns the same instance on every call, implementing the singleton pattern.
+  /// Only one event manager exists during the app lifecycle. This keeps the
+  /// event stream consistent and avoids more than one connection to the native
+  /// platform.
   ///
   /// Example:
   /// ```dart
@@ -50,35 +50,39 @@ class CallEventManager {
   /// ```
   factory CallEventManager() => _instance;
 
-  /// The EventChannel stream that receives and processes call events from the native platform.
+  /// The EventChannel stream that receives and processes call events from the
+  /// native platform.
   ///
-  /// This stream:
-  /// - Connects to the "mobilistenCallEvents" channel on the native side
-  /// - Receives raw event data as broadcast stream
-  /// - Automatically deserializes each event using the [deserialize] method
-  /// - Transforms raw Map data into strongly-typed [CallEvent] objects
+  /// This stream does the following:
+  /// - Connects to the "mobilistenCallEvents" channel on the native side.
+  /// - Receives raw event data as a broadcast stream.
+  /// - Converts each event automatically with the [deserialize] method.
+  /// - Turns raw Map data into typed [CallEvent] objects.
   ///
-  /// The stream is set up during class initialization and remains active
-  /// throughout the application lifecycle.
+  /// The stream is set up when the class is initialized, and it stays active
+  /// during the whole app lifecycle.
   final eventChannel = EventChannel("mobilistenCallEvents")
       .receiveBroadcastStream()
       .map((event) => deserialize(event));
 
   CallEventManager._internal();
 
-  /// Provides access to the stream of parsed call events.
+  /// Returns the stream of parsed call events.
   ///
-  /// This getter returns a stream that emits [CallEvent] objects whenever
-  /// the native platform sends call-related events. The stream includes:
+  /// The stream sends a [CallEvent] object each time the native platform sends
+  /// a call event. The stream includes:
   ///
-  /// - [CallStateChanged]: When call status changes (connected, ended, etc.)
-  /// - [QueuePositionChanged]: When position in call queue updates
-  /// - [UnknownCallState]: For unrecognized or future event types
+  /// - [CallStateChanged]: Sent when the call status changes, such as to
+  ///   connected or ended.
+  /// - [QueuePositionChanged]: Sent when the position in the call queue
+  ///   changes.
+  /// - [UnknownCallState]: Sent for event types that are not recognized, or
+  ///   that a later version adds.
   ///
-  /// The stream is a broadcast stream, meaning multiple listeners can
-  /// subscribe to it simultaneously without interfering with each other.
+  /// The stream is a broadcast stream, so many listeners can subscribe to it at
+  /// the same time without affecting each other.
   ///
-  /// Example usage:
+  /// Example:
   /// ```dart
   /// CallEventManager().events.listen((event) {
   ///   switch (event.runtimeType) {
@@ -92,27 +96,31 @@ class CallEventManager {
   /// });
   /// ```
   ///
-  /// Returns a [Stream<CallEvent>] that emits call events from the native platform.
+  /// Returns a [Stream<CallEvent>] that sends call events from the native
+  /// platform.
   Stream<CallEvent> get events => eventChannel;
 
-  /// Deserializes raw event data from the native platform into typed [CallEvent] objects.
+  /// Converts raw event data from the native platform into typed [CallEvent]
+  /// objects.
   ///
-  /// This static method processes raw event data received from the native platform
-  /// and converts it into appropriate [CallEvent] subclass instances based on the
-  /// event type specified in the data.
+  /// This static method reads the raw event data from the native platform. It
+  /// creates the [CallEvent] subclass instance that matches the event type in
+  /// the data.
   ///
   /// Supported event types:
-  /// - `"queuePositionChanged"`: Creates [QueuePositionChanged] with conversation ID and position
-  /// - `"callStateChanged"`: Creates [CallStateChanged] with deserialized call state
-  /// - Any other type: Creates [UnknownCallState] as a fallback
+  /// - `"queuePositionChanged"`: Creates a [QueuePositionChanged] with the
+  ///   conversation ID and position.
+  /// - `"callStateChanged"`: Creates a [CallStateChanged] with the parsed call
+  ///   state.
+  /// - Any other type: Creates an [UnknownCallState] as a fallback.
   ///
-  /// The method expects the event data to contain an "eventName" field that
-  /// identifies the type of event, along with event-specific data fields.
+  /// The event data must contain an "eventName" field that names the event
+  /// type, along with the data fields of that event.
   ///
   /// Parameters:
-  /// - [event]: Raw event data from the native platform as a Map
+  /// - [event]: The raw event data from the native platform, as a Map.
   ///
-  /// Returns a [CallEvent] object corresponding to the event type.
+  /// Returns a [CallEvent] object that matches the event type.
   ///
   /// Example input data:
   /// ```dart

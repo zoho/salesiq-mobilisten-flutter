@@ -100,7 +100,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       showToast('Push handled', ToastTone.success);
     } catch (e) {
       setState(() => _result = {'error': e.toString()});
-      showToast('Push handling failed', ToastTone.danger);
+      showToast('Push handling failed${reason(e)}', ToastTone.danger);
     }
   }
 

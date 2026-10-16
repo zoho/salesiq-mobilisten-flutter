@@ -41,7 +41,7 @@ class _RefreshDataScreenState extends State<RefreshDataScreen> {
       showToast('Data refreshed', ToastTone.success);
     } catch (e) {
       setState(() => _result = {'error': e.toString()});
-      showToast('Refresh failed', ToastTone.danger);
+      showToast('Refresh failed${reason(e)}', ToastTone.danger);
     } finally {
       if (mounted) setState(() => _busy = false);
     }

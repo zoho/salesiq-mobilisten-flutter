@@ -1,76 +1,75 @@
-/// A Dart representation of a URI scheme with hosts and path matchers.
+/// The Dart form of a URI scheme with hosts and path matchers.
 class PathMatcher {
-  /// Private constructor to prevent direct instantiation.
+  /// Creates a path matcher. Use one of its subclasses: [Exact], [Prefix],
+  /// [Suffix], or [Pattern].
   const PathMatcher();
 }
 
-/// An exact path matcher.
+/// A path matcher that matches the exact path.
 class Exact extends PathMatcher {
-  /// The exact path string to match against.
+  /// The exact path to match.
   final String path;
 
-  /// Constructor for the Exact path matcher.
+  /// Creates an exact path matcher.
   const Exact(this.path);
 }
 
-/// A prefix path matcher.
+/// A path matcher that matches a prefix.
 class Prefix extends PathMatcher {
-  /// The prefix string to match against.
+  /// The prefix to match.
   final String prefix;
 
-  /// Constructor for the Prefix path matcher.
+  /// Creates a prefix path matcher.
   const Prefix(this.prefix);
 }
 
-/// A suffix path matcher.
+/// A path matcher that matches a suffix.
 class Suffix extends PathMatcher {
-  /// The suffix string to match against.
+  /// The suffix to match.
   final String suffix;
 
-  /// Constructor for the Suffix path matcher.
+  /// Creates a suffix path matcher.
   const Suffix(this.suffix);
 }
 
-/// A pattern matcher using simple wildcard patterns.
+/// A path matcher that uses simple wildcard patterns.
 class Pattern extends PathMatcher {
-  /// The pattern string to match against.
+  /// The pattern to match.
   final String pattern;
 
-  /// Constructor for the Pattern matcher.
+  /// Creates a pattern matcher.
   const Pattern(this.pattern);
 }
 
 /// Represents a URI scheme with associated hosts and path matchers.
 class SalesIQUriScheme {
-  /// The scheme part of the URI (e.g., "https", "myapp").
+  /// The scheme part of the URI, such as "https" or "myapp".
   final String scheme;
 
-  /// The host/domain part of the URI (e.g., "www.example.com").
-  /// In Dart, `final` on a collection means the reference cannot be changed,
-  /// but the contents of the collection itself can be modified.
+  /// The hosts or domains of the URI to match, such as "www.example.com".
   final Set<String> hosts = {};
 
-  /// A list of path conditions to match against.
+  /// The list of path conditions to match.
   final List<PathMatcher> paths = [];
 
-  /// Constructor for the class.
+  /// Creates a URI scheme with the given [scheme].
   SalesIQUriScheme(this.scheme);
 
-  /// Adds one or more hostnames, [newHosts] (e.g. "example.com",
-  /// "api.example.com"). Returns `this` for a fluent, chainable API.
+  /// Adds one or more hostnames in [newHosts], such as "example.com" and
+  /// "api.example.com". Returns `this`, so you can chain calls.
   SalesIQUriScheme addHosts(List<String> newHosts) {
     hosts.addAll(newHosts);
     return this; // Return `this` to allow for a fluent, chainable API.
   }
 
-  /// Adds one or more path conditions, [newPaths]. Returns `this` for a
-  /// fluent, chainable API.
+  /// Adds one or more path conditions in [newPaths]. Returns `this`, so you can
+  /// chain calls.
   SalesIQUriScheme addPaths(List<PathMatcher> newPaths) {
     paths.addAll(newPaths);
     return this;
   }
 
-  /// Converts the instance to a Map representation.
+  /// Converts this instance to a Map.
   Map<String, dynamic> toMap() {
     return {
       "scheme": scheme,

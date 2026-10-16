@@ -1,23 +1,23 @@
-/// This class is used to store data of the message
+/// Holds the data of a message.
 class SIQMessage {
-  /// constructor to initialize the message
+  /// Creates a message with the given data.
   SIQMessage(this.text, this.sender, this.time, this.isRead, this.file);
 
-  /// sender of the message
+  /// The sender of the message.
   final String? sender;
 
-  /// content of the message
+  /// The content of the message.
   final String? text; //type, senderId;
-  /// denotes whether the message is read or not
+  /// Whether the message is read.
   final bool? isRead; //, sentByVisitor;
-  /// file data of the message
+  /// The file data of the message.
   final File? file;
 
-  /// time of the message
+  /// The time of the message.
   late final DateTime? time;
   // final Status? status;
 
-  /// Builds a [SIQMessage] from the native message [map], or `null` when
+  /// Builds an [SIQMessage] from the native message [map]. Returns `null` when
   /// [map] is `null`.
   static SIQMessage? getObject(Map? map) {
     if (map != null) {
@@ -51,15 +51,15 @@ class SIQMessage {
   }
 }
 
-/// This class is used to store data of the file
+/// Holds the data of a file.
 class File {
-  /// name, content type, comment of the file
+  /// The name, content type, and comment of the file.
   final String? name, contentType, comment;
 
-  /// size of the file in bytes
+  /// The size of the file in bytes.
   final int size;
 
-  /// constructor to initialize the file
+  /// Creates a file with the given data.
   File(this.name, this.comment, this.contentType, this.size);
 }
 

@@ -4,46 +4,49 @@ import 'dart:io' as io;
 import 'package:flutter/material.dart';
 import 'package:salesiq_mobilisten_calls/salesiq_mobilisten_calls.dart';
 
-/// A Flutter widget that displays a status bar view for active SalesIQ calls on Android devices.
+/// A Flutter widget that shows a status bar view for active SalesIQ calls on
+/// Android devices.
 ///
-/// This widget provides a compact status bar overlay that appears when there's an active call,
-/// allowing users to see call information and tap to return to the full screen call interface.
-/// The widget automatically shows/hides based on call state and only displays on Android platforms.
+/// This widget shows a compact status bar when there is an active call.
+/// Visitors can see call information, and tap the bar to return to the full
+/// screen call view. The widget shows and hides automatically based on the call
+/// state, and it appears only on Android.
 ///
 /// The status bar view includes:
-/// - Visual representation of the current call status
-/// - Tap gesture handling to enter full screen mode
-/// - Automatic theme adaptation based on dark/light mode
-/// - Real-time updates based on call state changes
+/// - The current call status.
+/// - Tap handling that opens the full screen mode.
+/// - A theme that follows dark or light mode automatically.
+/// - Real-time updates when the call state changes.
 ///
-/// Example usage:
+/// Example:
 /// ```dart
 /// SalesIQAndroidCallStatusBarView(
 ///   isDarkMode: true/false,
 /// )
 /// ```
 class SalesIQAndroidCallStatusBarView extends StatefulWidget {
-  /// Determines whether the status bar should use dark mode styling.
+  /// Determines whether the status bar uses dark mode styling.
   ///
-  /// When set to `true`, the status bar will use dark theme colors and styling.
-  /// When set to `false`, it will use light theme styling.
-  /// This should typically be synchronized with your app's current theme.
+  /// When it is `true`, the status bar uses dark theme colors and styling. When
+  /// it is `false`, it uses light theme styling. Usually, you match this value
+  /// to the current theme of your app.
   final bool isDarkMode;
 
   /// Creates a new instance of [SalesIQAndroidCallStatusBarView].
   ///
-  /// The [isDarkMode] parameter is required and determines the visual theme
-  /// of the status bar view.
+  /// The [isDarkMode] parameter is required. It sets the visual theme of the
+  /// status bar view.
   ///
   /// Parameters:
-  /// - [key]: An optional key to identify this widget
-  /// - [isDarkMode]: Whether to use dark mode styling for the status bar
+  /// - [key]: An optional key that identifies this widget.
+  /// - [isDarkMode]: Whether the status bar uses dark mode styling.
   const SalesIQAndroidCallStatusBarView({super.key, required this.isDarkMode});
 
   /// Creates the mutable state for this widget.
   ///
-  /// Returns a [SalesIQCallViewState] instance that manages the widget's state,
-  /// including call status monitoring, view loading, and UI updates.
+  /// Returns a [SalesIQCallViewState] instance that manages the state of the
+  /// widget. This includes watching the call status, loading the view, and
+  /// updating the UI.
   @override
   SalesIQCallViewState createState() => SalesIQCallViewState();
 }

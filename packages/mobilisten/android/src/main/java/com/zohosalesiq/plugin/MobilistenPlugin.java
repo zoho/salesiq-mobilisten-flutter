@@ -1719,6 +1719,8 @@ public class MobilistenPlugin implements FlutterPlugin, MethodCallHandler, Activ
                 ZohoSalesIQ.setTimeout(SalesIQTimeoutType.DISPLAY_FIELDS, LiveChatUtil.getLong(value));
             } else if ("EnableHomePageBackStackForChatInitiation".equals(key)) {
                 config = new SalesIQConfig.EnableHomePageBackStackForChatInitiation(LiveChatUtil.getBoolean(value));
+            } else if ("ConnectionUIDelayDuration".equals(key)) {
+                config = new SalesIQConfig.ConnectionUIDelayDuration(LiveChatUtil.getLong(value));
             }
             if (config != null) {
                 ZohoSalesIQ.setConfig(config);

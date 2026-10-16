@@ -2,14 +2,14 @@ import 'package:flutter/services.dart';
 
 import 'mobilisten_date_time.dart';
 
-/// Entry point for the knowledge base — controlling resource visibility,
-/// fetching articles and their categories, opening resources and subscribing
-/// to resource events. Accessed via [ZohoSalesIQ.knowledgeBase].
+/// Provides the APIs for the Knowledge Base. With it, you can control the
+/// visibility of resources, get articles and their categories, open resources,
+/// and listen to resource events. To use it, call [ZohoSalesIQ.knowledgeBase].
 class KnowledgeBase {
   final MethodChannel _channel = const MethodChannel("salesiq_knowledge_base");
 
-  /// Broadcast stream of knowledge base [KnowledgeBaseEvent]s, emitted when a
-  /// visitor opens, closes, likes or dislikes a resource.
+  /// The broadcast stream of Knowledge Base [KnowledgeBaseEvent]s. It sends an
+  /// event when a visitor opens, closes, likes, or dislikes a resource.
   final eventChannel = EventChannel("mobilisten_knowledge_base_events")
       .receiveBroadcastStream()
       .map((event) => KnowledgeBaseEvent(
@@ -19,8 +19,8 @@ class KnowledgeBase {
           KnowledgeBaseErrorInfo.fromMap(
               event["error"] as Map<dynamic, dynamic>)));
 
-  /// Shows or hides resources of the given [type], based on the value
-  /// provided for [shouldShow].
+  /// Shows or hides resources of the given [type], based on the value of
+  /// [shouldShow].
   void setVisibility(ResourceType type, bool shouldShow) {
     Map<String, dynamic> args = <String, dynamic>{};
     args.putIfAbsent("type", () => type.index);
@@ -28,8 +28,8 @@ class KnowledgeBase {
     _channel.invokeMethod('setVisibility', args);
   }
 
-  /// Combines resources of the given [type] across departments when [merge]
-  /// is `true`, otherwise keeps them grouped per department.
+  /// Combines resources of the given [type] from all departments when [merge]
+  /// is `true`. Otherwise, it keeps them grouped by department.
   void combineDepartments(ResourceType type, bool merge) {
     Map<String, dynamic> args = <String, dynamic>{};
     args.putIfAbsent("type", () => type.index);
@@ -37,8 +37,8 @@ class KnowledgeBase {
     _channel.invokeMethod('combineDepartments', args);
   }
 
-  /// Enables or disables categorized display of resources of the given
-  /// [type], based on the value provided for [shouldCategorize].
+  /// Turns the grouping of resources of the given [type] into categories on or
+  /// off, based on the value of [shouldCategorize].
   void categorize(ResourceType type, bool shouldCategorize) {
     Map<String, dynamic> args = <String, dynamic>{};
     args.putIfAbsent("type", () => type.index);
@@ -46,7 +46,7 @@ class KnowledgeBase {
     _channel.invokeMethod('categorize', args);
   }
 
-  /// Returns whether the resource of the given [type] is enabled.
+  /// Returns whether resources of the given [type] are enabled.
   Future<bool> isEnabled(ResourceType type) async {
     Map<String, dynamic> arguments = <String, dynamic>{};
     arguments.putIfAbsent("type", () => type.index);
@@ -55,7 +55,7 @@ class KnowledgeBase {
         .then((value) => value ?? false);
   }
 
-  /// Returns a single resource of the given [type] matching the given [id].
+  /// Returns one resource of the given [type] that matches the given [id].
   //
   // [pending iOS support] `shouldFallbackToDefaultLanguage` (falls back to the
   // resource in the default language when it is unavailable in the current
@@ -165,13 +165,13 @@ class KnowledgeBase {
         ratedType: ratedTypes);
   }
 
-  /// Sets the maximum number, [limit], of recently viewed resources retained
-  /// and displayed.
+  /// Sets [limit], the maximum number of recently viewed resources that the SDK
+  /// keeps and shows.
   void setRecentlyViewedCount(int limit) {
     _channel.invokeMethod('setRecentlyViewedCount', limit);
   }
 
-  /// Opens the resource of the given [type] identified by [id].
+  /// Opens the resource of the given [type] that [id] identifies.
   Future<bool> open(ResourceType type, String id) async {
     int rawValue = type.index;
     Map<String, dynamic> args = <String, dynamic>{};
@@ -184,15 +184,19 @@ class KnowledgeBase {
 
   /// Returns the resources of the given [type].
   ///
-  /// Optionally scopes the result to a department via [departmentId] and to a
-  /// parent category via [parentCategoryId], and filters by a full-text
-  /// [searchKey]. Results are paginated: [page] selects the page (starting at 1)
-  /// and [limit] sets the page size (defaults to 99). The returned [Result]
-  /// exposes the fetched page via its resources list and whether more pages
-  /// remain via its moreDataAvailable flag.
+  /// To return only the resources of a department, pass [departmentId]. To
+  /// return only the resources under a parent category, pass
+  /// [parentCategoryId]. To filter the results with a full-text search, pass
+  /// [searchKey].
   ///
-  /// Each resource in the list omits its body content, which is `null` here;
-  /// call [getSingleResource] to fetch a single resource with its full content.
+  /// The results come in pages. [page] selects the page, starting at 1, and
+  /// [limit] sets the page size. The default page size is 99. The returned
+  /// [Result] holds the fetched page in its `resources` list. Its
+  /// `moreDataAvailable` flag tells you whether more pages remain.
+  ///
+  /// The resources in the list do not include their body content, which is
+  /// `null` here. To get one resource with its full content, call
+  /// [getSingleResource].
   //
   // [pending iOS support] `includeChildCategoryResources` (includes resources
   // belonging to child categories of [parentCategoryId]) is handled on Android
@@ -231,8 +235,8 @@ class KnowledgeBase {
 
   /// Returns the resource categories of the given [type].
   ///
-  /// Optionally scopes the result to a department via [departmentId] and to
-  /// the children of a category via [parentCategoryId].
+  /// To return only the categories of a department, pass [departmentId]. To
+  /// return only the child categories of a category, pass [parentCategoryId].
   Future<List<ResourceCategory>> getCategories(ResourceType type,
       {String? departmentId, String? parentCategoryId}) async {
     int rawValue = type.index;
@@ -251,8 +255,8 @@ class KnowledgeBase {
         await _channel.invokeMethod<List<dynamic>>('getCategories', args));
   }
 
-  /// Returns the resource departments associated with the brand, as configured
-  /// under the brand's flow control settings.
+  /// Returns the resource departments of the brand, as they are set in the flow
+  /// control settings of the brand.
   Future<List<ResourceDepartment>> getResourceDepartments() async {
     final List<dynamic>? departmentList =
         await _channel.invokeMethod<List<dynamic>>('getResourceDepartments');
@@ -321,9 +325,10 @@ class KnowledgeBase {
   }
 }
 
-/// The type of knowledge base resource a [KnowledgeBase] API operates on.
+/// Defines the type of Knowledge Base resource that a [KnowledgeBase] API works
+/// on.
 enum ResourceType {
-  /// Knowledge base articles.
+  /// Knowledge Base articles.
   articles,
 
   // FAQs is pending the iOS native implementation. Uncomment when iOS supports it.
@@ -331,7 +336,7 @@ enum ResourceType {
   // faqs,
 }
 
-/// The result of a resource fetch, holding the fetched page and whether more
+/// The result of a resource fetch. It holds the fetched page, and whether more
 /// data is available beyond the requested page limit.
 class Result {
   /// `true` when more resources exist beyond the requested page limit.
@@ -345,45 +350,45 @@ class Result {
   Result(this.resources, this.moreDataAvailable);
 }
 
-/// A knowledge base resource (article) and its metadata.
+/// A Knowledge Base resource, such as an article, and its metadata.
 class Resource {
-  /// The resource's unique identifier.
+  /// The unique ID of the resource.
   String? id;
 
-  /// The category the resource belongs to.
+  /// The category that the resource belongs to.
   SIQResourceCategory? category;
 
-  /// The resource's title.
+  /// The title of the resource.
   String? title;
 
-  /// The identifier of the department the resource belongs to.
+  /// The ID of the department that the resource belongs to.
   String? departmentId;
 
   /// The language of the resource.
   Language? language;
 
-  /// The user who created the resource.
+  /// The operator who created the resource.
   User? creator;
 
-  /// The user who last modified the resource.
+  /// The operator who last modified the resource.
   User? modifier;
 
-  /// The time the resource was created.
+  /// The time when the resource was created.
   DateTime? createdTime;
 
-  /// The time the resource was last modified.
+  /// The time when the resource was last modified.
   DateTime? modifiedTime;
 
   /// The public URL of the resource.
   String? publicUrl;
 
-  /// Engagement statistics for the resource.
+  /// The engagement statistics of the resource.
   Stats? stats;
 
-  /// The resource's body content.
+  /// The body content of the resource.
   String? content;
 
-  /// The current visitor's rating on the resource.
+  /// The current visitor's rating of the resource.
   RatedType ratedType = RatedType.none;
 
   /// Creates a [Resource] with the given metadata.
@@ -404,12 +409,12 @@ class Resource {
   });
 }
 
-/// The category a [Resource] belongs to.
+/// The category that a [Resource] belongs to.
 class SIQResourceCategory {
-  /// The category's unique identifier.
+  /// The unique ID of the category.
   String? id;
 
-  /// The category's name.
+  /// The name of the category.
   String? name;
 
   /// Creates a [SIQResourceCategory] with the given [id] and [name].
@@ -418,7 +423,7 @@ class SIQResourceCategory {
 
 /// The language of a [Resource].
 class Language {
-  /// The language's unique identifier.
+  /// The unique ID of the language.
   String? id;
 
   /// The language code.
@@ -428,19 +433,19 @@ class Language {
   Language({this.id, this.code});
 }
 
-/// A user (operator) referenced by a [Resource], such as its creator or
-/// modifier.
+/// An operator that a [Resource] refers to, such as the operator who created it
+/// or last modified it.
 class User {
-  /// The user's unique identifier.
+  /// The unique ID of the user.
   String? id;
 
-  /// The user's name.
+  /// The name of the user.
   String? name;
 
-  /// The user's email address.
+  /// The email address of the user.
   String? email;
 
-  /// The user's display name.
+  /// The display name of the user.
   String? displayName;
 
   /// The URL of the user's image.
@@ -450,7 +455,7 @@ class User {
   User({this.id, this.name, this.email, this.displayName, this.imageUrl});
 }
 
-/// Engagement statistics for a [Resource].
+/// The engagement statistics of a [Resource].
 class Stats {
   /// The number of likes.
   num? liked;
@@ -468,15 +473,15 @@ class Stats {
   Stats({this.liked, this.disliked, this.used, this.viewed});
 }
 
-/// A knowledge base resource (article) category.
+/// A category of Knowledge Base resources, such as articles.
 class ResourceCategory {
-  /// The category's unique identifier.
+  /// The unique ID of the category.
   String? id;
 
-  /// The category's name.
+  /// The name of the category.
   String? name;
 
-  /// The identifier of the department the category belongs to.
+  /// The ID of the department that the category belongs to.
   String? departmentId;
 
   /// The number of resources in the category.
@@ -488,10 +493,10 @@ class ResourceCategory {
   /// The display order of the category.
   num? order;
 
-  /// The identifier of the parent category, if this is a sub-category.
+  /// The ID of the parent category, if this is a subcategory.
   String? parentCategoryId;
 
-  /// The time a resource in the category was last modified.
+  /// The time when a resource in the category was last modified.
   DateTime? resourceModifiedTime;
 
   /// Creates a [ResourceCategory] with the given metadata.
@@ -507,19 +512,19 @@ class ResourceCategory {
   });
 }
 
-/// A department under which knowledge base resources are grouped.
+/// A department that groups Knowledge Base resources.
 class ResourceDepartment {
-  /// The department's unique identifier.
+  /// The unique ID of the department.
   String? id;
 
-  /// The department's name.
+  /// The name of the department.
   String? name;
 
   /// Creates a [ResourceDepartment] with the given [id] and [name].
   ResourceDepartment({this.id, this.name});
 }
 
-/// The current visitor's rating on a [Resource].
+/// Defines the current visitor's rating of a [Resource].
 enum RatedType {
   /// The visitor liked the resource.
   liked,
@@ -531,7 +536,7 @@ enum RatedType {
   none
 }
 
-/// Conversion helpers between [RatedType] and its native string value.
+/// Converts between [RatedType] and its native string value.
 extension RatedTypeString on RatedType {
   static const Map<RatedType, String> _stringValues = const {
     RatedType.liked: "liked",
@@ -548,8 +553,8 @@ extension RatedTypeString on RatedType {
     return code;
   }
 
-  /// Returns the [RatedType] matching the native [rateString], defaulting to
-  /// [RatedType.none] when unrecognized.
+  /// Returns the [RatedType] that matches the native [rateString]. If the value
+  /// is not recognized, it returns [RatedType.none].
   static RatedType toRateType(String rateString) {
     var valueList = RatedType.values;
     for (var i = 0; i < valueList.length; i++) {
@@ -574,40 +579,40 @@ extension UserParsing on Map {
   }
 }
 
-/// A knowledge base resource event delivered on [KnowledgeBase.eventChannel],
-/// describing a visitor action such as opening, closing, liking or disliking a
+/// A Knowledge Base resource event that [KnowledgeBase.eventChannel] sends. It
+/// describes a visitor action, such as opening, closing, liking, or disliking a
 /// resource.
 class KnowledgeBaseEvent {
   /// The resource action that occurred.
   ResourceAction? action;
 
-  /// The type of the affected resource.
+  /// The type of the resource that the action affected.
   ResourceType? type;
 
-  /// The affected resource.
+  /// The resource that the action affected.
   Resource? resource;
 
-  /// Error details, present when the action is [ResourceAction.error].
+  /// The error details, when the action is [ResourceAction.error].
   KnowledgeBaseErrorInfo? errorInfo;
 
-  /// Creates a [KnowledgeBaseEvent] from the [action], [type], [resource] and
+  /// Creates a [KnowledgeBaseEvent] from the [action], [type], [resource], and
   /// [errorInfo].
   KnowledgeBaseEvent(this.action, this.type, this.resource, this.errorInfo);
 }
 
-/// Error details carried by a [KnowledgeBaseEvent] when a resource action
+/// The error details that a [KnowledgeBaseEvent] carries when a resource action
 /// fails.
 class KnowledgeBaseErrorInfo {
-  /// A human-readable description of the error.
+  /// A readable description of the error.
   final String message;
 
   /// The error code.
   final int code;
 
-  /// The error type identifier.
+  /// The ID of the error type.
   final String type;
 
-  /// Creates a [KnowledgeBaseErrorInfo] with the given [message], [code] and
+  /// Creates a [KnowledgeBaseErrorInfo] with the given [message], [code], and
   /// [type].
   KnowledgeBaseErrorInfo(this.message, this.code, this.type);
 
@@ -621,11 +626,11 @@ class KnowledgeBaseErrorInfo {
   }
 }
 
-/// The visitor action a [KnowledgeBaseEvent] reports on a resource.
+/// The visitor action on a resource that a [KnowledgeBaseEvent] reports.
 class ResourceAction {
   const ResourceAction._(this.value);
 
-  /// The raw event name backing this action.
+  /// The raw event name behind this action.
   final String value;
 
   /// The visitor opened a resource.
@@ -640,11 +645,11 @@ class ResourceAction {
   /// The visitor disliked a resource.
   static const ResourceAction disliked = ResourceAction._("resourceDisliked");
 
-  /// A resource action failed; see [KnowledgeBaseEvent.errorInfo].
+  /// A resource action failed. For details, see [KnowledgeBaseEvent.errorInfo].
   static const ResourceAction error = ResourceAction._("resourceError");
 
-  /// Returns the [ResourceAction] matching the raw event [value], or `null`
-  /// if it is unrecognized.
+  /// Returns the [ResourceAction] that matches the raw event [value], or `null`
+  /// if it is not recognized.
   static ResourceAction? from(String value) {
     if (value == opened.value) {
       return opened;

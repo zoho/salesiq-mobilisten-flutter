@@ -1,4 +1,4 @@
-/// The communication modes supported by a department or brand.
+/// Defines the communication modes that a department or brand supports.
 enum CommunicationMode {
   /// Chat only.
   chat,
@@ -9,8 +9,8 @@ enum CommunicationMode {
   /// Both chat and call.
   chatAndCall;
 
-  /// Returns the [CommunicationMode] matching [mode], or `null` if
-  /// unrecognized.
+  /// Returns the [CommunicationMode] that matches [mode], or `null` if it is
+  /// not recognized.
   static CommunicationMode? fromString(String? mode) {
     if (mode == null) return null;
     switch (mode) {
@@ -25,12 +25,12 @@ enum CommunicationMode {
     }
   }
 
-  /// The native enum constant name for this mode ("CHAT" / "CALL" /
-  /// "CHAT_AND_CALL"), used when sending departments to the native SDK.
+  /// Returns the native enum constant name for this mode, which is "CHAT",
+  /// "CALL", or "CHAT_AND_CALL". The SDK uses it when it sends departments to
+  /// the native SDK.
   ///
-  /// This mirrors the Android/iOS `CommunicationMode` constant names so that
-  /// every native reader (Gson-backed core plugin, calls plugin, iOS Swift)
-  /// deserializes the mode consistently.
+  /// These names match the `CommunicationMode` constant names on Android and
+  /// iOS.
   String toNativeString() {
     switch (this) {
       case CommunicationMode.chat:

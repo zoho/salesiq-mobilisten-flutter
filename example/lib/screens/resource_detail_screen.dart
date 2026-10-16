@@ -54,7 +54,7 @@ class _ResourceDetailScreenState extends State<ResourceDetailScreen> {
       setState(() => _result = {'opened': ok, 'id': widget.resourceId});
     } catch (e) {
       setState(() => _result = {'error': e.toString()});
-      showToast('Failed to open article', ToastTone.danger);
+      showToast('Failed to open article${reason(e)}', ToastTone.danger);
     }
   }
 

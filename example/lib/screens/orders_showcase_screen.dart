@@ -49,7 +49,7 @@ class _OrdersShowcaseScreenState extends State<OrdersShowcaseScreen> {
       showToast('Chat for ${order.id}', ToastTone.success);
     } catch (e) {
       setState(() => _result = {'error': e.toString()});
-      showToast('Failed to start chat', ToastTone.danger);
+      showToast('Failed to start chat${reason(e)}', ToastTone.danger);
       _presentOrderConversation(order.id);
     }
   }
@@ -63,7 +63,7 @@ class _OrdersShowcaseScreenState extends State<OrdersShowcaseScreen> {
       showToast('Chat about ${order.id}', ToastTone.success);
     } catch (e) {
       setState(() => _result = {'error': e.toString()});
-      showToast('Failed to start chat', ToastTone.danger);
+      showToast('Failed to start chat${reason(e)}', ToastTone.danger);
       _presentOrderConversation(order.id);
     }
   }
@@ -76,7 +76,11 @@ class _OrdersShowcaseScreenState extends State<OrdersShowcaseScreen> {
         screen:
             SIQConversationScreen.withId(id, sessionType: SIQSessionType.chat),
       );
-    } catch (_) {}
+    } catch (e) {
+      // Best-effort fallback present — the caller already surfaced the real
+      // failure; just log if even opening the conversation fails.
+      debugPrint('Order conversation present failed: $e');
+    }
   }
 
   BadgeTone _tone(String status) {

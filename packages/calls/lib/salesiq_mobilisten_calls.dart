@@ -19,23 +19,23 @@ export 'package:salesiq_mobilisten_core/salesiq_conversation.dart';
 export 'package:salesiq_mobilisten_core/salesiq_conversation_attributes.dart';
 export 'package:salesiq_mobilisten_core/salesiq_department.dart';
 
-/// This class provides APIs to manage and interact with the Zoho SalesIQ calls feature.
+/// Provides the APIs for the voice calls feature of Zoho SalesIQ.
 ///
-/// [ZohoSalesIQCalls] is for all call-related functionality
-/// in the SalesIQ Mobilisten SDK. It provides comprehensive APIs to:
+/// With [ZohoSalesIQCalls], you can do the following in the SalesIQ Mobilisten
+/// SDK:
 ///
-/// - Start and end call conversations
-/// - Monitor call states and events in real-time
-/// - Manage call UI components and visibility
-/// - Handle call view modes (fullscreen, floating, status bar)
-/// - Configure call settings and appearance
+/// - Start and end call conversations.
+/// - Follow call states and events in real time.
+/// - Manage the call UI components and their visibility.
+/// - Switch the call view mode between full screen, floating, and the status
+///   bar.
+/// - Configure call settings and appearance.
 ///
-/// The class uses static methods to provide a simple, consistent API that can be
-/// accessed from anywhere in your application without requiring instantiation.
-/// All call operations are asynchronous and return Future objects for proper
-/// async/await handling.
+/// All methods are static, so you can call them from anywhere in your app
+/// without creating an instance. Every call operation is asynchronous and
+/// returns a `Future` that you can `await`.
 ///
-/// Example usage:
+/// Example:
 /// ```dart
 /// // Listen to call events
 /// ZohoSalesIQCalls.events.listen((event) {
@@ -53,18 +53,23 @@ export 'package:salesiq_mobilisten_core/salesiq_department.dart';
 class ZohoSalesIQCalls {
   static const MethodChannel _channel = MethodChannel('mobilisten_calls_api');
 
+  /// Returns the stream of call events.
   ///
-  /// This stream provides real-time updates about call state changes, queue position
-  /// updates, and other call-related events. The stream is backed by the native
-  /// platform's event system and automatically deserializes events into strongly-typed
-  /// Dart objects.
+  /// The stream sends real-time updates when the call state or the queue
+  /// position changes, and for other call events. The native event system of
+  /// each platform drives the stream. The SDK converts each event into a typed
+  /// Dart object.
   ///
-  /// Available event types:
-  /// - [CallStateChanged]: Fired when call status changes (connecting, connected, ended, etc.)
-  /// - [QueuePositionChanged]: Fired when position in call queue updates
-  /// - [UnknownCallState]: Fallback for unrecognized event types
+  /// The stream can send these event types:
+  /// - [CallStateChanged]: Sent when the call status changes, such as to
+  ///   connecting, connected, or ended.
+  /// - [QueuePositionChanged]: Sent when the position in the call queue
+  ///   changes.
+  /// - [UnknownCallState]: The fallback for event types that are not
+  ///   recognized.
   ///
-  /// The stream is a broadcast stream, allowing multiple listeners without interference.
+  /// The stream is a broadcast stream, so many listeners can use it at the same
+  /// time without affecting each other.
   ///
   /// Example:
   /// ```dart
@@ -83,17 +88,18 @@ class ZohoSalesIQCalls {
   /// ```
   static Stream<CallEvent> get events => CallEventManager().events;
 
+  /// Returns whether the calls feature is enabled for your brand.
   ///
-  /// This method checks the SalesIQ brand configuration to determine if the
-  /// call feature is available for use. The call feature must be enabled in
-  /// the SalesIQ dashboard for this to return `true`.
+  /// It checks the configuration of your SalesIQ brand to see whether the calls
+  /// feature is available. The calls feature must be turned on in the SalesIQ
+  /// console for this to return `true`.
   ///
-  /// Returns `false` if:
-  /// - Call feature is disabled in brand settings
-  /// - Network error occurs during the check
-  /// - SalesIQ is not properly initialized
+  /// Returns `false` in these cases:
+  /// - The calls feature is turned off in the brand settings.
+  /// - A network error occurs during the check.
+  /// - SalesIQ is not initialized properly.
   ///
-  /// Returns `true` if the call feature is enabled and available for use.
+  /// Returns `true` when the calls feature is turned on and available.
   ///
   /// Example:
   /// ```dart
@@ -109,17 +115,18 @@ class ZohoSalesIQCalls {
       .invokeMethod<bool>('isEnabled')
       .then((onValue) => onValue ?? false);
 
+  /// Returns the unique ID of the current active call.
   ///
-  /// Retrieves the unique identifier for the currently active call session.
-  /// This ID can be used to reference the call in other operations or for
-  /// logging and tracking purposes.
+  /// Use this ID to refer to the call in other operations, or for logging and
+  /// tracking.
   ///
-  /// Returns `null` if:
-  /// - There is no active call
-  /// - The call session hasn't been established yet
-  /// - An error occurred while retrieving the call ID
+  /// Returns `null` in these cases:
+  /// - There is no active call.
+  /// - The call session is not set up yet.
+  /// - An error occurred while getting the call ID.
   ///
-  /// Returns a non-null [String] containing the call ID if there's an active call.
+  /// When there is an active call, it returns a non-null [String] with the call
+  /// ID.
   ///
   /// Example:
   /// ```dart
@@ -134,19 +141,15 @@ class ZohoSalesIQCalls {
   static Future<String?> get currentCallId async =>
       await _channel.invokeMethod<String?>('currentCallId');
 
+  /// Returns the state of the current call.
   ///
-  /// Retrieves comprehensive information about the current call including:
-  /// - Call status (connecting, connected, ended, etc.)
-  /// - Whether it's an incoming or outgoing call
-  /// - Additional call metadata
+  /// The [SalesIQCallState] has the call status, such as connecting,
+  /// connected, or ended, and whether the call is incoming or outgoing.
   ///
-  /// The [SalesIQCallState] object provides both the current status and contextual
-  /// information about the call session.
-  ///
-  /// Returns `null` if:
-  /// - There is no active call
-  /// - Call state information is not available
-  /// - An error occurred while retrieving the state
+  /// Returns `null` in these cases:
+  /// - There is no active call.
+  /// - The call state is not available.
+  /// - An error occurred while getting the state.
   ///
   /// Example:
   /// ```dart
@@ -163,22 +166,16 @@ class ZohoSalesIQCalls {
         SalesIQCallState.fromMap(onValue?.cast<dynamic, dynamic>()));
   }
 
-  /// Enters the call view for the current call in full screen mode.
+  /// Opens the call view of the current call in full screen mode.
   ///
-  /// Transitions the call interface to full screen mode, providing the complete
-  /// call experience with all available controls and information. This is typically
-  /// used when the user wants to interact fully with the call interface.
+  /// The full screen view shows the complete call screen, with all the controls
+  /// and details.
   ///
-  /// This method:
-  /// - Brings the call UI to the foreground
-  /// - Displays all call controls and information
-  /// - Maximizes the call interface for optimal interaction
-  ///
-  /// Should be called when there's an active call to ensure proper functionality.
+  /// Call this method only when there is an active call.
   ///
   /// Example:
   /// ```dart
-  /// // When user taps on call status bar or notification
+  /// // When the visitor taps the call status bar or notification
   /// onCallStatusTap() {
   ///   ZohoSalesIQCalls.enterFullScreenMode();
   /// }
@@ -187,22 +184,21 @@ class ZohoSalesIQCalls {
     _channel.invokeMethod('enterFullScreenMode');
   }
 
-  /// Transitions the call interface to a floating overlay mode, allowing users
-  /// to continue using other parts of the app while maintaining access to
-  /// essential call controls. The floating view typically shows minimal call
-  /// information and basic controls.
+  /// Switches the call view of the current call to floating view mode.
   ///
-  /// This mode is useful for:
-  /// - Multitasking during calls
-  /// - Providing non-intrusive call controls
-  /// - Maintaining call visibility while using other features
+  /// The floating view lets visitors keep using other parts of your app, with
+  /// the main call controls still in reach. It usually shows a few call details
+  /// and basic controls.
   ///
-  /// Should be called when there's an active call and the user wants to
-  /// minimize the call interface.
+  /// This mode helps visitors do other tasks during a call. It keeps the call
+  /// and its controls in view, without getting in the way.
+  ///
+  /// Call this method when there is an active call and the visitor wants to
+  /// minimize the call screen.
   ///
   /// Example:
   /// ```dart
-  /// // When user wants to minimize call interface
+  /// // When the visitor wants to minimize the call screen
   /// onMinimizeCall() {
   ///   ZohoSalesIQCalls.enterFloatingViewMode();
   /// }
@@ -211,15 +207,16 @@ class ZohoSalesIQCalls {
     _channel.invokeMethod('enterFloatingViewMode');
   }
 
-  /// Sets the title for the call view when online and offline.
+  /// Sets the title of the call view for when the department is online and
+  /// offline.
   ///
   /// Parameters:
-  /// - [onlineTitle]: Title to display when the department is online.
-  ///   Pass `null` to use the default online title.
-  /// - [offlineTitle]: Title to display when the department is offline.
-  ///   Pass `null` to use the default offline title.
+  /// - [onlineTitle]: The title to show when the department is online. To use
+  ///   the default online title, pass `null`.
+  /// - [offlineTitle]: The title to show when the department is offline. To use
+  ///   the default offline title, pass `null`.
   ///
-  /// The titles are displayed in the call interface header and help users
+  /// The title appears in the header of the call screen. It helps visitors
   /// understand the current state of their connection.
   ///
   /// Example:
@@ -240,16 +237,16 @@ class ZohoSalesIQCalls {
     });
   }
 
-  /// Sets the CallKit icon for iOS call integration.
+  /// Sets the icon for the iOS CallKit integration.
   ///
-  /// Configures the icon displayed in iOS CallKit interface.
+  /// This icon appears in the iOS CallKit interface.
   ///
-  /// This method is iOS-specific and has no effect on Android devices.
-  /// The icon should be properly formatted for iOS CallKit requirements.
+  /// This method works only on iOS and has no effect on Android. Make sure the
+  /// icon meets the CallKit requirements of iOS.
   ///
   /// Parameters:
-  /// - [icon]: The icon data to use for CallKit integration. The format depends
-  ///   on the native implementation requirements.
+  /// - [icon]: The icon data for the CallKit integration. The format depends on
+  ///   the requirements of the native implementation.
   ///
   /// Example:
   /// ```dart
@@ -269,15 +266,15 @@ class ZohoSalesIQCalls {
     _channel.invokeMethod('setCallKitIcon', icon);
   }
 
-  /// Enables VoIP (PushKit) call notifications for iOS using the given
-  /// PushKit [token].
+  /// Turns on VoIP (PushKit) call notifications for iOS with the given PushKit
+  /// [token].
   ///
-  /// Set [isTestDevice] to `true` for test devices and [mode] to
-  /// [APNSMode.sandbox] while testing with a development build.
+  /// On test devices, set [isTestDevice] to `true`. While you test with a
+  /// development build, set [mode] to [APNSMode.sandbox].
   ///
-  /// Applies only for iOS; on Android, call notifications are delivered
-  /// through FCM via the notification registerPush API and this call
-  /// is a no-op.
+  /// This works only on iOS. On Android, call notifications arrive through FCM,
+  /// which you set up with `registerPush` in the notification module. So on
+  /// Android, this call has no effect.
   static Future<void> enableVoIP(String token,
       {bool isTestDevice = false, APNSMode mode = APNSMode.production}) {
     return _channel.invokeMethod('enableVoIP', {
@@ -287,33 +284,28 @@ class ZohoSalesIQCalls {
     });
   }
 
-  /// Handles a VoIP (PushKit) notification action using the given
-  /// notification payload [info].
+  /// Handles a VoIP (PushKit) notification action with the given notification
+  /// payload [info].
   ///
-  /// Applies only for iOS; resolves immediately on Android.
+  /// This works only on iOS. On Android, it completes right away.
   static Future<void> handleVOIPNotificationAction(Map info) async {
     await _channel.invokeMethod('handleVOIPNotificationAction', info);
   }
 
-  /// Initiates a new call session or resumes an existing one. This method
-  /// provides comprehensive options for configuring the call experience,
-  /// including conversation attributes and UI behavior.
+  /// Starts a new call, or resumes an existing one.
+  ///
+  /// You can set conversation attributes and choose how the call UI behaves.
   ///
   /// Parameters:
-  /// - [id]: Optional conversation ID to resume an existing call conversation.
-  ///   If null, a new conversation will be started.
-  /// - [displayActiveCall]: Whether to display the active call UI if the call
-  ///   is already in progress. Defaults to `true`.
-  /// - [attributes]: Optional conversation attributes such as operator information,
-  ///   custom fields, or additional metadata for the call session.
+  /// - [id]: The ID of an existing call conversation to resume. This is
+  ///   optional. If it is null, a new conversation starts.
+  /// - [displayActiveCall]: Whether to show the active call UI if the call is
+  ///   already in progress. The default is `true`.
+  /// - [attributes]: Optional conversation attributes for the call session,
+  ///   such as operator information, custom fields, or other metadata.
   ///
-  /// Returns a [SalesIQConversation] object representing the started conversation,
-  /// or `null` if the call could not be started.
-  ///
-  /// The conversation object contains:
-  /// - Conversation ID for future reference
-  /// - Participant information
-  /// - Conversation metadata and attributes
+  /// Returns the [SalesIQConversation] of the call, or `null` if the call could
+  /// not start.
   ///
   /// Example:
   /// ```dart
@@ -368,24 +360,11 @@ class ZohoSalesIQCalls {
     return conversations;
   }
 
-  /// Terminates the active call session and cleans up associated resources.
-  /// This method gracefully closes the call connection, notifies all participants,
-  /// and updates the call state to ended.
+  /// Ends the active call.
   ///
-  /// The method handles:
-  /// - Terminating the call connection
-  /// - Cleaning up call resources
-  /// - Notifying participants of call end
-  /// - Updating call state and UI
-  ///
-  /// Returns a [SalesIQConversation] object representing the ended conversation
-  /// with final call information, or `null` if no call was active or an error occurred.
-  ///
-  /// The returned conversation object contains:
-  /// - Final call duration and statistics
-  /// - End time and reason
-  /// - Participant information
-  /// - Conversation metadata
+  /// Returns the [SalesIQConversation] that ended, or `null` if no call was
+  /// active or an error occurred. The conversation has the details of the
+  /// operator, and its `media` has the call times and who ended the call.
   ///
   /// Example:
   /// ```dart
@@ -394,7 +373,7 @@ class ZohoSalesIQCalls {
   ///
   /// if (endedConversation != null) {
   ///   print('Call ended: ${endedConversation.id}');
-  ///   // Log call duration, save conversation, etc.
+  ///   // Log the call duration or save the conversation.
   ///   logCallEnd(endedConversation);
   /// } else {
   ///   print('No active call to end');
@@ -405,22 +384,14 @@ class ZohoSalesIQCalls {
         SalesIQConversation.fromMap(onValue?.cast<dynamic, dynamic>()));
   }
 
-  /// Configures predefined messages that can be quickly sent for an incoming call.
-  /// These messages appear as quick-reply options in the call interface, allowing
-  /// users to send common responses or information without typing.
+  /// Sets the quick-reply messages that the visitor can send to decline an
+  /// incoming call. They appear in the incoming call notification.
   ///
-  /// This feature is useful for:
-  /// - Providing quick responses to common questions
-  /// - Sending standardized information during calls
-  /// - Improving efficiency in call interactions
-  /// - Reducing typing effort during active calls
+  /// This works only on Android. Set the messages before you call
+  /// `ZohoSalesIQ.initialize()`.
   ///
   /// Parameters:
-  /// - [messages]: A list of strings representing the predefined messages.
-  ///   Each string becomes a quick-reply option in the call interface.
-  ///
-  /// The messages are displayed as buttons or options that users can tap
-  /// to send immediately during the call.
+  /// - [messages]: The list of messages. Each string becomes one quick reply.
   ///
   /// Example:
   /// ```dart
@@ -437,23 +408,24 @@ class ZohoSalesIQCalls {
     _channel.invokeMethod('setAndroidReplyMessages', {'messages': messages});
   }
 
-  /// Controls which UI components are displayed in the call interface, allowing
-  /// customization of the call experience based on your application's requirements.
-  /// This method enables fine-grained control over call UI elements.
+  /// Shows or hides a UI component on the call screen, so you can adapt the
+  /// call experience to your app.
   ///
-  /// Available components that can be controlled:
-  /// - [CallComponent.operatorName]: Shows/hides the operator's name
-  /// - [CallComponent.operatorImage]: Shows/hides the operator's profile image
-  /// - [CallComponent.preChatForm]: Shows/hides the pre-chat form
-  /// - [CallComponent.queuePosition]: Shows/hides the queue position indicator
+  /// You can control these components:
+  /// - [CallComponent.operatorName]: Shows or hides the operator's name.
+  /// - [CallComponent.operatorImage]: Shows or hides the operator's profile
+  ///   image.
+  /// - [CallComponent.preChatForm]: Shows or hides the pre-chat form.
+  /// - [CallComponent.queuePosition]: Shows or hides the queue position
+  ///   indicator.
   ///
   /// Parameters:
-  /// - [component]: The specific UI component to configure visibility for.
-  ///   Use values from the [CallComponent] enum.
-  /// - [isVisible]: Boolean indicating whether the component should be visible.
-  ///   `true` shows the component, `false` hides it.
+  /// - [component]: The UI component to show or hide. Use a value from the
+  ///   [CallComponent] enum.
+  /// - [isVisible]: Whether the component is visible. `true` shows the
+  ///   component, and `false` hides it.
   ///
-  /// Changes take effect immediately and apply to the current and future call sessions.
+  /// Changes apply right away, to the current call and to future calls.
   ///
   /// Example:
   /// ```dart
@@ -474,33 +446,15 @@ class ZohoSalesIQCalls {
     });
   }
 
-  /// Retrieves all call conversations that are currently active or have been
-  /// completed within the session. This method provides access to conversation
-  /// history and can be used for displaying call logs, analytics, or conversation
-  /// management features.
+  /// Returns the conversations that the SDK knows about, as a list of
+  /// [SalesIQConversation].
   ///
-  /// The returned list includes:
-  /// - Active call conversations
-  /// - Recently completed calls
-  /// - Call conversation metadata and details
-  /// - Participant information for each conversation
+  /// Each item is a [SalesIQCallConversation]. When the native SDK includes
+  /// chats, an item can also be a [SalesIQChatConversation], so check the type
+  /// before you read fields that belong to one type. Returns an empty list when
+  /// there are no conversations, or when an error occurs.
   ///
-  /// Returns an empty list if:
-  /// - No call conversations exist
-  /// - User doesn't have access to conversation history
-  /// - An error occurred while retrieving conversations
-  ///
-  /// Each [SalesIQConversation] in the list contains:
-  /// - Conversation ID and metadata
-  /// - Participant information
-  /// - Call duration and timestamps
-  /// - Conversation status and state
-  ///
-  /// This method is useful for:
-  /// - Building call history interfaces
-  /// - Generating call reports and analytics
-  /// - Managing ongoing conversations
-  /// - Providing conversation context to users
+  /// You can use it to build your own call history screen.
   ///
   /// Example:
   /// ```dart
@@ -520,27 +474,25 @@ class ZohoSalesIQCalls {
         (onValue) => _getConversations(onValue?.cast<Map<dynamic, dynamic>>()));
   }
 
-  /// Retrieves the necessary parameters and configuration to instantiate a native
-  /// Android status bar view for active calls. This method is used internally by
-  /// the [SalesIQAndroidCallStatusBarView] widget to create the native view.
+  /// Returns the parameters and configuration that create a native Android
+  /// status bar view for active calls.
   ///
-  /// The method provides:
-  /// - View type identifier for the native Android view
-  /// - Configuration parameters for view creation
-  /// - Theme-specific settings based on dark/light mode
-  /// - Layout and appearance parameters
+  /// The [SalesIQAndroidCallStatusBarView] widget uses this method internally
+  /// to create the native view.
+  ///
+  /// This works only when the call view mode is banner.
   ///
   /// Parameters:
-  /// - [isDarkMode]: Boolean indicating whether to use dark theme styling.
-  ///   Affects colors, icons, and overall appearance of the status bar.
+  /// - [isDarkMode]: Whether to use the dark theme. It changes the colors,
+  ///   icons, and overall look of the status bar.
   ///
-  /// Returns a [Map] containing:
-  /// - `viewType`: String identifier for the native view type
-  /// - `success`: Boolean indicating if the view parameters were generated successfully
-  /// - Additional platform-specific parameters for view creation
+  /// Returns a [Map] that contains:
+  /// - `viewType`: The string ID of the native view type.
+  /// - `success`: Whether the view parameters were created successfully.
+  /// - Other platform parameters to create the view.
   ///
-  /// This method is typically called by Flutter widgets that need to embed
-  /// the native call status bar view, such as [SalesIQAndroidCallStatusBarView].
+  /// For the usual case, use the [SalesIQAndroidCallStatusBarView] widget,
+  /// which calls this method for you.
   ///
   /// Example:
   /// ```dart
@@ -569,34 +521,23 @@ class ZohoSalesIQCalls {
         .invokeMethod('getStatusBarView', {"isDarkMode": isDarkMode});
   }
 
-  /// Creates a Flutter widget that displays the native call status bar view.
+  /// Creates a Flutter widget that shows the native call status bar view.
   ///
-  /// Builds an [AndroidView] widget that embeds the native Android call status bar
-  /// view into the Flutter widget tree. This widget displays call information in
-  /// a compact status bar format and provides tap handling for call interactions.
-  ///
-  /// The widget:
-  /// - Embeds the native Android view using the provided view type
-  /// - Passes creation parameters to configure the native view
-  /// - Sets up gesture recognizers for touch handling
-  /// - Configures clipping behavior for proper layout
+  /// It builds an [AndroidView] widget that embeds the native Android call
+  /// status bar view in the Flutter widget tree. The widget shows call
+  /// information in a compact status bar, and it handles taps for call actions.
   ///
   /// Parameters:
-  /// - [viewType]: The native view type identifier obtained from [getStatusBarView].
-  ///   This tells Android which native view class to instantiate.
-  /// - [params]: Optional creation parameters to pass to the native view.
-  ///   These parameters configure the view's appearance and behavior.
+  /// - [viewType]: The native view type ID from [getStatusBarView]. It tells
+  ///   Android which native view class to create.
+  /// - [params]: Optional creation parameters for the native view. They set the
+  ///   appearance and behavior of the view.
   ///
-  /// Returns a [Widget] that can be embedded in the Flutter widget tree.
-  /// The widget will display the native call status bar and handle user interactions.
+  /// Returns a [Widget] that you can embed in the Flutter widget tree. The
+  /// widget shows the native call status bar and handles the visitor's taps.
   ///
-  /// The widget includes:
-  /// - Gesture recognition for tap handling
-  /// - Proper message codec for parameter passing
-  /// - Optimized clipping for performance
-  ///
-  /// This method is typically used by [SalesIQAndroidCallStatusBarView] but can
-  /// be used directly if you need custom integration.
+  /// [SalesIQAndroidCallStatusBarView] usually calls this method, but you can
+  /// also call it directly for a custom integration.
   ///
   /// Example:
   /// ```dart
@@ -631,21 +572,24 @@ class ZohoSalesIQCalls {
   }
 }
 
-/// This enum defines the various UI elements within the SalesIQ call interface
-/// that can be shown or hidden using the [ZohoSalesIQCalls.setVisibility] method.
-/// Each component serves a specific purpose in the call experience and can be
-/// controlled independently.
+/// Defines the UI components of the SalesIQ call screen that you can show or
+/// hide with [ZohoSalesIQCalls.setVisibility].
+///
+/// Each component has its own role in the call experience, and you can control
+/// each one separately.
 ///
 /// Available components:
-/// - [operatorName]: The name/title of the call operator or agent
-/// - [operatorImage]: The profile picture or avatar of the operator
-/// - [preChatForm]: A form displayed before the call starts for gathering information
-/// - [queuePosition]: An indicator showing the user's position in the call queue
+/// - [operatorName]: The name or title of the operator on the call.
+/// - [operatorImage]: The profile picture or avatar of the operator.
+/// - [preChatForm]: A form that appears before the call starts, to collect
+///   information.
+/// - [queuePosition]: An indicator that shows the visitor's position in the
+///   call queue.
 ///
-/// These components can be selectively shown or hidden to customize the call
-/// interface according to your application's requirements and user experience goals.
+/// Show or hide these components to fit the call screen to your app and to the
+/// experience that you want.
 ///
-/// Example usage:
+/// Example:
 /// ```dart
 /// // Hide operator image for a cleaner interface
 /// ZohoSalesIQCalls.setVisibility(CallComponent.operatorImage, false);
@@ -654,109 +598,104 @@ class ZohoSalesIQCalls {
 /// ZohoSalesIQCalls.setVisibility(CallComponent.queuePosition, true);
 /// ```
 enum CallComponent {
-  /// The operator's name or title displayed in the call interface.
-  /// Shows the name of the agent or representative handling the call.
+  /// The operator's name or title on the call screen. It shows the name of the
+  /// operator who handles the call.
   operatorName,
 
-  /// The operator's profile image or avatar.
-  /// Displays a visual representation of the agent handling the call.
+  /// The operator's profile image or avatar. It shows a picture of the operator
+  /// who handles the call.
   operatorImage,
 
-  /// A form shown before the call starts.
-  /// Used to collect user information or call context before initiating the call.
+  /// A form that appears before the call starts. It collects the visitor's
+  /// information or the context of the call before the call starts.
   preChatForm,
 
-  /// An indicator showing the user's position in the call queue.
-  /// Displays how many people are ahead in line when calls are queued.
+  /// An indicator that shows the visitor's position in the call queue. It shows
+  /// how many people are ahead in the queue.
   queuePosition
 }
 
-/// Enum representing the status of a call in Zoho SalesIQ.
+/// Defines the status of a call in Zoho SalesIQ.
 ///
-/// This enum defines all possible states that a SalesIQ call can be in during
-/// its lifecycle. Each status represents a specific phase of the call process,
-/// from initiation through completion or termination.
+/// These are all the states that a SalesIQ call can be in during its lifecycle.
+/// Each status is one phase of the call, from the start of the call until it
+/// ends or stops.
 ///
 /// The statuses follow a typical call flow:
-/// 1. [none] → [calling] → [ringing] → [connecting] → [connected]
-/// 2. From [connected], calls can go to [reconnecting] if connection issues occur
-/// 3. Calls end in [ended], [missed], [cancelled], [declined], or [failed]
-/// 4. Calls may be placed in [queue] when operators are busy
+/// 1. [none], then [calling], [ringing], [connecting], and [connected].
+/// 2. From [connected], a call can go to [reconnecting] if the connection has
+///    problems.
+/// 3. A call ends in [ended], [missed], [cancelled], [declined], or [failed].
+/// 4. A call can go to [queue] when operators are busy.
 ///
-/// Each status provides context about the current call state and can be used
-/// to update UI, trigger actions, or handle call logic appropriately.
+/// Use each status to update the UI, start actions, or run your call logic.
 enum SalesIQCallStatus {
-  /// No call is active or no call status is available.
-  /// This is the default state when no call operations are in progress.
+  /// No call is active, or no call status is available. This is the default
+  /// state when no call is in progress.
   none,
 
-  /// Call is being initiated and dialing is in progress.
-  /// The call request has been sent but not yet connected to the recipient.
+  /// The call is starting and dialing is in progress. The call request is sent,
+  /// but the call is not connected to the recipient yet.
   calling,
 
-  /// Call is ringing on the recipient's end.
-  /// The call has reached the recipient and is awaiting answer.
+  /// The call is ringing for the recipient. The call has reached the recipient
+  /// and is waiting for an answer.
   ringing,
 
-  /// Call is in the process of establishing connection.
-  /// The recipient has answered and connection negotiation is in progress.
+  /// The call is connecting. The recipient has answered, and the connection is
+  /// being set up.
   connecting,
 
-  /// Call is successfully connected and active.
-  /// Both parties are connected and can communicate.
+  /// The call is connected and active. Both sides are connected and can talk.
   connected,
 
-  /// Call is temporarily placed on hold.
+  /// The call is on hold for now.
   ///
-  /// Applies only for Android; the iOS native SDK does not report an
-  /// on-hold status.
+  /// This works only on Android. The iOS SDK does not report an on-hold status.
   onHold,
 
-  /// Call is attempting to reconnect after connection loss.
-  /// Temporary network issues are being resolved automatically.
+  /// The call is trying to reconnect after the connection was lost. The SDK
+  /// tries to recover from temporary network problems automatically.
   reconnecting,
 
-  /// Call has ended normally.
-  /// The call was completed successfully and terminated by either party.
+  /// The call ended normally. It was completed, and either side ended it.
   ended,
 
-  /// Call was missed by the recipient.
-  /// The call was not answered within the timeout period.
+  /// The recipient missed the call. Nobody answered the call within the timeout
+  /// period.
   missed,
 
-  /// Call was cancelled by the caller before connection.
-  /// The caller terminated the call before it was answered.
+  /// The caller canceled the call before it connected. The caller ended the
+  /// call before it was answered.
   cancelled,
 
-  /// Call was declined by the recipient.
-  /// The recipient actively rejected the incoming call.
+  /// The recipient declined the call. The recipient rejected the incoming call.
   declined,
 
-  /// Call failed due to technical issues.
-  /// System errors, network problems, or other technical failures occurred.
+  /// The call failed because of a technical problem, such as a system error or
+  /// a network problem.
   failed,
 
-  /// Call is waiting in queue for an available operator.
-  /// No operators are currently available and the call is queued.
+  /// The call is waiting in the queue for an available operator. No operators
+  /// are available right now, so the call is in the queue.
   queue,
 
-  /// Invalid or unknown call status.
-  /// Used as fallback for unrecognized status values.
+  /// The call status is invalid or unknown. It is the fallback for status
+  /// values that are not recognized.
   invalid;
 
-  /// Returns true if the call is in an active state where communication can occur.
+  /// Returns `true` when the call is in an active state, where communication
+  /// can take place.
   ///
-  /// Active call states include all statuses where the call is progressing
-  /// toward or maintaining a connection. This excludes terminal states like
-  /// ended, failed, missed, etc.
+  /// Active states are all the statuses where the call is moving toward a
+  /// connection or keeping one. They do not include final states, such as
+  /// ended, failed, and missed.
   ///
-  /// Active states: [calling], [ringing], [connecting], [connected], [reconnecting], [queue]
+  /// Active states: [calling], [ringing], [connecting], [connected], [onHold], [reconnecting], [queue]
   /// Inactive states: [none], [ended], [missed], [cancelled], [declined], [failed], [invalid]
   ///
-  /// This property is useful for:
-  /// - Determining when to show active call UI
-  /// - Controlling call-related features and buttons
-  /// - Managing call state transitions
+  /// Use this property to decide when to show the active call UI, to control
+  /// call features and buttons, and to manage changes in the call state.
   ///
   /// Example:
   /// ```dart
@@ -780,18 +719,18 @@ enum SalesIQCallStatus {
 
   /// Creates a [SalesIQCallStatus] from a string value.
   ///
-  /// Converts string representations of call statuses (typically received from
-  /// native platforms) into the corresponding enum values. This method handles
-  /// the deserialization of call status data from the native bridge.
+  /// It converts the string form of a call status, usually from the native
+  /// platforms, into the matching enum value. The SDK uses it to read call
+  /// status data from the native bridge.
   ///
   /// Parameters:
-  /// - [value]: The string representation of the call status. Can be null.
+  /// - [value]: The string form of the call status. It can be null.
   ///
-  /// Returns the corresponding [SalesIQCallStatus] enum value, or [invalid]
-  /// if the value is null or doesn't match any known status.
+  /// Returns the matching [SalesIQCallStatus] value. Returns [invalid] when the
+  /// value is null or does not match a known status.
   ///
-  /// The method performs case-sensitive matching against the enum value names
-  /// (after the dot notation, e.g., "calling" matches [SalesIQCallStatus.calling]).
+  /// The match is case-sensitive, and it uses the enum value name after the
+  /// dot. For example, "calling" matches [SalesIQCallStatus.calling].
   ///
   /// Example:
   /// ```dart
@@ -817,58 +756,57 @@ enum SalesIQCallStatus {
   }
 }
 
-/// The APNS environment used for VoIP (PushKit) notifications on iOS.
-/// See [ZohoSalesIQCalls.enableVoIP].
+/// Defines the APNS environment for VoIP (PushKit) notifications on iOS. See
+/// [ZohoSalesIQCalls.enableVoIP].
 enum APNSMode {
-  /// The APNS sandbox environment, used with development builds.
+  /// The APNS sandbox environment, for development builds.
   sandbox,
 
   /// The APNS production environment.
   production
 }
 
-/// Enum representing the possible actions that can be performed on a SalesIQ call.
+/// Defines the actions that can be performed on a SalesIQ call.
 ///
-/// This enum defines all supported call actions, such as ending, missing, cancelling,
-/// inviting, accepting, or rejecting a call. It is used throughout the SalesIQ call
-/// system to specify and handle user or system-initiated call actions.
+/// The supported actions are end, miss, cancel, invite, accept, and reject. The
+/// SalesIQ call system uses them to name and handle the call actions that the
+/// visitor or the system starts.
 ///
-/// Each value corresponds to a specific action that can be triggered by the user
-/// or by the system during the call lifecycle.
+/// Each value is one action that the visitor or the system can trigger during
+/// the call lifecycle.
 enum SalesIQCallAction {
-  /// End the call.
+  /// Ends the call.
   end,
 
-  /// Mark the call as missed.
+  /// Marks the call as missed.
   miss,
 
-  /// Cancel the call before it is answered.
+  /// Cancels the call before it is answered.
   cancel,
 
-  /// Invite another participant to the call.
+  /// Invites another participant to the call.
   invite,
 
-  /// Accept an incoming call.
+  /// Accepts an incoming call.
   accept,
 
-  /// Reject an incoming call.
+  /// Rejects an incoming call.
   reject,
 
-  /// Invalid or unknown call action.
-  /// Used as a fallback for unrecognized action values.
+  /// The call action is invalid or unknown. It is the fallback for action
+  /// values that are not recognized.
   invalid;
 
   /// Creates a [SalesIQCallAction] from a string value.
   ///
-  /// Converts a string representation of a call action (typically received from
-  /// native platforms or APIs) into the corresponding enum value. Returns [invalid]
-  /// if the value is null or does not match any known action.
+  /// It converts the string form of a call action, usually from the native
+  /// platforms or APIs, into the matching enum value.
   ///
   /// Parameters:
-  /// - [value]: The string representation of the call action. Can be null.
+  /// - [value]: The string form of the call action. It can be null.
   ///
-  /// Returns the corresponding [SalesIQCallAction] enum value, or [invalid]
-  /// if the value is null or doesn't match any known action.
+  /// Returns the matching [SalesIQCallAction] value, or [invalid] when the
+  /// value is null or does not match a known action.
   ///
   /// Example:
   /// ```dart
@@ -889,20 +827,20 @@ enum SalesIQCallAction {
 
 /// Represents the current state of a SalesIQ call.
 ///
-/// This class encapsulates comprehensive information about a call's current status
-/// and properties. It provides a snapshot of the call state at a specific moment
-/// and is used throughout the SalesIQ system to track and respond to call changes.
+/// It holds the current status and properties of a call. It is a snapshot of
+/// the call state at one moment, and the SDK uses it to track and respond to
+/// call changes.
 ///
-/// The state object includes:
-/// - Current call status (connecting, connected, ended, etc.)
-/// - Call direction information (incoming vs outgoing)
-/// - Additional call metadata and properties
+/// The state object has two fields:
+/// - [status]: The current call status, such as connecting, connected, or
+///   ended.
+/// - [isIncomingCall]: The call direction, which is incoming or outgoing.
 ///
-/// This class is immutable and represents a point-in-time snapshot of call state.
-/// When call state changes, a new [SalesIQCallState] instance is created with
-/// updated information.
+/// This class is immutable, and it shows the call state at one point in time.
+/// When the call state changes, the SDK creates a new [SalesIQCallState]
+/// instance with the new information.
 ///
-/// Example usage:
+/// Example:
 /// ```dart
 /// final callState = await ZohoSalesIQCalls.currentState;
 ///
@@ -921,32 +859,29 @@ enum SalesIQCallAction {
 class SalesIQCallState {
   /// The current status of the call.
   ///
-  /// Indicates the current phase of the call lifecycle, such as calling,
-  /// connected, ended, etc. This status drives most call-related UI updates
-  /// and business logic decisions.
+  /// It shows the current phase of the call lifecycle, such as calling,
+  /// connected, or ended. Most call UI updates and call logic depend on this
+  /// status.
   ///
-  /// See [SalesIQCallStatus] for all possible status values and their meanings.
+  /// For all the status values and their meanings, see [SalesIQCallStatus].
   final SalesIQCallStatus status;
 
   /// Indicates whether this is an incoming call.
   ///
-  /// - `true`: The call was initiated by another party (incoming call)
-  /// - `false`: The call was initiated by the current user (outgoing call)
-  /// - `null`: Call direction is unknown or not applicable
+  /// - `true`: Another party started the call, so it is an incoming call.
+  /// - `false`: The visitor started the call, so it is an outgoing call.
+  /// - `null`: The call direction is unknown or does not apply.
   ///
-  /// This information is useful for:
-  /// - Displaying appropriate UI (answer/decline vs hang up)
-  /// - Applying different call handling logic
-  /// - Logging and analytics purposes
-  /// - Customizing call experience based on direction
+  /// Use it to show the right UI, such as answer and decline buttons or a
+  /// hang-up button.
   final bool? isIncomingCall;
 
   /// Creates a new [SalesIQCallState] instance.
   ///
   /// Parameters:
-  /// - [status]: The current call status. Required.
-  /// - [isIncomingCall]: Optional boolean indicating call direction.
-  ///   Pass `null` if direction is unknown or not applicable.
+  /// - [status]: The current call status. It is required.
+  /// - [isIncomingCall]: An optional value that shows the call direction. Pass
+  ///   `null` if the direction is unknown or does not apply.
   ///
   /// Example:
   /// ```dart
@@ -959,12 +894,11 @@ class SalesIQCallState {
 
   /// Creates a [SalesIQCallState] from a map of data.
   ///
-  /// Deserializes call state information from a map structure, typically
-  /// received from the native platform or API responses. This factory method
-  /// handles the conversion of raw data into a properly typed state object.
+  /// It converts call state information from a map, usually from the native
+  /// platform or an API response, into a typed state object.
   ///
   /// Parameters:
-  /// - [map]: Map containing call state data. Can be `null`.
+  /// - [map]: The map that contains the call state data. It can be `null`.
   ///
   /// Expected map structure:
   /// ```dart
@@ -975,12 +909,12 @@ class SalesIQCallState {
   /// ```
   ///
   /// Returns a [SalesIQCallState] with:
-  /// - Parsed status from the 'status' field
-  /// - Call direction from the 'isIncomingCall' field
-  /// - Invalid status if map is null or malformed
+  /// - The status from the `status` field.
+  /// - The call direction from the `isIncomingCall` field.
+  /// - An invalid status if the map is null or malformed.
   ///
-  /// If the map is `null` or doesn't contain expected data, returns a state
-  /// with [SalesIQCallStatus.invalid] and `null` for call direction.
+  /// If the map is `null` or does not contain the expected data, it returns a
+  /// state with [SalesIQCallStatus.invalid] and `null` for the call direction.
   ///
   /// Example:
   /// ```dart

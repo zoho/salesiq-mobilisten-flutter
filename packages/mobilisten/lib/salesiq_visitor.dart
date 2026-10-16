@@ -4,20 +4,21 @@ import 'package:flutter/services.dart';
 
 import 'salesiq_mobilisten.dart';
 
-/// Provides APIs to manage the visitor's information.
-/// Access this via [ZohoSalesIQ.visitor].
+/// Provides the APIs to manage the visitor's information. To use it, call
+/// [ZohoSalesIQ.visitor].
 class Visitor {
   final MethodChannel _channel = const MethodChannel('salesiq_visitor_module');
 
-  /// Updates the visitor's profile using the given [profile].
+  /// Updates the visitor's profile with the given [profile].
   ///
-  /// Replaces the individual `setVisitorName`/`setVisitorEmail`/
-  /// `setVisitorContactNumber`/`setVisitorAddInfo`/`setVisitorLocation` APIs.
+  /// It replaces the separate `setVisitorName`, `setVisitorEmail`,
+  /// `setVisitorContactNumber`, `setVisitorAddInfo`, and `setVisitorLocation`
+  /// APIs.
   Future<void> updateProfile(SalesIQVisitorProfile profile) {
     return _channel.invokeMethod('updateVisitorProfile', profile.toMap());
   }
 
-  /// Performs a custom action using the action name provided in [actionName].
+  /// Performs the custom action with the name in [actionName].
   Future<void> performCustomAction(String actionName) {
     return _channel.invokeMethod('performCustomAction', <String, dynamic>{
       'action_name': actionName,
@@ -25,7 +26,7 @@ class Visitor {
   }
 }
 
-/// Salutation of the visitor.
+/// Defines the salutation of the visitor.
 enum Salutation { none, mr, ms, mrs, dr, prof }
 
 /// The visitor's phone number with its country [code].
@@ -36,14 +37,14 @@ class SIQVisitorPhoneNumber {
   /// The phone number, without the country code.
   final String number;
 
-  /// Creates a phone number from the country [code] and [number].
+  /// Creates a phone number from the country [code] and the [number].
   const SIQVisitorPhoneNumber({this.code = "", required this.number});
 
-  /// Serializes this phone number to a map for the native bridge.
+  /// Converts this phone number to a map for the native bridge.
   Map<String, dynamic> toMap() => {'code': code, 'number': number};
 }
 
-/// The visitor's profile, applied using [Visitor.updateProfile].
+/// The visitor's profile, which you apply with [Visitor.updateProfile].
 class SalesIQVisitorProfile {
   /// The visitor's salutation.
   final Salutation? salutation;
@@ -60,10 +61,10 @@ class SalesIQVisitorProfile {
   /// The visitor's phone number.
   final SIQVisitorPhoneNumber? phone;
 
-  /// The visitor's unique user ID. Applies only for iOS.
+  /// The visitor's unique user ID. This works only on iOS.
   final String? userId;
 
-  /// Custom information associated with the visitor.
+  /// The custom information about the visitor.
   final Map<String, String>? customInfo;
 
   /// The visitor's secondary location.
@@ -80,7 +81,7 @@ class SalesIQVisitorProfile {
     this.location,
   });
 
-  /// Serializes this visitor profile to a map for the native bridge.
+  /// Converts this visitor profile to a map for the native bridge.
   Map<String, dynamic> toMap() {
     final Map<String, dynamic> map = <String, dynamic>{};
     if (salutation != null) map['salutation'] = salutation!.name;

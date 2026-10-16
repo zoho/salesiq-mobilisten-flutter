@@ -1,7 +1,7 @@
 import 'package:salesiq_mobilisten_core/salesiq_configuration.dart';
 
-/// Internal helper holding call-related state shared across the SDK.
+/// An internal helper that holds the call state that the SDK shares.
 class SalesIQCallsHelper {
-  /// The Android call view mode selected at initialization, if any.
+  /// The Android call view mode that was set at initialization, if any.
   static SalesIQCallViewMode? currentAndroidCallViewMode = null;
 }
