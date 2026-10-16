@@ -5,6 +5,7 @@ import MobilistenCalls
 import MobilistenCallsCore
 
 
+@objc(MobilistenCallsPlugin)
 public class SwiftMobilistenCallsPlugin: NSObject, FlutterPlugin {
     
     // MARK: - Properties

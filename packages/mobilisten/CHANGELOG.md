@@ -1,5 +1,9 @@
 ## Mobilisten Plugin Changelog
 
+- ### 6.6.12 - 16 Oct 2026
+
+- Added Swift Package Manager support on iOS; the plugin can now be consumed via SPM or CocoaPods. CocoaPods users upgrading an existing app should clean the iOS build folder once (`flutter clean`), because stale `MobilistenPlugin.h` headers from the previous layout conflict with the new Swift module.
+
 - ### 6.6.11 - 28 Jul 2026
 
 - Updated Mobilisten SDK for Android

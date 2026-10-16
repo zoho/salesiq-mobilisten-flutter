@@ -3,6 +3,7 @@ import UIKit
 import Mobilisten
 import MobilistenCore
 
+@objc(MobilistenPlugin)
 public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
     
     private enum MobilistenChannel {
@@ -172,6 +173,7 @@ public class SwiftMobilistenPlugin: NSObject, FlutterPlugin {
         let chatModule = ChatModulePlugin()
         let conversationModule = ConversationPlugin(channel: conversationChannel)
         sharedInstance = instance
+        emptyChatInstance = SIQVisitorChat()
         knowledgebaseInstance = knowledgebase
         launcherInstance = launcher
         notificationInstance = notification

@@ -4,6 +4,8 @@ import 'dart:io' as io;
 import 'package:flutter/material.dart';
 import 'package:salesiq_mobilisten/salesiq_mobilisten.dart';
 
+import 'calls.dart';
+
 void main() {
   runApp(MyApp());
 }
@@ -14,6 +16,11 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  static const String BHAHIRATHAN_APP_KEY =
+      "rj3ZRJbxTdayKjFlt4rLRoFVEcYWqmSsWz4EKhYOAGRdUp%2BpKqc8I4BXgPGzNLqtZSJ92bBkeTDEHh%2B3hAnf4ylFx%2FcaT3z1GDXZTT4n5DJFfUeIaKm9ow%3D%3D_in";
+  static const String BHAHIRATHAN_ACCESS_KEY =
+      "qN%2Bkwn%2Ft4RFMUAMbd3yXIs%2BB7wyh5eamu0g504vWBDPeyuCmsycKOQDgwnz8Don0X6koRiQu5iy3b%2BusJKqXwZEYS7yPxRZ41uNb1nPnX5CBWPoHaEe8F5BH6r6RWmpraer4Nnq%2BL6TWcQz%2Brl3NS5afrghXhU2%2F";
+
   @override
   void initState() {
     super.initState();
@@ -29,8 +36,8 @@ class _MyAppState extends State<MyApp> {
         appKey = "INSERT_IOS_APP_KEY";
         accessKey = "INSERT_IOS_ACCESS_KEY";
       } else {
-        appKey = "INSERT_ANDROID_APP_KEY";
-        accessKey = "INSERT_ANDROID_ACCESS_KEY";
+        appKey = BHAHIRATHAN_APP_KEY;
+        accessKey = BHAHIRATHAN_ACCESS_KEY;
       }
 
       SalesIQConfiguration configuration =
@@ -92,6 +99,7 @@ class MobilistenDemoScreen extends StatelessWidget {
                   height: 120), // Replace with your image
             ),
             SizedBox(height: 16),
+
             ElevatedButton(
               onPressed: () {
                 ZohoSalesIQ.present();
@@ -99,7 +107,9 @@ class MobilistenDemoScreen extends StatelessWidget {
               style: buttonStyle,
               child: Center(child: Text("Open SalesIQ support")),
             ),
+
             SizedBox(height: 24),
+
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -116,10 +126,23 @@ class MobilistenDemoScreen extends StatelessWidget {
                       label: Icon(Icons.message_rounded),
                     ),
                     SizedBox(width: 12),
+                    // FloatingActionButton.extended(
+                    //     heroTag: "call",
+                    //     backgroundColor: Colors.blue,
+                    //     // child: Icon(Icons.add_ic_call_rounded),
+                    //     shape: RoundedRectangleBorder(
+                    //       borderRadius: BorderRadius.circular(50),
+                    //     ),
+                    //     onPressed: () {
+                    //
+                    //     },
+                    //     label: Icon(Icons.add_ic_call_rounded) //Text("Call")
+                    //     ),
                   ],
                 )
               ],
             ),
+
             SizedBox(height: 16),
             ToggleRow(
                 label: "Launcher visibility :",
@@ -150,6 +173,7 @@ class MobilistenDemoScreen extends StatelessWidget {
                       launcherProperties);
                 }),
             Divider(height: 32),
+
             TextField(
               maxLength: 100,
               decoration: InputDecoration(
@@ -158,6 +182,7 @@ class MobilistenDemoScreen extends StatelessWidget {
               ),
               controller: _visitorIdController,
             ),
+
             Row(
               children: [
                 Expanded(
@@ -195,12 +220,15 @@ class MobilistenDemoScreen extends StatelessWidget {
                 ),
               ],
             ),
+
             SizedBox(height: 16),
+
             ElevatedButton(
               onPressed: () {},
               style: buttonStyle,
               child: Center(child: Text("Set visitor details")),
             ),
+
             SizedBox(height: 24),
             Text("Support language :", style: TextStyle(fontSize: 16)),
             SizedBox(height: 8),
@@ -213,6 +241,81 @@ class MobilistenDemoScreen extends StatelessWidget {
                 _langButton("ar"),
               ],
             ),
+
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                _goToCallScreen(context);
+                // ZohoSalesIQCalls.events.listen((event) {
+                //   if (event is QueuePositionChanged) {
+                //     ScaffoldMessenger.of(context).showSnackBar(
+                //       SnackBar(
+                //         content: Text("Call event: " +
+                //             event.conversationId.toString() +
+                //             " " +
+                //             event.position.toString()),
+                //       ),
+                //     );
+                //   } else if (event is CallStateChanged) {
+                //     ScaffoldMessenger.of(context).showSnackBar(
+                //       SnackBar(
+                //         content: Text("Call event: " +
+                //             event.state.status.toString() +
+                //             " " +
+                //             event.state.isIncomingCall.toString()),
+                //       ),
+                //     );
+                //   }
+                // });
+                // SalesIQConversationAttributes attributes =
+                //     SalesIQConversationAttributes(
+                //   name: "",
+                //   displayPicture:
+                //       Image.asset("assets/images/mobilisten_sdk.png"),
+                //   additionalInfo: "Additional info",
+                // );
+                //
+                // ZohoSalesIQCalls.start(
+                //     id: null, displayActiveCall: false, attributes: attributes);
+
+                // ZohoSalesIQ.chat
+                //     .initiateWithTrigger(
+                //         "Trigger 1", null, "David Bhahirathan Private")
+                //     .then((value) {
+                //   if (value != null) {
+                //     ScaffoldMessenger.of(context).showSnackBar(
+                //       SnackBar(
+                //         content: Text("Chat started successfully"),
+                //       ),
+                //     );
+                //   } else {
+                //     ScaffoldMessenger.of(context).showSnackBar(
+                //       SnackBar(
+                //         content: Text("Error starting chat"),
+                //       ),
+                //     );
+                //   }
+                // }, onError: (error) {
+                //   ScaffoldMessenger.of(context).showSnackBar(
+                //     SnackBar(
+                //       content: Text("Error starting chat " +
+                //           error.code +
+                //           " " +
+                //           (error.message ?? "")),
+                //     ),
+                //   );
+                // });
+                // .catchError((PlatformException? error) {
+                //   ScaffoldMessenger.of(context).showSnackBar(
+                //     SnackBar(
+                //       content: Text("Error starting chat " + (error?.code ?? "-1") +" "+(error?.message ?? "")),
+                //     ),
+                //   );
+                // });
+              },
+              style: buttonStyle,
+              child: Center(child: Text("Transactions")),
+            ), // Space for floating button
           ],
         ),
       ),
@@ -229,6 +332,13 @@ class MobilistenDemoScreen extends StatelessWidget {
 
   Widget _langDivider() {
     return Text("|", style: TextStyle(color: Colors.grey));
+  }
+
+  void _goToCallScreen(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => CallDemoScreen()),
+    );
   }
 }
 

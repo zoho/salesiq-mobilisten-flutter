@@ -35,3 +35,5 @@ Icon?
 
 /Flutter/Generated.xcconfig
 /Flutter/flutter_export_environment.sh
+# Xcode metadata created when the Swift package is opened in Xcode
+.swiftpm/
